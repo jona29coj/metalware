@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FaBell, FaSearch } from 'react-icons/fa';
 import userprofile from "../components/userprofile.png";
 
-const Navbar = ({ isCollapsed }) => {
+const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {

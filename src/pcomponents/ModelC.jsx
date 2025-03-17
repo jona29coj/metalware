@@ -27,8 +27,8 @@ const ThreeDModel = () => {
           ref={cameraRef}
           target={[0, 0, -0.2]} // Focus camera on the center
           enableRotate={false} // Disable rotation
-          enableZoom={true} // Allow zoom in and out
-          enablePan={true} // Allow panning
+          enableZoom={false} // Allow zoom in and out
+          enablePan={false} // Allow panning
           maxPolarAngle={Math.PI / 2} // Limit vertical rotation (up and down)
           minDistance={3} // Limit zoom-out distance
           maxDistance={10} // Limit zoom-in distance
