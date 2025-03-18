@@ -1,5 +1,5 @@
 import React from "react";
-import mware1 from "../sections/pictures/mware1.png";
+import mware1 from "../sections/pictures/mware1.jpeg";
 import mware2 from "../sections/pictures/mware2.png";
 
 const SolarAnalysisCard = () => {
