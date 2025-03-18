@@ -48,8 +48,11 @@ const FacInf = () => {
   
         {/* Center Label */}
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <p className="text-4xl font-bold text-gray-800">760</p>
-          <p className="text-lg text-gray-500">Building Score</p>
+          <p className="text-lg sm:text-base md:text-1xl lg:text-4xl xl:text-4xl font-bold text-gray-800">760</p>
+          <p className="flex flex-col text-sm sm:text-xs md:text-sm lg:text-lg text-gray-500 text-center">
+            <span>Building</span>
+            <span>Score</span>
+          </p>
         </div>
       </div>
   

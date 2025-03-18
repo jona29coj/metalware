@@ -74,6 +74,7 @@ const App = () => {
           <div className="flex-1 overflow-auto max-w-full mt-[52px]">
             <Routes>
               <Route path="/dashboard" element={<EDashboard />} />
+              <Route path="/" element={<EDashboard />} />
               <Route path="/alerts" element={<AlertsOverview />} />
               <Route path="/reports" element={<Reports />} />
               <Route path="/profile" element={<Profile />} />

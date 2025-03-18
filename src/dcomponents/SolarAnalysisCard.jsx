@@ -15,11 +15,11 @@ const SolarAnalysisCard = () => {
       <div className="grid grid-cols-2 gap-4">
         <div className="flex flex-col items-center">
           <img src={mware2} alt="Solar Energy Visualization 2" className="w-auto h-[80%]" />
-          <p className="text-sm text-gray-500 mt-2">Building Solar Energy Visualization 2</p>
+          <p className="text-sm text-gray-500 mt-2">Building Solar Energy Visualization 1</p>
         </div>
         <div className="flex flex-col items-center">
           <img src={mware1} alt="Solar Energy Visualization 1" className="w-auto h-[80%]" />
-          <p className="text-sm text-gray-500 mt-2">Building Solar Energy Visualization 1</p>
+          <p className="text-sm text-gray-500 mt-2">Building Solar Energy Visualization 2</p>
         </div>
       </div>
     </div>
