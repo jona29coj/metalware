@@ -1,65 +1,128 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 
 const EnergySources = () => {
-  const totalConsumption = 4450; // Adjusted to match 10 zones
+  const data = {
+    daily: [
+      { name: 'SPRAY+ EPL', consumption: 150 },
+      { name: 'PLATING', consumption: 80 },
+      { name: 'COMPRESSOR', consumption: 100 },
+      { name: 'BUFFING + VIBRATOR + ETP', consumption: 120 },
+      { name: 'Terrace', consumption: 180 },
+      { name: 'SPRAY+ EPL', consumption: 90 },
+      { name: 'CHINA BUFFING', consumption: 60 },
+      { name: 'BUFFING+CASTING M/C -7', consumption: 130 },
+      { name: 'DIE CASTING', consumption: 170 },
+      { name: 'RUMBLE', consumption: 180 }
+    ],
+    monthly: [],
+    yearly: []
+  };
+
+  data.monthly = data.daily.map(zone => ({ name: zone.name, consumption: zone.consumption * 30 }));
+  data.yearly = data.daily.map(zone => ({ name: zone.name, consumption: zone.consumption * 365 }));
+
+  const [selectedPeriod, setSelectedPeriod] = useState('daily');
+  const [zones, setZones] = useState(data.daily);
+
+  const totalConsumption = zones.reduce((sum, zone) => sum + zone.consumption, 0);
+  const highZone = zones.reduce((prev, current) => (prev.consumption > current.consumption ? prev : current));
+  const lowZone = zones.reduce((prev, current) => (prev.consumption < current.consumption ? prev : current));
+
+  const handlePeriodChange = (period) => {
+    setSelectedPeriod(period);
+    setZones([...data[period]]);
+  };
+
+  const otherZonesConsumption = totalConsumption - (highZone.consumption + lowZone.consumption);
 
   const chartOptions = {
     chart: {
-      type: 'pie',
+      type: 'column',
       backgroundColor: 'transparent',
-      height: 'min(300px, 40vmin)', // Keeps it responsive
+      height: '300px',
     },
-    title: {
-      text: ''
+    title: { text: '' },
+    xAxis: {
+      categories: ['Total Consumption'],
+    },
+    yAxis: {
+      title: { text: 'Consumption (kWh)' },
     },
     plotOptions: {
-      pie: {
-        innerSize: '55%', // Adjusted for better visualization
+      series: {
+        stacking: 'normal',
         borderWidth: 0,
         dataLabels: {
-          enabled: true,
-          formatter: function () {
-            if (this.y === 780 || this.y === 280) {
-              return `<b>${this.point.name}</b>: ${this.y} kWh`;
-            }
-            return null;
-          },
-          style: {
-            fontSize: '1.2vmin'
-          }
+          enabled: false,
+        },
+      },
+    },
+    tooltip: {
+      formatter: function () {
+        if (this.series.name === 'Other Zones') {
+          return `<b>Other Zones:</b> ${otherZonesConsumption} kWh`;
         }
-      }
+        return `<b>${this.series.name}:</b> ${this.y} kWh`;
+      },
     },
     series: [
       {
-        name: 'Consumption',
-        data: [
-          { name: 'Zone-1', y: 780, color: 'rgb(239,68,68)' },  // Highest consumption
-          { name: 'Zone-2', y: 680, color: 'rgba(96, 165, 250, 0.2)' },
-          { name: 'Zone-3', y: 600, color: 'rgba(251,191,36,0.2)' },
-          { name: 'Zone-4', y: 550, color: 'rgba(167, 139, 250, 0.2)' },
-          { name: 'Zone-5', y: 500, color: 'rgba(255, 0, 123, 0.2)' },
-          { name: 'Zone-6', y: 400, color: 'rgba(59,130,246,0.2)' },
-          { name: 'Zone-7', y: 360, color: 'rgba(217,119,6,0.2)' },
-          { name: 'Zone-8', y: 350, color: 'rgba(147,51,234,0.2)' },
-          { name: 'Zone-9', y: 300, color: 'rgba(0, 255, 162, 0.2)' },
-          { name: 'Zone-10', y: 280, color: 'rgb(52,211,153)' }   // Lowest consumption
-        ]
-      }
-    ]
+        name: highZone.name,
+        data: [highZone.consumption],
+        color: 'rgb(185, 28, 28)',
+      },
+      {
+        name: lowZone.name,
+        data: [lowZone.consumption],
+        color: 'rgb(21, 128, 61)',
+      },
+      {
+        name: 'Other Zones',
+        data: [otherZonesConsumption],
+        color: 'rgba(96, 165, 250, 0.2)',
+        showInLegend: true,
+      },
+    ],
+    legend: {
+      enabled: true,
+    },
+    credits: { enabled: false },
   };
 
   return (
-    <div className="bg-white p-5 rounded-lg shadow-md">
-      <h2 className="text-xl font-semibold">Consumption</h2>
-      <p className="text-lg text-gray-700 mt-2">
-        Total-Consumption: <span className="font-bold">{totalConsumption} kWh</span>
-      </p>
-
-      <div className="mt-6 flex justify-center">
-        <div style={{ width: '90%', maxWidth: '500px' }}> {/* Width control for consistency */}
+    <div className="bg-white p-6 rounded-lg shadow-md">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-xl font-semibold">Consumption</h2>
+        <div className="flex space-x-3">
+          <button className={`px-4 py-2 rounded ${selectedPeriod === 'daily' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`} onClick={() => handlePeriodChange('daily')}>Daily</button>
+          <button className={`px-4 py-2 rounded ${selectedPeriod === 'monthly' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`} onClick={() => handlePeriodChange('monthly')}>Monthly</button>
+          <button className={`px-4 py-2 rounded ${selectedPeriod === 'yearly' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`} onClick={() => handlePeriodChange('yearly')}>Yearly</button>
+        </div>
+      </div>
+      
+      <div className="grid grid-cols-2 gap-6">
+        <div>
+          <p className="text-md text-gray-700 mb-6">
+            Total Consumption: <span className="font-bold text-lg">{totalConsumption} kWh</span>
+          </p>
+          <div className="space-y-6">
+            <div className="bg-red-200 p-3 rounded-lg shadow">
+              <h3 className="text-lg font-semibold text-red-700">High Zone</h3>
+              <p className="text-gray-900 font-medium mt-2">{highZone.name}</p>
+              <p className="text-gray-900 mt-1">{highZone.consumption} kWh</p>
+              <p className="text-sm text-gray-600 mt-1">{((highZone.consumption / totalConsumption) * 100).toFixed(2)}% of Total Consumption</p>
+            </div>
+            <div className="bg-green-200 p-3 rounded-lg shadow">
+              <h3 className="text-lg font-semibold text-green-700">Low Zone</h3>
+              <p className="text-gray-900 font-medium mt-2">{lowZone.name}</p>
+              <p className="text-gray-900 mt-1">{lowZone.consumption} kWh</p>
+              <p className="text-sm text-gray-600 mt-1">{((lowZone.consumption / totalConsumption) * 100).toFixed(2)}% of Total Consumption</p>
+            </div>
+          </div>
+        </div>
+        <div className="flex justify-center items-center mt-6 pt-10">
           <HighchartsReact highcharts={Highcharts} options={chartOptions} />
         </div>
       </div>

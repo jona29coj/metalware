@@ -3,8 +3,6 @@ import mware_g from "../sections/pictures/mware4.png";
 import mware_l1 from "../sections/pictures/mware12.png";
 import mware_l2 from "../sections/pictures/mware13.png";
 import mware_l3 from "../sections/pictures/mware14.png";
-import mware_l4 from "../sections/pictures/mware15.png";
-import mware_t from "../sections/pictures/mware16.png";
 
 const DaylightFloorPlanAnalysis = () => {
   const floorPlans = [
@@ -23,7 +21,7 @@ const DaylightFloorPlanAnalysis = () => {
       </div>
 
       {/* Floor Plan Images in a Row */}
-      <div className="flex justify-between mb-6 flex-wrap">
+      <div className="flex justify-around mb-6 flex-wrap">
         {floorPlans.map((plan) => (
           <div key={plan.title} className="flex flex-col items-center w-1/6 p-2">
             <img src={plan.image} alt={plan.title} className="w-full h-auto object-cover rounded-lg" />
