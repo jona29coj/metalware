@@ -12,6 +12,10 @@ import Zones from './sections/Monitor/Zones';
 import Emd from './dcomponents/Emd';
 import Dgd from './dcomponents/Dgd';
 import EDashboard from './sections/Dashboard/EDashboard';
+import IOEBatteryControl from './sections/IOEBattery';
+import LTOControl from './sections/LTOControl';
+import UPSControl from './sections/UPSControl';
+
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
@@ -83,6 +87,9 @@ const App = () => {
               <Route path="/monitor/zones" element={<Zones />} />
               <Route path="/monitor/diesel" element={<Diesel />} />
               <Route path="/meter/:id" element={<Emd />} />
+              <Route path="/control/ltobattery" element={<LTOControl />} />
+              <Route path="/control/ioebattery" element={<IOEBatteryControl />} />
+              <Route path="/control/upsbattery" element={<UPSControl />} />
               <Route path="/generator/:id" element={<Dgd />} />
             </Routes>
           </div>

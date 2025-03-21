@@ -3,7 +3,7 @@ import SolarPanel from "../dcomponents/SolarPanel.png";
 
 const WheeledInSolar = () => {
   return (
-    <div className="bg-white shadow-lg rounded-lg px-6 pt-6 w-full flex flex-col opacity-50">
+    <div className="bg-white shadow-lg rounded-lg px-6 pt-6 w-full flex flex-col">
       {/* Header Section */}
       <div className="flex justify-between items-center pb-4">
         <h3 className="text-lg font-bold text-gray-700">Wheeled-in Solar</h3>

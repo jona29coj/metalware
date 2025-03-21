@@ -6,7 +6,7 @@ import ups from "../sections/UPS3.png";
 
 const Batteries = () => {
   return (
-    <div className="relative bg-white dark:bg-secondary-dark-bg rounded-xl opacity-50 shadow-lg p-8 group">
+    <div className="relative bg-white dark:bg-secondary-dark-bg rounded-xl shadow-lg p-8 group">
       {/* Title */}
       <div className="flex justify-between items-center pb-8">
         <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200">
@@ -21,34 +21,34 @@ const Batteries = () => {
           {
             name: "IOE Battery",
             image: ioe,
-            charge: "--",
-            discharge: "--",
-            temperature: "--",
-            voltage: "--",
-            status: "Not Operational",
-            statusColor: "bg-gray-400",
+            charge: "0 kWh",
+            discharge: "0 kWh",
+            temperature: "33°C",
+            voltage: "695",
+            status: "Idle",
+            statusColor: "bg-yellow-400",
             cycleWarning: "N/A",
             cycleWarningColor: "text-gray-400",
           },
           {
             name: "LTO Battery",
             image: lithium,
-            charge: "--",
-            discharge: "--",
-            temperature: "--",
-            voltage: "--",
-            status: "Not Operational",
-            statusColor: "bg-gray-400",
+            charge: "0 kWh",
+            discharge: "0 kWh",
+            temperature: "31.5°C",
+            voltage: "400",
+            status: "Operational",
+            statusColor: "bg-green-400",
             cycleWarning: "N/A",
             cycleWarningColor: "text-gray-400",
           },
           {
             name: "UPS Battery",
             image: ups,
-            charge: "--",
-            discharge: "--",
-            temperature: "--",
-            voltage: "--",
+            charge: "0 kWh",
+            discharge: "0 kWh",
+            temperature: "28°C",
+            voltage: "382",
             status: "Not Operational",
             statusColor: "bg-gray-400",
             cycleWarning: "N/A",
@@ -99,9 +99,7 @@ const Batteries = () => {
                 {/* Control Button aligned to the right */}
                 <div className="pt-3 flex justify-end">
                   <Link
-                    to={`/control/${battery.name
-                      .toLowerCase()
-                      .replace(" ", "")}`}
+                    to={`/control/${battery.name.toLowerCase().replace(" ", "")}`}
                   >
                     <button className="py-2 px-4 bg-teal-600 text-white rounded-lg text-xs">
                       Control
@@ -116,9 +114,9 @@ const Batteries = () => {
               <p className="text-center font-medium text-gray-800 dark:text-gray-200 mb-2">
                 Previous Cycle
               </p>
-              <p>Charge Time: --</p>
-              <p>Discharge Time: --</p>
-              <p className={battery.cycleWarningColor}>{battery.cycleWarning}</p>
+              <p>Charge Time: 2025-03-19, 11:43-11:08</p>
+              <p>Discharge Time: 2025-03-19, 16:26-16:31</p>
+              {/* <p className={battery.cycleWarningColor}>{battery.cycleWarning}</p> */}
             </div>
           </div>
         ))}

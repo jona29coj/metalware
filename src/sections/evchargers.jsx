@@ -6,19 +6,19 @@ import DateSelector from '../components/DateSelector';
 const EVChargerOverview = () => {
   // Data for the main statistics
   const mainStats = [
-    { title: 'No. of chargers used', value: '--' },
-    { title: 'Total Sessions Today', value: '--' },
-    { title: 'Total Energy Used', value: '--' },
+    { title: 'No. of chargers used', value: ' 01' },
+    { title: 'Total Sessions Today', value: ' 01' },
+    { title: 'Total Energy Used', value: ' 1.1 kWh' },
   ];
 
   // Data for EV Charger stations
   const evChargerStats = [
-    { capacity: '--', location: '--', energyConsumed: '--', status: 'Not Operational' },
-    { capacity: '--', location: '--', energyConsumed: '--', status: 'Not Operational' },
-    { capacity: '--', location: '--', energyConsumed: '--', status: 'Not Operational' },
-    { capacity: '--', location: '--', energyConsumed: '--', status: 'Not Operational' },
-    { capacity: '--', location: '--', energyConsumed: '--', status: 'Not Operational' },
-    { capacity: '--', location: '--', energyConsumed: '--', status: 'Not Operational' },
+    { capacity: '3.3 KW', location: 'Basement Level-1', energyConsumed: '0 kWh', status: 'Idle' },
+    { capacity: '3.3 KW', location: 'Basement Level-2', energyConsumed: '1.1 kWh', status: 'Active' },
+    { capacity: '3.3 KW', location: 'Open Parking', energyConsumed: '0 kWh', status: 'Idle' },
+    { capacity: '7 KW', location: 'MLCP 1st floor', energyConsumed: '0 kWh', status: 'Not Operational' },
+    { capacity: '7 KW', location: 'MLCP 2nd floor', energyConsumed: '0 kWh', status: 'Idle' },
+    { capacity: '7 KW', location: 'MLCP 3rd floor', energyConsumed: '0 kWh', status: 'Idle' },
   ];
 
   // Helper function to determine color based on status
@@ -36,7 +36,7 @@ const EVChargerOverview = () => {
   };
 
   return (
-    <div className="grid grid-cols-1 gap-4 opacity-50">
+    <div className="grid grid-cols-1 gap-4">
       {/* Big Card for the entire EV Chargers section */}
       <div className="bg-white shadow-md rounded-xl p-6 relative group">
         

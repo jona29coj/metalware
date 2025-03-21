@@ -102,8 +102,8 @@ const ZoneUsage = () => {
           setHoveredZone(intersected.userData);
     
           tooltipRef.current.style.display = "block";
-          tooltipRef.current.style.left = `${event.clientX - rect.left - 1}px`;
-          tooltipRef.current.style.top = `${event.clientY - rect.top - 1}px`;
+          tooltipRef.current.style.left = `${event.clientX + 10}px`; // Closer to the cursor
+          tooltipRef.current.style.top = `${event.clientY + 10}px`;  // Closer to the cursor
           tooltipRef.current.innerHTML = `${intersected.userData.name}: ${intersected.userData.kWh} kWh`;
     
           mount.style.cursor = "pointer"; 
@@ -114,6 +114,8 @@ const ZoneUsage = () => {
         }
       }, 0);
     };
+
+    
 
     const handleMouseClick = () => {
       if (hoveredZone) {
@@ -153,24 +155,23 @@ const ZoneUsage = () => {
   }, [navigate]);
 
   return (
-<>
-  <div className="relative bg-white p-5 rounded-lg shadow-lg w-full">
-    <h2 className="text-xl font-semibold">Facility Usage</h2>
-    <div ref={mountRef} className="w-full h-[50vh] overflow-hidden relative" />
-    <div className="flex space-x-12 pb-2 justify-center">
-      <div className="bg-[#008B8B] text-white px-4 py-3 rounded-lg shadow-lg border-2 border-[#99FF99] text-lg font-bold">
-        C-49
+    <>
+      <div className="relative bg-white p-5 rounded-lg shadow-lg w-full">
+        <div ref={mountRef} className="w-full h-[50vh] overflow-hidden relative" />
+        <div className="flex space-x-12 pb-2 justify-center">
+          <div className="bg-[#008B8B] text-white px-4 py-3 rounded-lg shadow-lg border-2 border-[#99FF99] text-lg font-bold">
+            C-49
+          </div>
+          <div className="bg-[#FFA500] text-white px-4 py-3 rounded-lg shadow-lg border-2 border-[#FFFF99] text-lg font-bold">
+            C-50
+          </div>
+        </div>
       </div>
-      <div className="bg-[#FFA500] text-white px-4 py-3 rounded-lg shadow-lg border-2 border-[#FFFF99] text-lg font-bold">
-        C-50
-      </div>
-    </div>
-  </div>
-  <div
-    ref={tooltipRef}
-    className="absolute bg-white p-2 border border-black hidden pointer-events-none"
-  />
-</>
+      <div
+        ref={tooltipRef}
+        className="absolute bg-white p-2 border border-black hidden pointer-events-none"
+      />
+    </>
   );
 };
 

@@ -7,7 +7,7 @@ const WaterStorage = () => {
   const [hotWaterStatus, setHotWaterStatus] = useState('Not Operational');
 
   return (
-    <div className="relative opacity-50">
+    <div className="relative">
       {/* Grayed-Out Overlay */}
       <div className="grid grid-cols-1 gap-6 mb-4 relative group">
         <div className="bg-white shadow-md rounded-xl p-6">
@@ -39,15 +39,15 @@ const WaterStorage = () => {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="text-sm">
                     <p className="text-gray-500">Charging Energy</p>
-                    <p className="text-gray-900 font-semibold">--</p>
+                    <p className="text-gray-900 font-semibold">0 kWh</p>
                   </div>
                   <div className="text-sm">
                     <p className="text-gray-500">Discharging Energy</p>
-                    <p className="text-gray-900 font-semibold">--</p>
+                    <p className="text-gray-900 font-semibold">0 kWh</p>
                   </div>
                   <div className="text-sm">
                     <p className="text-gray-500">Stored Temp</p>
-                    <p className="text-gray-900 font-semibold">--</p>
+                    <p className="text-gray-900 font-semibold">7°C</p>
                   </div>
                 </div>
               </div>
@@ -78,15 +78,15 @@ const WaterStorage = () => {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="text-sm">
                     <p className="text-gray-500">Charging Energy</p>
-                    <p className="text-gray-900 font-semibold">--</p>
+                    <p className="text-gray-900 font-semibold">0 kWh</p>
                   </div>
                   <div className="text-sm">
                     <p className="text-gray-500">Discharging Energy</p>
-                    <p className="text-gray-900 font-semibold">--</p>
+                    <p className="text-gray-900 font-semibold">0 kWh</p>
                   </div>
                   <div className="text-sm">
                     <p className="text-gray-500">Stored Temp</p>
-                    <p className="text-gray-900 font-semibold">--</p>
+                    <p className="text-gray-900 font-semibold">0°C</p>
                   </div>
                 </div>
               </div>
@@ -95,11 +95,11 @@ const WaterStorage = () => {
         </div>
 
         {/* Tooltip */}
-        <div className="absolute inset-0 flex justify-center items-center group-hover:opacity-100 opacity-0 transition-opacity">
+        {/* <div className="absolute inset-0 flex justify-center items-center group-hover:opacity-100 opacity-0 transition-opacity">
           <p className="text-sm bg-gray-900 text-white py-2 px-4 rounded-lg shadow-lg">
             Section Not Available
           </p>
-        </div>
+        </div> */}
       </div>
     </div>
   );
