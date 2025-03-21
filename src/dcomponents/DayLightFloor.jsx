@@ -29,7 +29,7 @@ const DaylightFloorPlanAnalysis = () => {
         {floorPlans.map((plan) => (
           <div key={plan.title} className="flex flex-col items-center w-1/6 p-2">
             <img src={plan.image} alt={plan.title} className="w-full h-full object-cover rounded-lg" />
-            <p className="text-sm text-gray-500 mt-2">{plan.title}</p>
+            <p className="text-sm text-gray-500 mt-2 whitespace-nowrap">{plan.title}</p>
           </div>
         ))}
       </div>
