@@ -145,6 +145,14 @@ const EnergySources = () => {
             <DatePicker
               selected={selectedDate}
               onChange={(date) => setSelectedDate(date)}
+              popperPlacement="bottom-end"
+              popperModifiers={{
+                preventOverflow: {
+                  enabled: true,
+                  escapeWithReference: false,
+                  boundariesElement: "viewport",
+                },
+              }}
               customInput={
                 <button className="text-gray-600 text-xl">
                   <FaCalendarAlt />
