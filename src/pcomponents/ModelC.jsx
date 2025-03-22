@@ -1,6 +1,7 @@
 import React, { Suspense, useRef, startTransition } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, useGLTF } from '@react-three/drei';
+import modelImage from './model.png';
 
 const ThreeDModel = () => {
   const { scene } = useGLTF('/models/metalware_v3.glb'); 
@@ -10,20 +11,21 @@ const ThreeDModel = () => {
   startTransition(() => {});
 
   return (
-    <div className="p-6 bg-white shadow-lg rounded-lg">
+    <div className="p-6 bg-white shadow-lg rounded-lg flex flex-col justify-between items-center sm:h-[30vh] md:h-[38vh] lg:h-[50vmin]">
       <h2 className="text-2xl font-bold pt-1 text-center">Metalware - 3D Model</h2>
-      <Canvas
+      <img src={modelImage} alt="Metalware Model" className="w-auto max-h-full object-contain p-5"/>
+      {/* <Canvas
         style={{ height: '300px', width: '100%' }}
         camera={{ position: [5, -0.3, 0], fov: 50 }} // Set the initial camera position
       >
         <ambientLight intensity={0.5} />
-        <spotLight position={[10, 10, 10]} angle={0.10} penumbra={1} />
+        <spotLight position={[10, 10, 10]} angle={0.10} penumbra={1} /> */}
         
         {/* Model */}
-        <primitive object={scene} scale={0.115} position={[-5, -1.1, 0]} ref={modelRef} />
+        {/* <primitive object={scene} scale={0.115} position={[-5, -1.1, 0]} ref={modelRef} /> */}
         
         {/* OrbitControls with restricted movement */}
-        <OrbitControls
+        {/* <OrbitControls
           ref={cameraRef}
           target={[0, 0, -0.2]} // Focus camera on the center
           enableRotate={false} // Disable rotation
@@ -33,7 +35,7 @@ const ThreeDModel = () => {
           minDistance={3} // Limit zoom-out distance
           maxDistance={10} // Limit zoom-in distance
         />
-      </Canvas>
+      </Canvas> */}
     </div>
   );
 };
