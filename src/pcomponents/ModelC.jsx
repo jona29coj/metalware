@@ -11,9 +11,11 @@ const ThreeDModel = () => {
   startTransition(() => {});
 
   return (
-    <div className="p-6 bg-white shadow-lg rounded-lg flex flex-col justify-between items-center sm:h-[30vh] md:h-[38vh] lg:h-[50vmin]">
+    <div className="p-6 bg-white shadow-lg rounded-lg flex flex-col gap-[10px] items-center h-[100%]">
       <h2 className="text-2xl font-bold pt-1 text-center">Metalware - 3D Model</h2>
-      <img src={modelImage} alt="Metalware Model" className="w-auto max-h-full object-contain p-5"/>
+      <div className='flex aling-center justify-center'>
+              <img src={modelImage} alt="Metalware Model" className="w-[80vmin] h-[auto] p-3 md:w-[auto] md:h-[40vmin] "/>
+      </div>
       {/* <Canvas
         style={{ height: '300px', width: '100%' }}
         camera={{ position: [5, -0.3, 0], fov: 50 }} // Set the initial camera position
