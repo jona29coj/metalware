@@ -52,7 +52,7 @@ const LiveConsumption = () => {
   };
 
   return (
-    <div className="w-full flex flex-col p-6 bg-white shadow-lg rounded-lg">
+    <div className="w-full flex flex-col p-6 bg-white shadow-md rounded-lg">
       <div className="flex justify-between items-center pb-6">
         <h2 className="text-xl font-semibold">Live Consumption</h2>
       </div>

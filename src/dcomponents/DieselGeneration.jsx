@@ -6,12 +6,12 @@ const DieselGeneration = () => {
   const navigate = useNavigate(); // Navigation Hook
 
   return (
-    <div className="rounded-lg shadow-lg bg-white w-full border border-gray-300 p-6">
+    <div className="rounded-lg shadow-md bg-white w-full border border-gray-300 p-6">
       <h2 className="text-lg font-bold pb-6">Diesel Generators</h2>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* DG1 Section */}
-        <div className="flex flex-col items-center text-center p-6 bg-gray-50 rounded-lg shadow-sm">
+        <div className="flex flex-col items-center text-center p-6 bg-gray-50 rounded-lg shadow-md">
           <img className="w-50 h-40 object-contain rounded-lg mb-4" src={dg} alt="DG1" />
           <h2 className="font-bold text-2xl text-gray-800 mb-2">DG1</h2>
           <div className="text-gray-700 text-sm space-y-2">
@@ -28,7 +28,7 @@ const DieselGeneration = () => {
         </div>
 
         {/* DG2 Section */}
-        <div className="flex flex-col items-center text-center p-6 bg-gray-50 rounded-lg shadow-sm">
+        <div className="flex flex-col items-center text-center p-6 bg-gray-50 rounded-lg shadow-md">
           <img className="w-50 h-40 object-contain rounded-lg mb-4" src={dg} alt="DG2" />
           <h2 className="font-bold text-2xl text-gray-800 mb-2">DG2</h2>
           <div className="text-gray-700 text-sm space-y-2">

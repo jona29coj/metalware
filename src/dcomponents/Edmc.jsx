@@ -25,7 +25,7 @@ const Edmc = () => {
     <div className="bg-white shadow-md p-3 rounded-lg w-full flex-grow">
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 h-full">
         {/* Column 1 - Facility Information */}
-        <div className="flex flex-col justify-center items-center border-b sm:border-b-0 sm:border-r border-gray-300 pb-3 sm:pb-0 sm:pr-4 h-full space-y-2">
+        <div className="flex flex-col justify-center lg:items-center md:items-start sm:items-start border-b sm:border-b-0 sm:border-r border-gray-300 pb-3 sm:pb-0 sm:pr-4 h-full space-y-2">
           <h3 className="text-md font-extrabold text-gray-900">Facility Information</h3>
           <p className="text-sm text-gray-700 font-semibold">Metalware Corporation</p>
           <p className="text-sm text-gray-500"><span className="font-medium">BUA: </span><span className="text-gray-700 font-semibold">50,000 sq.ft.</span></p>

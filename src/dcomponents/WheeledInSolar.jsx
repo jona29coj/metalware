@@ -3,7 +3,14 @@ import SolarPanel from "../dcomponents/SolarPanel.png";
 
 const WheeledInSolar = () => {
   return (
-    <div className="bg-white shadow-lg rounded-lg px-6 pt-6 w-full flex flex-col">
+    <div className="relative bg-white shadow-md rounded-lg px-6 pt-6 w-full flex flex-col group opacity-50">
+      {/* Hover Tooltip for Entire Section */}
+      <div className="absolute inset-0 flex justify-center items-center group-hover:opacity-100 opacity-0 transition-opacity z-10">
+        <p className="text-sm bg-gray-900 text-white py-2 px-4 rounded-lg shadow-lg">
+          Section Not Available
+        </p>
+      </div>
+
       {/* Header Section */}
       <div className="flex justify-between items-center pb-4">
         <h3 className="text-lg font-bold text-gray-700">Wheeled-in Solar</h3>

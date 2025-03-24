@@ -7,7 +7,7 @@ const WaterStorage = () => {
   const [hotWaterStatus, setHotWaterStatus] = useState('Not Operational');
 
   return (
-    <div className="relative">
+    <div className="relative opacity-50">
       {/* Grayed-Out Overlay */}
       <div className="grid grid-cols-1 gap-6 mb-4 relative group">
         <div className="bg-white shadow-md rounded-xl p-6">
@@ -95,11 +95,11 @@ const WaterStorage = () => {
         </div>
 
         {/* Tooltip */}
-        {/* <div className="absolute inset-0 flex justify-center items-center group-hover:opacity-100 opacity-0 transition-opacity">
-          <p className="text-sm bg-gray-900 text-white py-2 px-4 rounded-lg shadow-lg">
-            Section Not Available
-          </p>
-        </div> */}
+        <div className="absolute inset-0 flex justify-center items-center group-hover:opacity-100 opacity-0 transition-opacity z-10">
+        <p className="text-sm bg-gray-900 text-white py-2 px-4 rounded-lg shadow-lg">
+          Section Not Available
+        </p>
+        </div>
       </div>
     </div>
   );

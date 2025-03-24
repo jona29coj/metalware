@@ -42,10 +42,10 @@ const EVChargerOverview = () => {
   return (
     <div className="grid grid-cols-1 gap-4">
       {/* Big Card for the entire EV Chargers section */}
-      <div className="bg-white shadow-md rounded-xl p-6 relative group">
+      <div className="bg-white shadow-md rounded-xl p-6 relative group opacity-50">
         
         {/* Hover Tooltip for Entire Section */}
-        <div className="absolute inset-0 flex justify-center items-center group-hover:opacity-100 opacity-0 transition-opacity">
+        <div className="absolute inset-0 flex justify-center items-center group-hover:opacity-100 opacity-0 transition-opacity z-10">
           <p className="text-sm bg-gray-900 text-white py-2 px-4 rounded-lg shadow-lg">
             Section Not Available
           </p>

@@ -11,7 +11,7 @@ const ThreeDModel = () => {
   startTransition(() => {});
 
   return (
-    <div className="p-6 bg-white shadow-lg rounded-lg flex flex-col gap-[10px] items-center h-[100%]">
+    <div className="p-6 bg-white shadow-md rounded-lg flex flex-col gap-[10px] items-center h-[100%]">
       <h2 className="text-2xl font-bold pt-1 text-center">Metalware - 3D Model</h2>
       <div className='flex aling-center justify-center pt-5'>
               <img src={modelImage} alt="Metalware Model" className="md:w-[auto] md:h-[30vmin] lg:w-[auto] lg:h-[30vmin] xl:h-[37vmin]"/>

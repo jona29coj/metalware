@@ -10,7 +10,7 @@ const FacInf = () => {
     setShowInfo(!showInfo);
   };
   return (
-    <div className="bg-white shadow-lg rounded-lg p-8 flex flex-col items-center w-full space-y-6">
+    <div className="bg-white shadow-md rounded-lg p-8 flex flex-col items-center w-full space-y-6">
     {/* Heading */}
     <h1 className="text-2xl font-bold text-center text-black">Facility Information</h1>
   

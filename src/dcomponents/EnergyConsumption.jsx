@@ -87,7 +87,7 @@ const EnergyConsumptionChart = () => {
 
 const EnergyConsumption = () => {
   return (
-    <div className="bg-white shadow-lg rounded-lg p-6 w-full h-full">
+    <div className="bg-white shadow-md rounded-lg p-6 w-full h-full">
       <h2 className="text-lg font-bold text-gray-700">Energy Consumption</h2>
       <div className="flex-grow w-full h-[500px]">
         <EnergyConsumptionChart />

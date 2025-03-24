@@ -6,7 +6,14 @@ import ups from "../sections/UPS3.png";
 
 const Batteries = () => {
   return (
-    <div className="relative bg-white dark:bg-secondary-dark-bg rounded-xl shadow-lg p-8 group">
+    <div className="relative bg-white dark:bg-secondary-dark-bg rounded-xl shadow-md p-8 group opacity-50">
+      {/* Hover Tooltip for Entire Section */}
+      <div className="absolute inset-0 flex justify-center items-center group-hover:opacity-100 opacity-0 transition-opacity z-10">
+        <p className="text-sm bg-gray-900 text-white py-2 px-4 rounded-lg shadow-lg">
+          Section Not Available
+        </p>
+      </div>
+
       {/* Title */}
       <div className="flex justify-between items-center pb-8">
         <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200">

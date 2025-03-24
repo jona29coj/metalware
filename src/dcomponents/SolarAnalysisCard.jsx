@@ -4,7 +4,7 @@ import mware2 from "../sections/pictures/mware2.png";
 
 const SolarAnalysisCard = () => {
   return (
-    <div className="bg-white rounded-2xl p-8">
+    <div className="bg-white rounded-2xl p-8 shadow-md">
       {/* Title Section */}
       <div className="text-center mb-6">
         <h1 className="text-2xl font-bold">Analysis Overview Study Type</h1>

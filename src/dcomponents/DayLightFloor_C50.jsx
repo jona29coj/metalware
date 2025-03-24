@@ -13,7 +13,7 @@ const DaylightFloorPlanAnalysis = () => {
   ];
 
   return (
-    <div className="bg-white shadow-xl rounded-2xl p-6">
+    <div className="bg-white shadow-md rounded-2xl p-6">
       {/* Title Section */}
       <div className="text-center mb-6">
         <h1 className="text-2xl font-bold">Daylight Factor Floor Plan Analysis</h1>
