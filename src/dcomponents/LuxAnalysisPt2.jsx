@@ -3,7 +3,7 @@ import lux_img_pt2 from "../sections/pictures/mware11.png";
 
 const LuxAnalysisPt2 = () => {
   return (
-    <div className="flex flex-col items-center p-6 bg-white rounded-lg justify-space-around gap-[20px]">
+    <div className="flex flex-col items-center p-6 bg-white rounded-lg justify-around gap-[20px]">
         <h1 className="text-2xl font-bold text-center">Cut Section</h1>
 
         <img

@@ -20,7 +20,7 @@ const FacInf = () => {
     </p>
   
     {/* Flex container for Visual and Buttons */}
-    <div className="flex items-center justify-center w-full space-x-8">
+    <div className="flex items-center justify-center md:w-[100%] md:h-[40%] lg:w-[auto] lg:h-[80%] space-x-8">
       {/* Score Representation */}
       <div className="relative flex items-center justify-center w-48 h-48">
         {/* Circular Progress Bar */}
@@ -48,8 +48,8 @@ const FacInf = () => {
   
         {/* Center Label */}
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <p className="text-lg sm:text-base md:text-1xl lg:text-4xl xl:text-4xl font-bold text-gray-800">760</p>
-          <p className="flex flex-col text-sm sm:text-xs md:text-sm lg:text-lg text-gray-500 text-center">
+          <p className="text-lg sm:text-base md:text-lg lg:text-4xl xl:text-4xl font-bold text-gray-800">760</p>
+          <p className="flex flex-col text-sm sm:text-xs md:text-xs lg:text-lg text-gray-500 text-center">
             <span>Building</span>
             <span>Score</span>
           </p>

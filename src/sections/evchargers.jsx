@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import evcharger from '../sections/ev.png';
-import DateSelector from '../components/DateSelector';
+import { FaCalendarAlt } from 'react-icons/fa';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 
 // EV Charger Overview Component
 const EVChargerOverview = () => {
@@ -20,6 +22,8 @@ const EVChargerOverview = () => {
     { capacity: '7 KW', location: 'MLCP 2nd floor', energyConsumed: '0 kWh', status: 'Idle' },
     { capacity: '7 KW', location: 'MLCP 3rd floor', energyConsumed: '0 kWh', status: 'Idle' },
   ];
+
+  const [selectedDate, setSelectedDate] = useState(new Date());
 
   // Helper function to determine color based on status
   const getStatusColor = (status) => {
@@ -50,8 +54,26 @@ const EVChargerOverview = () => {
         <div className='flex justify-between'>
           <h3 className="text-lg font-bold text-gray-800 pb-6">EV Chargers</h3>
 
-          {/* Date Picker in the Top Right Corner */}
-          <DateSelector />
+          {/* Date Picker Icon */}
+          <div className="relative">
+            <DatePicker
+              selected={selectedDate}
+              onChange={(date) => setSelectedDate(date)}
+              popperPlacement="bottom-end"
+              popperModifiers={{
+                preventOverflow: {
+                  enabled: true,
+                  escapeWithReference: false,
+                  boundariesElement: "viewport",
+                },
+              }}
+              customInput={
+                <button className="text-gray-600 text-xl">
+                  <FaCalendarAlt />
+                </button>
+              }
+            />
+          </div>
         </div>
 
         {/* Mini Cards for Main Statistics */}

@@ -13,8 +13,8 @@ const ThreeDModel = () => {
   return (
     <div className="p-6 bg-white shadow-lg rounded-lg flex flex-col gap-[10px] items-center h-[100%]">
       <h2 className="text-2xl font-bold pt-1 text-center">Metalware - 3D Model</h2>
-      <div className='flex aling-center justify-center'>
-              <img src={modelImage} alt="Metalware Model" className="w-[80vmin] h-[auto] p-3 md:w-[auto] md:h-[40vmin] "/>
+      <div className='flex aling-center justify-center pt-5'>
+              <img src={modelImage} alt="Metalware Model" className="md:w-[auto] md:h-[30vmin] lg:w-[auto] lg:h-[30vmin] xl:h-[37vmin]"/>
       </div>
       {/* <Canvas
         style={{ height: '300px', width: '100%' }}
