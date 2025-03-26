@@ -16,8 +16,10 @@ import EnergySources from "../../dcomponents/EnergySources";
 const EDashboard = () => {
   return (
     <div className="min-h-screen flex flex-col bg-gray-100 p-3 gap-4">
+      <div className="lg:h-[20vh]">
       <Edmc />
-      <div className="grid gap-4 custom:grid-cols-2 grid-cols-1 lg:h-[70vh] lg:w-[auto]">
+      </div>
+      <div className="grid gap-4 custom:grid-cols-2 grid-cols-1 lg:h-[68vh]">
         <ZoneUsage />
         <EnergySources />
       </div>

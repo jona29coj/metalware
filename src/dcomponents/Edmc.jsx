@@ -22,7 +22,7 @@ const Edmc = () => {
   const { period, rate } = getCurrentRate();
 
   return (
-    <div className="bg-white shadow-md p-3 rounded-lg w-full flex-grow">
+    <div className="bg-white shadow-md p-3 rounded-lg w-full flex-grow lg:h-[100%]">
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 h-full">
         {/* Column 1 - Facility Information */}
         <div className="flex flex-col justify-center lg:items-center md:items-start sm:items-start border-b sm:border-b-0 sm:border-r border-gray-300 pb-3 sm:pb-0 sm:pr-4 h-full space-y-2">
