@@ -109,7 +109,7 @@ const EnergySources = () => {
   };
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md">
+    <div className="bg-white p-6 rounded-lg shadow-md flex flex-col justify-between">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-semibold">Consumption</h2>
         <div className="flex items-center space-x-3">
@@ -163,7 +163,7 @@ const EnergySources = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-6">
+      <div className="grid grid-cols-2 gap-6 h-[100%] flex justify-center items-center">
         <div>
           <p className="text-md text-gray-700 mb-6">
             Total Consumption:{" "}

@@ -156,10 +156,10 @@ const ZoneUsage = () => {
 
   return (
     <>
-      <div className="relative bg-white p-5 rounded-lg shadow-md w-full">
+      <div className="relative bg-white p-5 rounded-lg shadow-md w-full flex flex-col justify-between h-[68vh]">
       <h2 className="text-xl font-semibold p-2">Zonal Usage</h2>
-        <div ref={mountRef} className="w-full h-[40vh] overflow-hidden relative" />
-        <div className="flex space-x-12 pb-2 justify-center">
+        <div ref={mountRef} className="w-full h-[60%] overflow-hidden relative" />
+        <div className="flex space-x-12 pb-2 justify-center items-start">
           <div className="bg-[#008B8B] text-white px-4 py-3 rounded-lg shadow-lg border-2 border-[#99FF99] text-lg font-bold">
             C-49
           </div>
