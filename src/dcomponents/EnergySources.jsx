@@ -169,9 +169,9 @@ const EnergySources = () => {
             Total Consumption:{" "}
             <span className="font-bold text-lg">{totalConsumption} kWh</span>
           </p>
-          <div className="space-y-6">
+          <div className="lg:space-y-6 md:space-y-4 ">
             <div className="border border-red-500 p-3 rounded-lg shadow">
-              <h3 className="text-lg font-semibold text-red-700">High Zone</h3>
+              <h3 className="md:text-md lg:text-lg font-semibold text-red-700">High Zone</h3>
               <p className="text-gray-900 font-medium mt-2">{highZone.name}</p>
               <p className="text-gray-900 mt-1">{highZone.consumption} kWh</p>
               <p className="text-sm text-gray-600 mt-1">
