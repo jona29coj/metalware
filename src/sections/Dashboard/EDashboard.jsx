@@ -19,7 +19,7 @@ const EDashboard = () => {
       <div className="lg:h-[20vh]">
       <Edmc />
       </div>
-      <div className="grid gap-4 grid-cols-1 lg:grid-cols-1 xl:grid-cols-2 h-auto lg:min-h-[68vh] relative">
+      <div className="grid gap-4 grid-cols-1 lg:grid-cols-1 xl:grid-cols-2 relative">
         <ZoneUsage />
         <EnergySources />
       </div>

@@ -109,8 +109,8 @@ const EnergySources = () => {
   };
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md flex flex-col justify-between">
-      <div className="flex justify-between items-center mb-6">
+    <div className="bg-white h-[100%] p-5 rounded-lg shadow-md flex flex-col space-y-7">
+      <div className="flex justify-between items-center">
         <h2 className="text-xl font-semibold">Consumption</h2>
         <div className="flex items-center space-x-3">
           <button
@@ -163,26 +163,26 @@ const EnergySources = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-6 h-[100%] flex justify-center items-center">
+      <div className="grid grid-cols-2 gap-6 flex justify-start items-start">
         <div>
           <p className="text-md text-gray-700 mb-6">
             Total Consumption:{" "}
             <span className="font-bold text-lg">{totalConsumption} kWh</span>
           </p>
-          <div className="lg:space-y-6 md:space-y-4 ">
+          <div className="lg:space-y-5 md:space-y-4 ">
             <div className="border border-red-500 p-3 rounded-lg shadow">
-              <h3 className="md:text-md lg:text-lg font-semibold text-red-700">High Zone</h3>
-              <p className="text-gray-900 font-medium mt-2">{highZone.name}</p>
-              <p className="text-gray-900 mt-1">{highZone.consumption} kWh</p>
+              <h3 className="md:text-md lg:text-md font-semibold text-red-700">High Zone</h3>
+              <p className="text-gray-900 text-sm mt-2">{highZone.name}</p>
+              <p className="text-gray-900 text-sm mt-1">{highZone.consumption} kWh</p>
               <p className="text-sm text-gray-600 mt-1">
                 {((highZone.consumption / totalConsumption) * 100).toFixed(2)}%
                 of Total Consumption
               </p>
             </div>
             <div className="border border-green-500 p-3 rounded-lg shadow">
-              <h3 className="text-lg font-semibold text-green-700">Low Zone</h3>
-              <p className="text-gray-900 font-medium mt-2">{lowZone.name}</p>
-              <p className="text-gray-900 mt-1">{lowZone.consumption} kWh</p>
+              <h3 className="md:text-md lg:text-md font-semibold text-green-700">Low Zone</h3>
+              <p className="text-gray-900 text-sm mt-2">{lowZone.name}</p>
+              <p className="text-gray-900 text-sm mt-1">{lowZone.consumption} kWh</p>
               <p className="text-sm text-gray-600 mt-1">
                 {((lowZone.consumption / totalConsumption) * 100).toFixed(2)}%
                 of Total Consumption
