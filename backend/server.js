@@ -18,17 +18,10 @@ const ccRoutes = require('./cc');
 const apdRoutes = require('./apd');
 
 
+
 const app = express();
 const port = 3001;
 const path = require('path');
-
-// Serve React static files
-app.use(express.static(path.join(__dirname, '../build')));
-
-// For any other route, send the React index.html
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../build', 'index.html'));
-});
 
 
 app.use(cors());
@@ -62,3 +55,5 @@ app.use((err, req, res, next) => {
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
 });
+
+
