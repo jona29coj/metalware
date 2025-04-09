@@ -1,58 +1,76 @@
-import React, { useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
-import { FaCalendarAlt } from "react-icons/fa";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
+import axios from "axios";
+import moment from "moment-timezone";
+import { DateContext } from "../contexts/DateContext";
+const meterNames = [
+  { id: 1, name: "SPRAY+ EPL", category: "C-49" },
+  { id: 2, name: "PLATING", category: "C-49" },
+  { id: 3, name: "COMPRESSOR", category: "C-49" },
+  { id: 4, name: "BUFFING + VIBRATOR + ETP", category: "C-49" },
+  { id: 5, name: "Terrace", category: "C-49" },
+  { id: 6, name: "SPRAY+ EPL", category: "C-50" },
+  { id: 7, name: "CHINA BUFFING", category: "C-50" },
+  { id: 8, name: "BUFFING+CASTING M/C -7", category: "C-50" },
+  { id: 9, name: "DIE CASTING", category: "C-50" },
+  { id: 10, name: "RUMBLE", category: "C-50" },
+  { id: 11, name: "TOOL ROOM", category: "C-50" },
+];
+
+const getMeterName = (id) => {
+  const meter = meterNames.find((meter) => meter.id === id);
+  return meter ? meter.name : "Unknown";
+};
 
 const EnergySources = () => {
-  const data = {
-    day: [
-      { name: "SPRAY+ EPL", consumption: 150 },
-      { name: "PLATING", consumption: 80 },
-      { name: "COMPRESSOR", consumption: 100 },
-      { name: "BUFFING + VIBRATOR + ETP", consumption: 120 },
-      { name: "Terrace", consumption: 180 },
-      { name: "SPRAY+ EPL", consumption: 90 },
-      { name: "CHINA BUFFING", consumption: 60 },
-      { name: "BUFFING+CASTING M/C -7", consumption: 130 },
-      { name: "DIE CASTING", consumption: 170 },
-      { name: "RUMBLE", consumption: 180 },
-    ],
+  const { selectedDate: globalSelectedDate } = useContext(DateContext); // Get date from context
+  const [zones, setZones] = useState([]);
+  const [localSelectedDate, setLocalSelectedDate] = useState(globalSelectedDate); // Local date state
+  const [highZone, setHighZone] = useState({ meter_id: "N/A", consumption: 0 });
+  const [lowZone, setLowZone] = useState({ meter_id: "N/A", consumption: 0 });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    setLocalSelectedDate(globalSelectedDate);
+  }, [globalSelectedDate]);
+
+  // Fetch data from the backend
+  const fetchConsumptionData = async (date) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const currentDateTime = moment().tz("Asia/Kolkata").format("YYYY-MM-DD HH:mm:ss");
+
+      const response = await axios.get("http://localhost:3001/api/hlcons", {
+        params: { date, currentDateTime },
+      });
+
+      if (response.data) {
+        setZones(response.data.consumptionData);
+        setHighZone(response.data.highZone);
+        setLowZone(response.data.lowZone);
+      }
+    } catch (err) {
+      setError("Failed to fetch data");
+      console.error("Error fetching data:", err);
+    }
+    setLoading(false);
   };
 
-  data.week = data.day.map((zone) => ({
-    name: zone.name,
-    consumption: zone.consumption * 7,
-  }));
+  // Fetch data when the local date changes
+  useEffect(() => {
+    fetchConsumptionData(localSelectedDate);
+  }, [localSelectedDate]);
 
-  data.month = data.day.map((zone) => ({
-    name: zone.name,
-    consumption: zone.consumption * 30,
-  }));
-
-  const [selectedPeriod, setSelectedPeriod] = useState("day");
-  const [zones, setZones] = useState(data.day);
-  const [selectedDate, setSelectedDate] = useState(new Date());
-
-  const totalConsumption = zones.reduce(
-    (sum, zone) => sum + zone.consumption,
-    0
-  );
-  const highZone = zones.reduce((prev, current) =>
-    prev.consumption > current.consumption ? prev : current
-  );
-  const lowZone = zones.reduce((prev, current) =>
-    prev.consumption < current.consumption ? prev : current
-  );
-
-  const handlePeriodChange = (period) => {
-    setSelectedPeriod(period);
-    setZones([...data[period]]);
+  const handleLocalDateChange = (e) => {
+    setLocalSelectedDate(e.target.value);
   };
 
-  const otherZonesConsumption =
-    totalConsumption - (highZone.consumption + lowZone.consumption);
+  const totalConsumption = zones.reduce((sum, zone) => sum + parseFloat(zone.consumption), 0);
+
+  const otherZonesConsumption = (totalConsumption - (highZone.consumption + lowZone.consumption)).toFixed(1);
 
   const chartOptions = {
     chart: {
@@ -61,19 +79,13 @@ const EnergySources = () => {
       height: "300px",
     },
     title: { text: "" },
-    xAxis: {
-      categories: ["Total Consumption"],
-    },
-    yAxis: {
-      title: { text: "Consumption (kWh)" },
-    },
+    xAxis: { categories: ["Total Consumption"] },
+    yAxis: { title: { text: "Consumption (kWh)" } },
     plotOptions: {
       series: {
         stacking: "normal",
         borderWidth: 0,
-        dataLabels: {
-          enabled: false,
-        },
+        dataLabels: { enabled: false },
       },
     },
     tooltip: {
@@ -85,115 +97,60 @@ const EnergySources = () => {
       },
     },
     series: [
-      {
-        name: highZone.name,
-        data: [highZone.consumption],
-        color: "rgb(185, 28, 28)",
-      },
-      {
-        name: "Other Zones",
-        data: [otherZonesConsumption],
-        color: "rgba(96, 165, 250, 0.2)",
-        showInLegend: true,
-      },
-      {
-        name: lowZone.name,
-        data: [lowZone.consumption],
-        color: "rgb(21, 128, 61)",
-      },
+      { name: `High Zone (${getMeterName(highZone.meter_id)})`, data: [highZone.consumption], color: "rgb(185, 28, 28)" },
+      { name: "Other Zones", data: [parseFloat(otherZonesConsumption)], color: "rgba(96, 165, 250, 0.2)", showInLegend: true },
+      { name: `Low Zone (${getMeterName(lowZone.meter_id)})`, data: [lowZone.consumption], color: "rgb(21, 128, 61)" },
     ],
-    legend: {
-      enabled: true,
-    },
+    legend: { enabled: true },
     credits: { enabled: false },
   };
 
   return (
-    <div className="bg-white h-[100%] p-5 rounded-lg shadow-md flex flex-col space-y-7">
+    <div className="bg-white xl:h-[68vh] p-5 rounded-lg shadow-md flex flex-col space-y-7">
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-semibold">Consumption</h2>
-        <div className="flex items-center space-x-3">
-          <button
-            className={`px-4 py-2 rounded ${
-              selectedPeriod === "day" ? "bg-blue-500 text-white" : "bg-gray-200"
-            }`}
-            onClick={() => handlePeriodChange("day")}
-          >
-            Day
-          </button>
-          <button
-            className={`px-4 py-2 rounded ${
-              selectedPeriod === "week"
-                ? "bg-blue-500 text-white"
-                : "bg-gray-200"
-            }`}
-            onClick={() => handlePeriodChange("week")}
-          >
-            Week
-          </button>
-          <button
-            className={`px-4 py-2 rounded ${
-              selectedPeriod === "month"
-                ? "bg-blue-500 text-white"
-                : "bg-gray-200"
-            }`}
-            onClick={() => handlePeriodChange("month")}
-          >
-            Month
-          </button>
-          <div className="relative">
-            <DatePicker
-              selected={selectedDate}
-              onChange={(date) => setSelectedDate(date)}
-              popperPlacement="bottom-end"
-              popperModifiers={{
-                preventOverflow: {
-                  enabled: true,
-                  escapeWithReference: false,
-                  boundariesElement: "viewport",
-                },
-              }}
-              customInput={
-                <button className="text-gray-600 text-xl">
-                  <FaCalendarAlt />
-                </button>
-              }
-            />
-          </div>
+        <div className="relative">
+          <input
+            type="date"
+            value={localSelectedDate} // Use local state
+            onChange={handleLocalDateChange} // Update local state
+            className="border rounded p-1 text-sm"
+          />
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-6 flex justify-start items-start">
-        <div>
-          <p className="text-md text-gray-700 mb-6">
-            Total Consumption:{" "}
-            <span className="font-bold text-lg">{totalConsumption} kWh</span>
-          </p>
-          <div className="lg:space-y-5 md:space-y-4 ">
-            <div className="border border-red-500 p-3 rounded-lg shadow">
-              <h3 className="md:text-md lg:text-md font-semibold text-red-700">High Zone</h3>
-              <p className="text-gray-900 text-sm mt-2">{highZone.name}</p>
-              <p className="text-gray-900 text-sm mt-1">{highZone.consumption} kWh</p>
-              <p className="text-sm text-gray-600 mt-1">
-                {((highZone.consumption / totalConsumption) * 100).toFixed(2)}%
-                of Total Consumption
-              </p>
-            </div>
-            <div className="border border-green-500 p-3 rounded-lg shadow">
-              <h3 className="md:text-md lg:text-md font-semibold text-green-700">Low Zone</h3>
-              <p className="text-gray-900 text-sm mt-2">{lowZone.name}</p>
-              <p className="text-gray-900 text-sm mt-1">{lowZone.consumption} kWh</p>
-              <p className="text-sm text-gray-600 mt-1">
-                {((lowZone.consumption / totalConsumption) * 100).toFixed(2)}%
-                of Total Consumption
-              </p>
+      {loading ? (
+        <p className="text-center text-gray-600">Loading...</p>
+      ) : error ? (
+        <p className="text-center text-red-500">{error}</p>
+      ) : (
+        <div className="grid grid-cols-2 gap-6 xl justify-start items-start">
+          <div>
+            <div className="lg:space-y-5 md:space-y-4">
+              <div className="border border-red-500 p-3 rounded-lg shadow">
+                <h3 className="md:text-md lg:text-md font-semibold text-red-700">High Zone</h3>
+                <p className="text-gray-900 text-sm mt-2">Zone: {getMeterName(highZone.meter_id)}</p>
+                <p className="text-gray-900 text-sm mt-1">{highZone.consumption} kWh</p>
+                <p className="text-sm text-gray-600 mt-1">{((highZone.consumption / totalConsumption) * 100).toFixed(1)}% of Total Consumption</p>
+              </div>
+              <div className="border border-green-500 p-3 rounded-lg shadow">
+                <h3 className="md:text-md lg:text-md font-semibold text-green-700">Low Zone</h3>
+                <p className="text-gray-900 text-sm mt-2">Zone: {getMeterName(lowZone.meter_id)}</p>
+                <p className="text-gray-900 text-sm mt-1">{lowZone.consumption} kWh</p>
+                <p className="text-sm text-gray-600 mt-1">{((lowZone.consumption / totalConsumption) * 100).toFixed(1)}% of Total Consumption</p>
+              </div>
+              <div className="border border-blue-500 p-3 rounded-lg shadow">
+                <h3 className="md:text-md lg:text-md font-semibold text-blue-700">Other Zones</h3>
+                <p className="text-gray-900 text-sm mt-1">{otherZonesConsumption} kWh</p>
+                <p className="text-sm text-gray-600 mt-1">{((parseFloat(otherZonesConsumption) / totalConsumption) * 100).toFixed(1)}% of Total Consumption</p>
+              </div>
             </div>
           </div>
+          <div className="flex justify-center items-center mt-6 pt-10">
+            <HighchartsReact highcharts={Highcharts} options={chartOptions} />
+          </div>
         </div>
-        <div className="flex justify-center items-center mt-6 pt-10">
-          <HighchartsReact highcharts={Highcharts} options={chartOptions} />
-        </div>
-      </div>
+      )}
     </div>
   );
 };

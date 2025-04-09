@@ -5,6 +5,8 @@ import mware_l2 from "../sections/pictures/mware6.png";
 import mware_l3 from "../sections/pictures/mware7.png";
 import mware_l4 from "../sections/pictures/mware8.png";
 import mware_t from "../sections/pictures/mware9.png";
+import scale from "../sections/pictures/Daylight_scale.png";
+
 
 const DaylightFloorPlanAnalysis = () => {
   const floorPlans = [
@@ -32,6 +34,9 @@ const DaylightFloorPlanAnalysis = () => {
             <p className="text-sm text-gray-500 mt-2 whitespace-nowrap">{plan.title}</p>
           </div>
         ))}
+      </div>
+      <div className="flex justify-center width-[100%]">
+        <img src={scale} alt="scale" className="md:w-[40%] xl:w-[37%]"/>
       </div>
     </div>
   );

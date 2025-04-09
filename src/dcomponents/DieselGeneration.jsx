@@ -6,7 +6,14 @@ const DieselGeneration = () => {
   const navigate = useNavigate(); // Navigation Hook
 
   return (
-    <div className="rounded-lg shadow-md bg-white w-full border border-gray-300 p-6">
+    <div className="relative bg-white dark:bg-secondary-dark-bg rounded-xl shadow-md p-8 group opacity-50">
+      {/* Hover Tooltip for Entire Section */}
+      <div className="absolute inset-0 flex justify-center items-center group-hover:opacity-100 opacity-0 transition-opacity z-10">
+        <p className="text-sm bg-gray-900 text-white py-2 px-4 rounded-lg shadow-lg">
+          Section Not Available
+        </p>
+      </div>
+
       <h2 className="text-lg font-bold pb-6">Diesel Generators</h2>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
