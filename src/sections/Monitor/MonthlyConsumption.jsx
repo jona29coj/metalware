@@ -12,7 +12,7 @@ const MonthlyConsumption = () => {
       const currentTime = new Date().toISOString().replace('T', ' ').substr(0, 19);
 
       try {
-        const response = await axios.get('http://localhost:3001/api/mbconsumption', {
+        const response = await axios.get('https://mw.elementsenergies.com/api/mbconsumption', {
           params: {
             year: year,
             currentTime: currentTime,

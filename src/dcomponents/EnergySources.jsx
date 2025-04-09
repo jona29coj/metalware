@@ -43,7 +43,7 @@ const EnergySources = () => {
     try {
       const currentDateTime = moment().tz("Asia/Kolkata").format("YYYY-MM-DD HH:mm:ss");
 
-      const response = await axios.get("http://localhost:3001/api/hlcons", {
+      const response = await axios.get("https://mw.elementsenergies.com/api/hlcons", {
         params: { date, currentDateTime },
       });
 

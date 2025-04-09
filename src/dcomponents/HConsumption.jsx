@@ -22,8 +22,8 @@ const HConsumption = () => {
       try {
         const currentDateTime = moment().tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss');
         const endpoint = consumptionType === 'kWh' ? 'hconsumption' : 'hkVAhconsumption';
-        const response = await axios.get(`http://localhost:3001/api/${endpoint}`, {
-          params: { date: localSelectedDate, currentDateTime } // Use local date
+        const response = await axios.get(`https://mw.elementsenergies.com/api/${endpoint}`, {
+          params: { date: localSelectedDate, currentDateTime } 
         });
         console.log('Data received by HConsumption:', response.data.consumptionData, 'for date:', localSelectedDate);
         const data = response.data.consumptionData.reduce((acc, item) => {

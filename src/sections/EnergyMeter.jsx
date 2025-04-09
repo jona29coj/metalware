@@ -62,7 +62,7 @@ const MeterInfo = () => {
     const fetchData = async () => {
       try {
         const currentDateTime = moment().tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss');
-        const response = await axios.get(`http://localhost:3001/api/econsumption`, {
+        const response = await axios.get(`https://mw.elementsenergies.com/api/econsumption`, {
           params: { date: globalSelectedDate, currentDateTime }
         });
 

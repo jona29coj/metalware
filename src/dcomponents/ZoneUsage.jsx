@@ -43,7 +43,7 @@ const ZoneUsage = () => {
         const currentDateTime = moment().tz("Asia/Kolkata").format("YYYY-MM-DD HH:mm:ss");
 
         const response = await fetch(
-          `http://localhost:3001/api/econsumption?date=${globalSelectedDate}&currentDateTime=${currentDateTime}`,
+          `https://mw.elementsenergies.com/api/econsumption?date=${globalSelectedDate}&currentDateTime=${currentDateTime}`,
           {
             headers: {
               Accept: "application/json",

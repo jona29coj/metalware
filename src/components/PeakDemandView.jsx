@@ -16,7 +16,7 @@ const PeakDemandView = () => {
     const fetchPeakDemandData = async () => {
       try {
         setLoading(true);
-        const response = await axios.get('http://localhost:3001/api/apd', {
+        const response = await axios.get('https://mw.elementsenergies.com/api/apd', {
           params: {
             date: selectedDate,
             currentDateTime: new Date().toISOString() // Just send current time as-is

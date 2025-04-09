@@ -47,10 +47,10 @@ const Zones = () => {
 
         const [consumptionResponses, pfResponses] = await Promise.all([
           Promise.all(zones.map(zone =>
-            axios.get(`http://localhost:3001/api/${endpoint}`, { params: { date, currentDateTime, zone } })
+            axios.get(`https://mw.elementsenergies.com/api/${endpoint}`, { params: { date, currentDateTime, zone } })
           )),
           Promise.all(zones.map(zone =>
-            axios.get(`http://localhost:3001/api/pf`, { params: { date, currentDateTime, zone } })
+            axios.get(`https://mw.elementsenergies.com/api/pf`, { params: { date, currentDateTime, zone } })
           ))
         ]);
 

@@ -48,7 +48,7 @@ const Edmc = () => {
         .format('YYYY-MM-DD HH:mm:ss');
       
       try {
-        const consumptionResponse = await axios.get('http://localhost:3001/api/mccons', {
+        const consumptionResponse = await axios.get('https://mw.elementsenergies.com/api/mccons', {
           params: { timestamp: kolkataTime },
           headers: { 'Content-Type': 'application/json' }
         });
@@ -84,7 +84,7 @@ const Edmc = () => {
       }
 
       try {
-        const peakDemandResponse = await axios.get('http://localhost:3001/api/mcpeak', {
+        const peakDemandResponse = await axios.get('https://mw.elementsenergies.com/api/mcpeak', {
           params: { timestamp: kolkataTime },
           headers: { 'Content-Type': 'application/json' }
         });
@@ -99,7 +99,7 @@ const Edmc = () => {
 
       try {
         // Fetch total cost from the new endpoint
-        const costResponse = await axios.get('http://localhost:3001/api/cc', {
+        const costResponse = await axios.get('https://mw.elementsenergies.com/api/cc', {
           params: { timestamp: kolkataTime }
         });
         setTotalCost(costResponse.data.totalCost);

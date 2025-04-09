@@ -124,7 +124,7 @@ const EnergyConsumption = () => {
       setError(null);
       try {
         const currentDateTime = moment().tz("Asia/Kolkata").format("YYYY-MM-DD HH:mm:ss");
-        const { data } = await axios.get('http://localhost:3001/api/ehconsumption', {
+        const { data } = await axios.get('https://mw.elementsenergies.com/api/ehconsumption', {
           params: {
             startDate: formatDateForBackend(dateRange.startDate),
             endDate: formatDateForBackend(dateRange.endDate),

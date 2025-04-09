@@ -13,7 +13,7 @@ const PeakDemand = () => {
   const fetchPeakDemandData = async (date) => {
     try {
       const currentDateTime = moment().tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss');
-      const response = await axios.get("http://localhost:3001/api/opeakdemand", {
+      const response = await axios.get("https://mw.elementsenergies.com/api/opeakdemand", {
         params: {
           date,
           currentDateTime, // Use current date and time in Asia/Kolkata timezone
