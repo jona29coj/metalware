@@ -13,21 +13,6 @@ const pool = mysql.createPool({
   queueLimit: 0
 });
 
-/**
- * @api {get} /mcpeak Calculate Peak Demand
- * @apiName GetPeakDemand
- * @apiGroup Energy
- * 
- * @apiParam {String} timestamp Timestamp in format 'YYYY-MM-DD HH:mm:ss'
- * 
- * @apiSuccess {Boolean} success True if calculation succeeded
- * @apiSuccess {Number} peakDemand Peak demand value in kVA
- * @apiSuccess {String} unit Measurement unit (kVA)
- * @apiSuccess {String} timestamp The input timestamp
- * @apiSuccess {Number} minutesEvaluated Number of minutes processed
- * @apiSuccess {String} calculationWindow Time window evaluated
- * @apiSuccess {String} processingTime Time taken for calculation
- */
 router.get('/mcpeak', async (req, res) => {
   const startTime = Date.now();
   const { timestamp } = req.query;
@@ -57,7 +42,6 @@ router.get('/mcpeak', async (req, res) => {
 
     console.log('Calculating peak demand in optimized single query...');
     
-    // Optimized single query to find the peak demand
     const [result] = await pool.query(`
       WITH minute_totals AS (
         SELECT 

@@ -21,7 +21,7 @@ const zoneMetadata = [
 ];
 
 const Zones = () => {
-  const { selectedDate: globalSelectedDate } = useContext(DateContext); // Get date from context
+  const { selectedDate: globalSelectedDate } = useContext(DateContext); 
   const location = useLocation();
   const navigate = useNavigate();
   const [zoneData, setZoneData] = useState([]);
@@ -41,18 +41,21 @@ const Zones = () => {
         setIsLoading(true);
         const currentDateTime = moment(globalSelectedDate).tz('Asia/Kolkata').format('YYYY-MM-DD 23:59:59');
         const date = globalSelectedDate;
-        const zones = zoneMetadata.map(zone => zone.id);
-
+        const zones = selectedView === 'single' 
+        ? [selectedZone] 
+        : zoneMetadata.map(zone => zone.id);
         const endpoint = consumptionType === 'kWh' ? 'zconsumption' : 'zkVAhconsumption';
 
-        const [consumptionResponses, pfResponses] = await Promise.all([
-          Promise.all(zones.map(zone =>
-            axios.get(`https://mw.elementsenergies.com/api/${endpoint}`, { params: { date, currentDateTime, zone } })
-          )),
-          Promise.all(zones.map(zone =>
-            axios.get(`https://mw.elementsenergies.com/api/pf`, { params: { date, currentDateTime, zone } })
-          ))
-        ]);
+      
+      const [consumptionResponses, pfResponses] = await Promise.all([
+        Promise.all(zones.map(zone =>
+          axios.get(`https://mw.elementsenergies.com/api/${endpoint}`, { params: { date, currentDateTime, zone } })
+        )),
+        Promise.all(zones.map(zone =>
+          axios.get(`https://mw.elementsenergies.com/api/pf`, { params: { date, currentDateTime, zone } })
+        ))
+      ]);
+      
 
         setZoneData(zones.map((zoneId, index) => {
           const metadata = zoneMetadata.find(z => z.id === zoneId);

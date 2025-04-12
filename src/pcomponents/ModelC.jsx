@@ -35,7 +35,6 @@ const CombinedComponent = () => {
             <p>Number of Occupants:</p>
             <p>‎</p>
             <p>Number of Zones:</p>
-            <p>Energy Sources:</p>
           </div>
           <div className="lg:text-sm xl:text-md text-gray-600 space-y-3 pl-2 ">
             <p>METALWARE CORPORATION</p>
@@ -52,8 +51,6 @@ const CombinedComponent = () => {
             <p>Day Shift - 275</p>
             <p>Night Shift - 175</p>
             <p>10 Zones</p>
-            <p>Grid (~2,50,000 Units/month),</p>
-            <p>Diesel 2 nos. (~2000 litres/month)</p>
           </div>
         </div>
 

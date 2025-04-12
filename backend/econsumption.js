@@ -37,8 +37,8 @@ async function getMeterWiseConsumptionForDate(date, currentDateTime) {
   const meterWiseConsumption = rows.map((entry) => ({
     energy_meter_id: entry.energy_meter_id,
     consumption: entry.kWh_difference !== null 
-      ? parseFloat(entry.kWh_difference).toFixed(1) // Round to one decimal point
-      : 0 // Ensure no NaN values
+      ? parseFloat(entry.kWh_difference).toFixed(1) 
+      : 0 
   }));
 
   console.log('Meter-wise consumption:', meterWiseConsumption);

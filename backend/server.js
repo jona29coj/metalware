@@ -16,8 +16,7 @@ const hkVAhRoutes = require('./hkVAhconsumption');
 const zkVAhConsumptionRoutes = require('./zkVAhconsumption');
 const ccRoutes = require('./cc');
 const apdRoutes = require('./apd');
-
-
+const DashboardRoutes = require('./dashboard');
 
 const app = express();
 const port = 3001;
@@ -45,6 +44,7 @@ app.use('/api', hkVAhRoutes);
 app.use('/api', zkVAhConsumptionRoutes);
 app.use('/api', ccRoutes);
 app.use('/api', apdRoutes);
+app.use('/api', DashboardRoutes);
 
 
 app.use((err, req, res, next) => {
@@ -55,5 +55,10 @@ app.use((err, req, res, next) => {
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
 });
+
+
+
+
+
 
 
