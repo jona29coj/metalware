@@ -3,6 +3,7 @@ import { FaBell } from 'react-icons/fa';
 import userprofile from "../components/userprofile.png";
 import moment from 'moment-timezone';
 import { DateContext } from '../contexts/DateContext';
+import Cookies from 'js-cookie'; // Import the js-cookie library
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -52,7 +53,7 @@ const Navbar = () => {
             read: false,
           };
         });
-        setNotifications(formatted); 
+        setNotifications(formatted);
       }
     } catch (err) {
       console.error("Error fetching notifications:", err);
@@ -85,6 +86,14 @@ const Navbar = () => {
 
   const handleDateInputChange = (e) => {
     handleDateChange(e.target.value);
+  };
+
+  const handleLogout = () => {
+    // Delete the 'auth' cookie
+    Cookies.remove('auth', { domain: '.elementsenergies.com', path: '/' });
+
+    // Redirect the user to the login page
+    window.location.href = 'https://elementsenergies.com/login';
   };
 
   return (
@@ -142,7 +151,12 @@ const Navbar = () => {
                 </div>
                 <hr className="my-2" />
                 <p className="px-4 py-2 text-sm text-gray-700 cursor-pointer hover:bg-gray-100">Help</p>
-                <p className="px-4 py-2 text-sm text-red-500 cursor-pointer hover:bg-gray-100">Log Out</p>
+                <p
+                  className="px-4 py-2 text-sm text-red-500 cursor-pointer hover:bg-gray-100"
+                  onClick={handleLogout}
+                >
+                  Log Out
+                </p>
               </div>
             )}
           </div>
