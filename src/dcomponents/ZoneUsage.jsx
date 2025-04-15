@@ -3,6 +3,7 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import moment from "moment-timezone";
 import { DateContext } from "../contexts/DateContext";
+
 const categoryColors = {
   "C-49": "#008B8B",
   "C-50": "#FFA500",
@@ -14,7 +15,7 @@ const highlightColors = {
 };
 
 const ZoneUsage = () => {
-  const { selectedDate: globalSelectedDate } = useContext(DateContext); // Get date from context
+  const { selectedDate: globalSelectedDate } = useContext(DateContext);
   const mountRef = useRef(null);
   const tooltipRef = useRef(null);
   const [hoveredZone, setHoveredZone] = useState(null);
@@ -85,7 +86,7 @@ const ZoneUsage = () => {
     };
 
     fetchData();
-  }, [globalSelectedDate]); // Fetch data when the global date changes
+  }, [globalSelectedDate]);
 
   useEffect(() => {
     if (loading || error || !mountRef.current || zoneData.length === 0) return;
@@ -160,12 +161,10 @@ const ZoneUsage = () => {
       if (intersects.length > 0) {
         const intersected = intersects[0].object;
         if (intersected !== currentIntersected) {
-          // Reset previous intersection
           if (currentIntersected) {
             currentIntersected.material.color.set(currentIntersected.userData.originalColor);
           }
 
-          // Set new intersection
           currentIntersected = intersected;
           intersected.material.color.set(highlightColors[intersected.userData.category]);
           setHoveredZone(intersected.userData);
@@ -195,7 +194,6 @@ const ZoneUsage = () => {
     };
 
     const handleMouseOver = (event) => {
-      // This ensures the tooltip stays visible when mouse stops moving but stays over a cube
       if (!checkIntersection(event.clientX, event.clientY)) {
         tooltipRef.current.style.display = "none";
       }
@@ -228,17 +226,25 @@ const ZoneUsage = () => {
       mount.removeEventListener("mousemove", handleMouseMove);
       mount.removeEventListener("mouseover", handleMouseOver);
     };
-  }, [zoneData, loading, error]); // Removed globalSelectedDate from dependency array to avoid re-initialization
-
-  if (loading) return <div className="text-center py-8">Loading zone data...</div>;
-  if (error) return <div className="text-center py-8 text-red-500">Error: {error}</div>;
-  if (zoneData.length === 0) return <div className="text-center py-8">No zone data available</div>;
+  }, [zoneData, loading, error]);
 
   return (
     <>
       <div className="relative bg-white p-5 rounded-lg shadow-md w-full flex flex-col space-y-8">
-        <h2 className="text-xl font-semibold p-2">Zonal Usage</h2>
-        <div ref={mountRef} className="w-full h-[60%] xl-w-full overflow-hidden relative" />
+        <h2 className="text-xl font-semibold">Energy - Zone wise</h2>
+
+        {loading ? (
+          <div className="w-full h-[300px] flex items-center justify-center">
+            <span className="text-gray-600">Loading zone data...</span>
+          </div>
+        ) : error ? (
+          <div className="text-red-500 text-center">{error}</div>
+        ) : zoneData.length === 0 ? (
+          <div className="text-center text-gray-500">No zone data available</div>
+        ) : (
+          <div ref={mountRef} className="w-full h-[60%] overflow-hidden relative" />
+        )}
+
         <div className="flex space-x-12 pb-2 justify-center items-start">
           <div className="bg-[#008B8B] text-white px-4 py-3 rounded-lg shadow-lg border-2 border-[#99FF99] text-lg font-bold">
             C-49
@@ -248,10 +254,11 @@ const ZoneUsage = () => {
           </div>
         </div>
       </div>
+
       <div
         ref={tooltipRef}
         className="fixed bg-white p-2 border border-black rounded shadow-lg text-sm hidden pointer-events-none z-50"
-        style={{ transform: 'translate(10px, 10px)' }}
+        style={{ transform: "translate(10px, 10px)" }}
       />
     </>
   );

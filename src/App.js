@@ -28,31 +28,18 @@ const ScrollToTop = () => {
 };
 
 const App = () => {
-  const cookies = document.cookie;
-  console.log(cookies);
-
-  const getAuthCookie = () => {
-    const match = document.cookie.match('(^|;)\\s*auth\\s*=\\s*([^;]+)');
-    return match ? match[2] : null;
-  };
-  
-  console.log(`auth: ${getAuthCookie()}`);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(window.innerWidth < 1024);
   const [refreshKey, setRefreshKey] = useState(0);
-  //const [isUser, setIsUser] = useState(true); // ✅
 
   useEffect(() => {
     const authCookie = Cookies.get('auth');
     if (authCookie === 'true') {
-        // User is authenticated
-        console.log('User is authenticated');
+      setIsAuthenticated(true);
     } else {
-        // User is not authenticated
-        console.log('User is not authenticated');
-        //window.location.href = '/login'; // Redirect to login page if not authenticated
+      window.location.href = 'https://elementsenergies.com/login';
     }
-}, []);
-  
+  }, []);  
 
   const toggleSidebar = () => {
     setIsCollapsed((prev) => !prev);
@@ -65,7 +52,7 @@ const App = () => {
     <DateProvider>
       <BrowserRouter>
         <ScrollToTop />
-         ( 
+        {isAuthenticated && ( 
           <div className="bg-main-bg min-h-screen flex">
             {/* Sidebar */}
             <div
@@ -94,7 +81,7 @@ const App = () => {
                 isCollapsed ? 'ml-[9%]' : 'ml-[15.5%]'
               }`}
             >
-              <div className="flex-1 overflow-auto max-w-full mt-[28px]">
+              <div className="flex-1 overflow-auto max-w-full mt-[52px]">
                 <Routes>
                   <Route path="/dashboard" element={<EDashboard />} />
                   <Route path="/" element={<EDashboard />} />
@@ -115,7 +102,7 @@ const App = () => {
               </div>
             </div>
           </div>
-         )
+         )}
       </BrowserRouter>
     </DateProvider>
   );

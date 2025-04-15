@@ -161,7 +161,7 @@ const PeakDemand = () => {
   return (
     <div className="bg-white shadow-lg rounded-lg p-6 w-full h-full">
       <div className="flex justify-between items-center pb-6">
-        <h2 className="text-lg font-bold text-gray-700">Peak Demand</h2>
+        <h2 className="text-xl font-semibold">Peak Demand</h2>
         <div className="flex space-x-4">
           <div>
             <label htmlFor="date" className="block text-gray-700 font-bold mb-2"></label>

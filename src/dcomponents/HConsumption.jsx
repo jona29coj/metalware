@@ -104,7 +104,7 @@ const HConsumption = () => {
   return (
 <div className="w-full flex flex-col p-6 bg-white shadow-lg rounded-lg">
   <div className="flex justify-between items-center pb-6">
-    <h2 className="text-xl font-semibold">Consumption</h2>
+    <h2 className="text-xl font-semibold">Hourly Energy Consumption</h2>
     <div className="flex items-center space-x-4">
       <div className="flex items-center space-x-2">
         <span className="text-sm font-medium">kWh</span>

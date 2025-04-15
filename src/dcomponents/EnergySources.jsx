@@ -108,7 +108,7 @@ const EnergySources = () => {
   return (
     <div className="bg-white xl:h-[68vh] p-5 rounded-lg shadow-md flex flex-col space-y-7">
       <div className="flex justify-between items-center">
-        <h2 className="text-xl font-semibold">Consumption</h2>
+        <h2 className="text-xl font-semibold">Facility Overview</h2>
         <div className="relative">
           <input
             type="date"

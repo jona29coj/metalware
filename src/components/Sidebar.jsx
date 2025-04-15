@@ -13,7 +13,6 @@ const links = {
 
 const navItems = [
   { name: "Alerts", path: "/alerts", icon: FiAlertCircle },
-  { name: "Files", path: "/files", icon: FiBook },
   { name: "Building Profile", path: "/profile", icon: FiUser },
   { name: "Settings", path: "/settings", icon: FiSettings }, // Add the Settings tab here
 ];

@@ -29,7 +29,7 @@ async function getPeakDemandAboveThreshold(date, currentDateTime, threshold = 55
       AND timestamp BETWEEN ? AND ?
     GROUP BY minute
     HAVING SUM(total_kVA) > ?
-    ORDER BY minute
+    ORDER BY minute DESC
     `,
     [startOfDay, endOfDay, threshold]
   );

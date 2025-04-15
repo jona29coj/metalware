@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useContext } from 'react';
-import { FaBell, FaCalendarAlt } from 'react-icons/fa';
+import { FaBell } from 'react-icons/fa';
 import userprofile from "../components/userprofile.png";
 import moment from 'moment-timezone';
 import { DateContext } from '../contexts/DateContext';
@@ -8,13 +8,7 @@ const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
-  const [notifications, setNotifications] = useState([
-    { id: 1, text: "New ticket assigned to you", read: false },
-    { id: 2, text: "System update scheduled at 3 PM", read: false },
-    { id: 3, text: "Reminder: Meeting at 2 PM", read: true },
-    { id: 4, text: "Server maintenance completed", read: true },
-    { id: 5, text: "New user registered", read: false },
-  ]);
+  const [notifications, setNotifications] = useState([]);
 
   const profileRef = useRef(null);
   const notificationRef = useRef(null);
@@ -39,10 +33,37 @@ const Navbar = () => {
         setShowNotifications(false);
       }
     };
-
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  const fetchNotifications = async () => {
+    try {
+      const currentDateTime = moment().tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss');
+      const response = await fetch(`https://mw.elementsenergies.com/api/apd?date=${selectedDate}&currentDateTime=${currentDateTime}`);
+      const data = await response.json();
+
+      if (data?.peakDemandAboveThreshold) {
+        const formatted = data.peakDemandAboveThreshold.map((entry, idx) => {
+          const time = moment(entry.minute).format("HH:mm");
+          return {
+            id: entry.id,
+            text: `Apparent Power → ${entry.total_kVA} kVA ${time} crossing 558.75 → Lower Ceiling`,
+            read: false,
+          };
+        });
+        setNotifications(formatted); 
+      }
+    } catch (err) {
+      console.error("Error fetching notifications:", err);
+    }
+  };
+
+  useEffect(() => {
+    if (selectedDate) {
+      fetchNotifications();
+    }
+  }, [selectedDate]);
 
   const hasUnread = notifications.some(n => !n.read);
 
@@ -63,31 +84,23 @@ const Navbar = () => {
   };
 
   const handleDateInputChange = (e) => {
-    const date = e.target.value;
-    handleDateChange(date);
+    handleDateChange(e.target.value);
   };
 
   return (
     <div className={`transition-all bg-white shadow-md py-1 px-3 ${isScrolled ? 'shadow-lg' : ''} duration-300 w-full`}>
       <div className="flex items-center justify-end flex-wrap">
-
-        {/* Notification & Profile Section */}
         <div className="flex items-center space-x-4">
-
-          {/* Date Picker */}
           <div className="relative flex items-center" ref={datePickerRef}>
-            <div className="relative">
-              <input
-                type="date"
-                value={selectedDate}
-                onChange={handleDateInputChange}
-                className="pl-2 pr-2 py-1 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500"
-                max={moment().tz('Asia/Kolkata').format('YYYY-MM-DD')}
-              />
-            </div>
+            <input
+              type="date"
+              value={selectedDate}
+              onChange={handleDateInputChange}
+              className="pl-2 pr-2 py-1 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500"
+              max={moment().tz('Asia/Kolkata').format('YYYY-MM-DD')}
+            />
           </div>
 
-          {/* Notification Icon with Badge */}
           <div className="relative" ref={notificationRef}>
             <div className="relative cursor-pointer" onClick={toggleNotifications}>
               <FaBell className="text-gray-600 text-xl hover:text-blue-500" />
@@ -97,9 +110,9 @@ const Navbar = () => {
             </div>
 
             {showNotifications && (
-              <div className="absolute right-[-60px] mt-5 w-64 bg-white shadow-lg rounded-lg py-3">
+              <div className="absolute right-[-60px] mt-5 w-72 bg-white shadow-lg rounded-lg py-3 z-50">
                 <p className="px-4 py-2 text-sm font-semibold text-gray-800">Notifications</p>
-                <div className="max-h-40 overflow-y-auto custom-scrollbar">
+                <div className="max-h-48 overflow-y-auto custom-scrollbar">
                   {notifications.map((notif) => (
                     <p
                       key={notif.id}
@@ -110,24 +123,16 @@ const Navbar = () => {
                     </p>
                   ))}
                 </div>
-                <p className="px-4 py-2 text-xs text-blue-500 cursor-pointer hover:underline text-right">
-                  Previous
-                </p>
               </div>
             )}
           </div>
 
-          {/* Profile Section */}
           <div className="relative" ref={profileRef}>
-            <div
-              className="flex items-center space-x-2 cursor-pointer"
-              onClick={toggleProfileDropdown}
-            >
+            <div className="flex items-center space-x-2 cursor-pointer" onClick={toggleProfileDropdown}>
               <img src={userprofile} alt="User" className="w-10 h-10 rounded-full" />
             </div>
-
             {showProfileDropdown && (
-              <div className="absolute right-0 mt-3 w-48 bg-white shadow-lg rounded-lg py-4">
+              <div className="absolute right-0 mt-3 w-48 bg-white shadow-lg rounded-lg py-4 z-50">
                 <div className="flex flex-col items-center">
                   <img src={userprofile} alt="Profile" className="w-14 h-14 rounded-full mb-2" />
                   <p className="text-gray-800 font-medium">Hi, Admin</p>
@@ -136,16 +141,11 @@ const Navbar = () => {
                   </p>
                 </div>
                 <hr className="my-2" />
-                <p className="px-4 py-2 text-sm text-gray-700 cursor-pointer hover:bg-gray-100">
-                  Help
-                </p>
-                <p className="px-4 py-2 text-sm text-red-500 cursor-pointer hover:bg-gray-100">
-                  Log Out
-                </p>
+                <p className="px-4 py-2 text-sm text-gray-700 cursor-pointer hover:bg-gray-100">Help</p>
+                <p className="px-4 py-2 text-sm text-red-500 cursor-pointer hover:bg-gray-100">Log Out</p>
               </div>
             )}
           </div>
-
         </div>
       </div>
 

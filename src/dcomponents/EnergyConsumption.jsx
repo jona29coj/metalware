@@ -144,7 +144,7 @@ const EnergyConsumption = () => {
   return (
     <div className="bg-white shadow rounded-lg p-7">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-2">
-        <h2 className="text-lg font-bold">Consumption</h2>
+        <h2 className="text-xl font-semibold">Energy Heat Map</h2>
         <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
           <div className="flex gap-2">
             <DatePicker

@@ -8,16 +8,16 @@ const getCurrentRate = () => {
   let period, rate;
 
   if (hours >= 5 && hours < 10) {
-    period = "Off-Peak (05:00 - 10:00)";
+    period = "Off-Peak Tariff (05:00 - 10:00)";
     rate = "₹6.035 per kVAh";
   } else if (hours >= 10 && hours < 19) {
-    period = "Normal (10:00 - 19:00)";
+    period = "Normal Tariff (10:00 - 19:00)";
     rate = "₹7.10 per kVAh";
   } else if ((hours >= 19 && hours <= 23) || (hours >= 0 && hours < 3)) {
-    period = "Peak (19:00 - 03:00)";
+    period = "Peak Tariff (19:00 - 03:00)";
     rate = "₹8.165 per kVAh";
   } else if (hours >= 3 && hours < 5) {
-    period = "Normal (03:00 - 05:00)";
+    period = "Normal Tariff (03:00 - 05:00)";
     rate = "₹7.10 per kVAh";
   }
   
@@ -70,17 +70,7 @@ const Edmc = () => {
         setError(prev => ({ ...prev, consumption: 'Failed to fetch consumption' }));
         setLoading(prev => ({ ...prev, consumption: false }));
         console.error('Consumption API error:', err);
-        
-        // Fallback values with correct calculations
-        const fallbackConsumption = 11438;
-        setConsumption(fallbackConsumption.toLocaleString());
-        
-        const fallbackEmissions = (fallbackConsumption * 0.82).toFixed(2);
-        const fallbackDistance = (fallbackEmissions * 0.356).toFixed(0);
-        setCarbonFootprint({
-          emissions: parseFloat(fallbackEmissions).toLocaleString(),
-          distance: fallbackDistance
-        });
+ 
       }
 
       try {
@@ -133,50 +123,65 @@ const Edmc = () => {
 
   return (
     <div className="bg-white shadow-md p-3 rounded-lg w-full flex-grow lg:h-[100%]">
-      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 h-full">
-        <div className="flex flex-col justify-center lg:items-center md:items-start sm:items-start border-b sm:border-b-0 sm:border-r border-gray-300 pb-3 sm:pb-0 sm:pr-4 h-full space-y-2">
-          <h4 className="text-md font-semibold text-gray-600">Facility Information</h4>
-          <p className="text-md text-gray-700 font-bold">Metalware Corporation</p>
-          <p className="text-sm text-gray-500"><span className="font-medium">BUA: </span><span className="text-gray-700 font-semibold">50,000 sq.ft.</span></p>
-          <p className="text-sm text-gray-500"><span className="font-medium">Location: </span><span className="text-gray-700 font-semibold">Noida, India</span></p>
-        </div>
-        
-        <div className="flex flex-col justify-center items-center border-b sm:border-b-0 sm:border-r border-gray-300 pb-3 sm:pb-0 sm:pr-4 h-full">
-          <h4 className="text-md font-semibold text-gray-600 pb-1">Consumption</h4>
-          {renderData(consumption, loading.consumption, error.consumption, 'kWh')}
-          
-          <h3 className="text-md font-semibold text-gray-600 pb-1 mt-2">Peak Demand</h3>
-          {renderData(peakDemand, loading.peakDemand, error.peakDemand, 'kVA')}
-        </div>
-        
-        <div className="flex flex-col justify-center items-center border-b sm:border-b-0 sm:border-r border-gray-300 pb-3 sm:pb-0 sm:pr-4 h-full">
-  <h3 className="text-base font-semibold text-gray-600 pb-1">Cost of Electricity</h3>
-  {totalCost ? (
-    <>
-      <p className="text-lg font-extrabold text-gray-900">₹{totalCost}</p>
-      <p className="text-sm text-gray-500">Today's Total Cost</p>
-    </>
-  ) : (
-    <div className="animate-pulse flex space-x-4">
-      <div className="h-6 w-20 bg-gray-200 rounded"></div>
-    </div>
-  )}
-  <p className="text-md font-extrabold text-gray-900">{rate}</p>
-  <p className="text-base font-medium text-gray-700">{period}</p>
+<div className="grid grid-cols-1 sm:grid-cols-4 gap-4 h-full">
+  {/* Facility Info */}
+  <div className="flex flex-col justify-start lg:items-center md:items-start sm:items-start border-b sm:border-b-0 sm:border-r border-gray-300 sm:pr-4 h-full pt-2 space-y-2">
+    <h4 className="text-md text-gray-900">Facility Information</h4>
+    <p className="text-md font-bold text-gray-900">Metalware Corporation</p>
+    <p className="text-sm">
+      <span className="text-gray-900">BUA: </span>
+      <span className="font-bold text-gray-900">50,000 sq.ft.</span>
+    </p>
+    <p className="text-sm">
+      <span className="text-gray-900">Location: </span>
+      <span className="font-bold text-gray-900">Noida, India</span>
+    </p>
+  </div>
+
+ {/* Consumption + Peak Demand */}
+<div className="flex flex-col justify-start items-center border-b sm:border-b-0 sm:border-r border-gray-300 sm:pr-4 h-full pt-2 space-y-1 text-center">
+  <h4 className="text-md text-gray-900">Consumption</h4>
+  <p className='text-lg font-bold'>{renderData(consumption, loading.consumption, error.consumption, 'kWh')}</p>
+  
+  <h4 className="text-md text-gray-900">Peak Demand</h4>
+  <p className='text-lg font-bold'>{renderData(peakDemand, loading.peakDemand, error.peakDemand, 'kVA')}</p>
 </div>
-        
-        <div className="flex flex-col justify-center items-center h-full">
-          <h3 className="text-base font-semibold text-gray-600 pb-1">Carbon Footprint</h3>
-          <p className="text-lg font-extrabold text-gray-900">
-            {carbonFootprint ? `${carbonFootprint.emissions} kg CO₂` : "Loading..."}
-          </p>
-          <p className="text-sm text-gray-500 text-center">
-            Equivalent to driving <span className="text-gray-700 font-semibold">
-              {carbonFootprint ? `${carbonFootprint.distance} km` : "Loading..."}
-            </span>
-          </p>
-        </div>
+
+
+  {/* Electricity Cost */}
+  <div className="flex flex-col justify-start items-center border-b sm:border-b-0 sm:border-r border-gray-300 sm:pr-4 h-full pt-2 space-y-2 text-center">
+    <h4 className="text-md text-gray-900">Cost of Electricity</h4>
+    {totalCost ? (
+      <>
+        <p className="text-lg font-bold text-gray-900">₹{totalCost}</p>
+        <p className="text-sm text-gray-900 flex items-center gap-1">
+  <span className="text-red-500 text-xs">🔴</span>
+  {period}
+</p>
+        <p className="text-sm font-bold text-gray-900">{rate}</p>
+      </>
+    ) : (
+      <div className="animate-pulse flex space-x-4">
+        <div className="h-6 w-20 bg-gray-200 rounded"></div>
       </div>
+    )}
+  </div>
+
+  {/* Carbon Footprint */}
+  <div className="flex flex-col justify-start items-center h-full pt-2 space-y-2 text-center">
+    <h4 className="text-md text-gray-900">Carbon Footprint</h4>
+    <p className="text-lg font-bold text-gray-900">
+      {carbonFootprint ? `${carbonFootprint.emissions} kg CO₂` : "Loading..."}
+    </p>
+    <p className="text-sm text-gray-900">
+      Equivalent to driving <span className="font-bold text-gray-900">
+        {carbonFootprint ? `${carbonFootprint.distance} km` : "Loading..."}
+      </span>
+    </p>
+  </div>
+</div>
+
+
     </div>
   );
 };
