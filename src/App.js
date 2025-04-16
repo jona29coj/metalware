@@ -41,6 +41,15 @@ const App = () => {
     }
   }, []);  
 
+  useEffect(() => {
+    const handleResize = () => {
+      setIsCollapsed(window.innerWidth < 1024);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const toggleSidebar = () => {
     setIsCollapsed((prev) => !prev);
     setRefreshKey((prevKey) => prevKey + 1);
@@ -52,7 +61,7 @@ const App = () => {
     <DateProvider>
       <BrowserRouter>
         <ScrollToTop />
-        {isAuthenticated && ( 
+        {isAuthenticated &&( 
           <div className="bg-main-bg min-h-screen flex">
             {/* Sidebar */}
             <div

@@ -5,6 +5,17 @@ import 'tailwindcss/tailwind.css';
 import axios from 'axios';
 import moment from 'moment-timezone';
 import { DateContext } from "../contexts/DateContext";
+import Exporting from 'highcharts/modules/exporting';
+import ExportData from 'highcharts/modules/export-data';
+
+if (Exporting && typeof Exporting === 'function') {
+  Exporting(Highcharts);
+}
+
+if (ExportData && typeof ExportData === 'function') {
+  ExportData(Highcharts);
+}
+
 
 const HConsumption = () => {
   const { selectedDate: globalSelectedDate } = useContext(DateContext); // Get the date from context
@@ -99,6 +110,18 @@ const HConsumption = () => {
     },
     legend: { enabled: false },
     credits: { enabled: false },
+    exporting: {
+      enabled: true,
+      buttons: {
+        contextButton: {
+          menuItems: [
+            'downloadXLS']
+        }
+      }
+    },
+    exportData: {
+      enabled: true
+    }
   };
 
   return (
@@ -123,7 +146,8 @@ const HConsumption = () => {
         type="date"
         value={localSelectedDate}
         onChange={handleLocalDateChange}
-        className="border rounded p-2"
+        className="pl-2 pr-2 py-1 border border-gray-300 rounded-md text-sm"
+        max={moment().tz('Asia/Kolkata').format('YYYY-MM-DD')}
       />
     </div>
   </div>

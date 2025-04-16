@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
 import Plot from "react-plotly.js";
-import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import axios from "axios";
 import moment from "moment-timezone";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
+
 
 // Function to format date to Asia/Kolkata timezone before sending to backend
 const formatDateForBackend = (date) => {
@@ -118,6 +120,25 @@ const EnergyConsumption = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  const handleDownloadExcel = () => {
+    if (!consumptionData?.length) return;
+  
+    const formattedData = consumptionData.map((item) => ({
+      Date: item.day,
+      Hour: `${item.hour}:00`,
+      "Energy Consumed (kWh)": item.total_consumption
+    }));
+  
+    const worksheet = XLSX.utils.json_to_sheet(formattedData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "EnergyConsumption");
+  
+    const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+    const data = new Blob([excelBuffer], { type: "application/octet-stream" });
+    saveAs(data, `Energy_Consumption_${moment(dateRange.startDate).format("YYYYMMDD")}_${moment(dateRange.endDate).format("YYYYMMDD")}.xlsx`);
+  };
+  
+
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -147,27 +168,52 @@ const EnergyConsumption = () => {
         <h2 className="text-xl font-semibold">Energy Heat Map</h2>
         <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
           <div className="flex gap-2">
-            <DatePicker
-              selected={dateRange.startDate}
-              onChange={date => setDateRange(prev => ({ ...prev, startDate: date }))}
-              selectsStart
-              startDate={dateRange.startDate}
-              endDate={dateRange.endDate}
-              maxDate={dateRange.endDate}
-              dateFormat="MMM d, yyyy"
-              className="border rounded px-2 py-1 text-sm w-36"
-            />
-            <DatePicker
-              selected={dateRange.endDate}
-              onChange={date => setDateRange(prev => ({ ...prev, endDate: date }))}
-              selectsEnd
-              startDate={dateRange.startDate}
-              endDate={dateRange.endDate}
-              minDate={dateRange.startDate}
-              maxDate={new Date()}
-              dateFormat="MMM d, yyyy"
-              className="border rounded px-2 py-1 text-sm w-36"
-            />
+          <input
+  type="date"
+  value={moment(dateRange.startDate).format('YYYY-MM-DD')}
+  onChange={(e) => {
+    const newStartDate = new Date(e.target.value);
+    const maxEndDate = new Date(newStartDate);
+    maxEndDate.setDate(maxEndDate.getDate() + 30);
+
+    const adjustedEndDate = dateRange.endDate > maxEndDate ? maxEndDate : dateRange.endDate;
+
+    setDateRange({
+      startDate: newStartDate,
+      endDate: adjustedEndDate,
+    });
+  }}
+  max={moment(dateRange.endDate).format('YYYY-MM-DD')}
+  className="pl-2 pr-2 py-1 border border-gray-300 rounded-md text-sm w-36"
+/>
+
+<input
+  type="date"
+  value={moment(dateRange.endDate).format('YYYY-MM-DD')}
+  onChange={(e) => {
+    const newEndDate = new Date(e.target.value);
+    const minStartDate = new Date(newEndDate);
+    minStartDate.setDate(minStartDate.getDate() - 30);
+
+    const adjustedStartDate = dateRange.startDate < minStartDate ? minStartDate : dateRange.startDate;
+
+    setDateRange({
+      startDate: adjustedStartDate,
+      endDate: newEndDate,
+    });
+  }}
+  min={moment(dateRange.startDate).format('YYYY-MM-DD')}
+  max={moment().tz('Asia/Kolkata').format('YYYY-MM-DD')}
+  className="pl-2 pr-2 py-1 border border-gray-300 rounded-md text-sm w-36"
+/>
+
+<button
+    onClick={handleDownloadExcel}
+    className="px-4 py-1 text-sm bg-green-600 text-white rounded-md hover:bg-green-700"
+  >
+    Download Excel
+  </button>
+
           </div>
         </div>
       </div>

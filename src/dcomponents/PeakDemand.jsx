@@ -75,6 +75,7 @@ const PeakDemand = () => {
           label: {
             text: 'Upper Ceiling (745 kVA)',
             align: 'right',
+            x: -30,
             style: {
               color: 'red',
               fontWeight: 'bold'
@@ -89,6 +90,7 @@ const PeakDemand = () => {
           label: {
             text: 'Lower Ceiling (558.75 kVA)',
             align: 'right',
+            x: -10,
             style: {
               color: 'red',
               fontWeight: 'bold'
@@ -136,6 +138,18 @@ const PeakDemand = () => {
     credits: {
       enabled: false,
     },
+    exporting: {
+      enabled: true,
+      buttons: {
+        contextButton: {
+          menuItems: [
+            'downloadXLS']
+        }
+      }
+    },
+    exportData: {
+      enabled: true
+    },
     responsive: {
       rules: [
         {
@@ -170,8 +184,8 @@ const PeakDemand = () => {
               id="date"
               value={localDate}
               onChange={handleLocalDateChange}
-              className="block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline"
-            />
+              className="pl-2 pr-2 py-1 border border-gray-300 rounded-md text-sm"
+              max={moment().tz('Asia/Kolkata').format('YYYY-MM-DD')}            />
           </div>
         </div>
       </div>

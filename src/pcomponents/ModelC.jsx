@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { FaInfoCircle } from "react-icons/fa";
-import modelImage from './model.png';
+import modelImage from '../sections/pictures/compressed.jpg';
 
 const CombinedComponent = () => {
   const [showInfo, setShowInfo] = useState(false);

@@ -5,6 +5,17 @@ import axios from 'axios';
 import moment from 'moment-timezone';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { DateContext } from '../../contexts/DateContext';
+import Exporting from 'highcharts/modules/exporting';
+import ExportData from 'highcharts/modules/export-data';
+
+if (Exporting && typeof Exporting === 'function') {
+  Exporting(Highcharts);
+}
+
+if (ExportData && typeof ExportData === 'function') {
+  ExportData(Highcharts);
+}
+
 
 const zoneMetadata = [
   { id: 1, name: "SPRAY+ EPL", category: "C-49" },
@@ -116,7 +127,15 @@ const Zones = () => {
     tooltip: {
       valueSuffix: ` ${consumptionType}`
     },
-    credits: { enabled: false }
+    credits: { enabled: false },
+    exporting: {
+      enabled: true,
+      buttons: {
+        contextButton: {
+          menuItems: ['downloadXLS']  // Only show Excel option
+        }
+      }
+    }
   });
   const handleViewChange = (view) => {
     setSelectedView(view);

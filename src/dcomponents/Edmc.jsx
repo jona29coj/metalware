@@ -122,10 +122,10 @@ const Edmc = () => {
   };
 
   return (
-    <div className="bg-white shadow-md p-3 rounded-lg w-full flex-grow lg:h-[100%]">
-<div className="grid grid-cols-1 sm:grid-cols-4 gap-4 h-full">
+    <div className="bg-white shadow-md p-3 rounded-lg w-full">
+<div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
   {/* Facility Info */}
-  <div className="flex flex-col justify-start lg:items-center md:items-start sm:items-start border-b sm:border-b-0 sm:border-r border-gray-300 sm:pr-4 h-full pt-2 space-y-2">
+  <div className="flex flex-col justify-start items-center md:items-start sm:items-start lg:items-center xl:items-center border-b sm:border-b-0 sm:border-r border-gray-300 sm:pr-4 h-full pt-1 space-y-2">
     <h4 className="text-md text-gray-900">Facility Information</h4>
     <p className="text-md font-bold text-gray-900">Metalware Corporation</p>
     <p className="text-sm">
@@ -139,7 +139,7 @@ const Edmc = () => {
   </div>
 
  {/* Consumption + Peak Demand */}
-<div className="flex flex-col justify-start items-center border-b sm:border-b-0 sm:border-r border-gray-300 sm:pr-4 h-full pt-2 space-y-1 text-center">
+<div className="flex flex-col justify-start items-center border-b sm:border-b-0 sm:border-r border-gray-300 sm:pr-4 h-full pt-1 space-y-1 text-center">
   <h4 className="text-md text-gray-900">Consumption</h4>
   <p className='text-lg font-bold'>{renderData(consumption, loading.consumption, error.consumption, 'kWh')}</p>
   
@@ -149,7 +149,7 @@ const Edmc = () => {
 
 
   {/* Electricity Cost */}
-  <div className="flex flex-col justify-start items-center border-b sm:border-b-0 sm:border-r border-gray-300 sm:pr-4 h-full pt-2 space-y-2 text-center">
+  <div className="flex flex-col justify-start items-center border-b sm:border-b-0 sm:border-r border-gray-300 sm:pr-4 h-full pt-1 space-y-1 text-center">
     <h4 className="text-md text-gray-900">Cost of Electricity</h4>
     {totalCost ? (
       <>
@@ -168,7 +168,7 @@ const Edmc = () => {
   </div>
 
   {/* Carbon Footprint */}
-  <div className="flex flex-col justify-start items-center h-full pt-2 space-y-2 text-center">
+  <div className="flex flex-col justify-start items-center h-full pt-1 space-y-1 text-center">
     <h4 className="text-md text-gray-900">Carbon Footprint</h4>
     <p className="text-lg font-bold text-gray-900">
       {carbonFootprint ? `${carbonFootprint.emissions} kg CO₂` : "Loading..."}

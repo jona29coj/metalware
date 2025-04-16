@@ -1,5 +1,5 @@
 import React from "react";
-import img from "../sections/pictures/daylightfactorlatest.jpg";
+import img from "../sections/pictures/Metalwaredaylightfactorcompressed.jpg";
 const DaylightFactorAnalysis = () => {
   return (
     <div className="border-gray-300 shadow-md rounded-lg p-4 bg-white">

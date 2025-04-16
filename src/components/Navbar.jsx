@@ -105,7 +105,7 @@ const Navbar = () => {
               type="date"
               value={selectedDate}
               onChange={handleDateInputChange}
-              className="pl-2 pr-2 py-1 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500"
+              className="pl-2 pr-2 py-1 border border-gray-300 rounded-md text-sm"
               max={moment().tz('Asia/Kolkata').format('YYYY-MM-DD')}
             />
           </div>

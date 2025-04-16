@@ -103,10 +103,13 @@ const EnergySources = () => {
     ],
     legend: { enabled: true },
     credits: { enabled: false },
+    exporting: {
+      enabled: false,
+    }
   };
 
   return (
-    <div className="bg-white xl:h-[68vh] p-5 rounded-lg shadow-md flex flex-col space-y-7">
+    <div className="bg-white xl:h-[100%] p-7 rounded-lg shadow-md flex flex-col space-y-7">
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-semibold">Facility Overview</h2>
         <div className="relative">
@@ -114,7 +117,8 @@ const EnergySources = () => {
             type="date"
             value={localSelectedDate} // Use local state
             onChange={handleLocalDateChange} // Update local state
-            className="border rounded p-1 text-sm"
+            className="pl-2 pr-2 py-1 border border-gray-300 rounded-md text-sm"
+            max={moment().tz('Asia/Kolkata').format('YYYY-MM-DD')}
           />
         </div>
       </div>
@@ -126,27 +130,27 @@ const EnergySources = () => {
       ) : (
         <div className="grid grid-cols-2 gap-6 xl justify-start items-start">
           <div>
-            <div className="lg:space-y-5 md:space-y-4">
+            <div className="xl:space-y-5 lg:space-y-4 md:space-y-4">
               <div className="border border-red-500 p-3 rounded-lg shadow">
-                <h3 className="md:text-md lg:text-md font-semibold text-red-700">High Zone</h3>
-                <p className="text-gray-900 text-sm mt-2">Zone: {getMeterName(highZone.meter_id)}</p>
-                <p className="text-gray-900 text-sm mt-1">{highZone.consumption} kWh</p>
-                <p className="text-sm text-gray-600 mt-1">{((highZone.consumption / totalConsumption) * 100).toFixed(1)}% of Total Consumption</p>
+                <h3 className="md:text-sm l:text-md xl:text-md font-semibold text-red-700">High Zone</h3>
+                <p className="md:text-xs l:text-xs xl:text-sm text-gray-900 text-sm mt-2">Zone: {getMeterName(highZone.meter_id)}</p>
+                <p className="md:text-xs l:text-xs xl:text-sm text-gray-900 text-sm mt-1">{highZone.consumption} kWh</p>
+                <p className="md:text-xs l:text-xs xl:text-sm text-sm text-gray-600 mt-1">{((highZone.consumption / totalConsumption) * 100).toFixed(1)}% of Total Consumption</p>
               </div>
               <div className="border border-green-500 p-3 rounded-lg shadow">
-                <h3 className="md:text-md lg:text-md font-semibold text-green-700">Low Zone</h3>
-                <p className="text-gray-900 text-sm mt-2">Zone: {getMeterName(lowZone.meter_id)}</p>
-                <p className="text-gray-900 text-sm mt-1">{lowZone.consumption} kWh</p>
-                <p className="text-sm text-gray-600 mt-1">{((lowZone.consumption / totalConsumption) * 100).toFixed(1)}% of Total Consumption</p>
+                <h3 className="md:text-sm l:text-md xl:text-md font-semibold text-green-700">Low Zone</h3>
+                <p className="md:text-xs l:text-xs xl:text-sm text-gray-900 text-sm mt-2">Zone: {getMeterName(lowZone.meter_id)}</p>
+                <p className="md:text-xs l:text-xs xl:text-sm text-gray-900 text-sm mt-1">{lowZone.consumption} kWh</p>
+                <p className="md:text-xs l:text-xs xl:text-sm text-sm text-gray-600 mt-1">{((lowZone.consumption / totalConsumption) * 100).toFixed(1)}% of Total Consumption</p>
               </div>
               <div className="border border-blue-500 p-3 rounded-lg shadow">
-                <h3 className="md:text-md lg:text-md font-semibold text-blue-700">Other Zones</h3>
-                <p className="text-gray-900 text-sm mt-1">{otherZonesConsumption} kWh</p>
-                <p className="text-sm text-gray-600 mt-1">{((parseFloat(otherZonesConsumption) / totalConsumption) * 100).toFixed(1)}% of Total Consumption</p>
+                <h3 className="md:text-sm l:text-md xl:text-md font-semibold text-blue-700">Other Zones</h3>
+                <p className="md:text-xs l:text-xs xl:text-sm text-gray-900 text-sm mt-1">{otherZonesConsumption} kWh</p>
+                <p className="md:text-xs l:text-xs xl:text-sm text-sm text-gray-600 mt-1">{((parseFloat(otherZonesConsumption) / totalConsumption) * 100).toFixed(1)}% of Total Consumption</p>
               </div>
             </div>
           </div>
-          <div className="flex justify-center items-center mt-6 pt-10">
+          <div className="flex justify-center items-center mt-6 pt-8">
             <HighchartsReact highcharts={Highcharts} options={chartOptions} />
           </div>
         </div>
