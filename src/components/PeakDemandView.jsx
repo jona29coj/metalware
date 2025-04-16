@@ -31,6 +31,7 @@ const PeakDemandView = () => {
     };
 
     fetchPeakDemandData();
+    setCurrentPage(1);
   }, [selectedDate]);
 
   // Format timestamp from backend (assuming format is "YYYY-MM-DD HH:mm:ss")

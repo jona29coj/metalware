@@ -61,7 +61,7 @@ const App = () => {
     <DateProvider>
       <BrowserRouter>
         <ScrollToTop />
-        {isAuthenticated &&( 
+        { isAuthenticated && ( 
           <div className="bg-main-bg min-h-screen flex">
             {/* Sidebar */}
             <div

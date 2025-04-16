@@ -36,9 +36,11 @@ const Sidebar = ({ isCollapsed }) => {
   };
 
   useEffect(() => {
-    closeAllDropdowns();
-  }, [location]);
-
+    if (isCollapsed) {
+      closeAllDropdowns();
+    }
+  }, [location, isCollapsed]);
+  
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (isCollapsed && sidebarRef.current && !sidebarRef.current.contains(event.target)) {
@@ -53,8 +55,11 @@ const Sidebar = ({ isCollapsed }) => {
   }, [isCollapsed]);
 
   const handleNavLinkClick = () => {
-    closeAllDropdowns();
+    if (isCollapsed) {
+      closeAllDropdowns();
+    }
   };
+  
 
   return (
     <div ref={sidebarRef} className="h-full w-full overflow-visible bg-white shadow-lg transition-all duration-300 flex flex-col relative">
@@ -75,60 +80,69 @@ const Sidebar = ({ isCollapsed }) => {
 
         {/* Monitor Section */}
         <div className="relative">
-          <div
-            className={`cursor-pointer ${linkClass(false, isCollapsed)} relative`}
-            onClick={() => toggleDropdown("monitor")}
-          >
-            <div className="flex items-center gap-5">
-              <FiMonitor className="text-xl mx-auto lg:mx-0" />
-              {!isCollapsed && <span>Monitor</span>}
-              {!isCollapsed && (dropdown.monitor ? <MdKeyboardArrowUp /> : <MdKeyboardArrowDown />)}
-            </div>
-          </div>
+  <div
+    className={`cursor-pointer ${linkClass(false, isCollapsed)} relative`}
+    onClick={() => toggleDropdown("monitor")}
+  >
+    <div className="flex items-center gap-5">
+      <FiMonitor className="text-xl mx-auto lg:mx-0" />
+      {!isCollapsed && <span>Monitor</span>}
+      {!isCollapsed && (dropdown.monitor ? <MdKeyboardArrowUp /> : <MdKeyboardArrowDown />)}
+    </div>
+  </div>
 
-          {/* Dropdown when expanded */}
-          {!isCollapsed && dropdown.monitor && (
-            <div className="ml-6 mt-2 flex flex-col">
-              {links.monitor.map((item, index) => (
-                <NavLink
-                  key={index}
-                  to={item.path}
-                  className={({ isActive }) =>
-                    `block py-2 px-4 rounded transition-all duration-300 ${
-                      isActive ? "text-white bg-green-600" : "text-gray-600 hover:bg-green-500 hover:text-white"
-                    }`
-                  }
-                  onClick={handleNavLinkClick}
-                >
-                  {item.name}
-                </NavLink>
-              ))}
-            </div>
-          )}
+  {/* Dropdown when expanded */}
+  {!isCollapsed && dropdown.monitor && (
+    <div className="ml-6 mt-2 flex flex-col">
+      {links.monitor.map((item, index) => (
+        <NavLink
+          key={index}
+          to={item.path}
+          className={({ isActive }) =>
+            `block py-2 px-4 rounded transition-all duration-300 ${
+              isActive ? "text-white bg-green-600" : "text-gray-600 hover:bg-green-500 hover:text-white"
+            }`
+          }
+          onClick={() => {
+            handleNavLinkClick();
+            // Only collapse dropdown if sidebar is collapsed
+            if (isCollapsed) toggleDropdown("monitor");
+          }}
+        >
+          {item.name}
+        </NavLink>
+      ))}
+    </div>
+  )}
 
-          {/* Tooltip when collapsed */}
-          {isCollapsed && dropdown.monitor && (
-            <div className="absolute left-full top-1/2 transform -translate-y-1/2 ml-2 bg-white shadow-xl rounded-lg w-48 p-2 z-[99999] border border-gray-300">
-              {/* Arrow pointing to the Monitor button */}
-              <div className="absolute -left-2 top-1/2 transform -translate-y-1/2 w-0 h-0 border-t-8 border-b-8 border-r-8 border-transparent border-r-gray-300"></div>
+  {/* Tooltip when collapsed */}
+  {isCollapsed && dropdown.monitor && (
+    <div className="absolute left-full top-1/2 transform -translate-y-1/2 ml-2 bg-white shadow-xl rounded-lg w-48 p-2 z-[99999] border border-gray-300">
+      {/* Arrow pointing to the Monitor button */}
+      <div className="absolute -left-2 top-1/2 transform -translate-y-1/2 w-0 h-0 border-t-8 border-b-8 border-r-8 border-transparent border-r-gray-300"></div>
 
-              {links.monitor.map((item, index) => (
-                <NavLink
-                  key={index}
-                  to={item.path}
-                  className={({ isActive }) =>
-                    `block py-2 px-4 rounded transition-all duration-300 ${
-                      isActive ? "text-white bg-green-600" : "text-gray-600 hover:bg-green-500 hover:text-white"
-                    }`
-                  }
-                  onClick={handleNavLinkClick}
-                >
-                  {item.name}
-                </NavLink>
-              ))}
-            </div>
-          )}
-        </div>
+      {links.monitor.map((item, index) => (
+        <NavLink
+          key={index}
+          to={item.path}
+          className={({ isActive }) =>
+            `block py-2 px-4 rounded transition-all duration-300 ${
+              isActive ? "text-white bg-green-600" : "text-gray-600 hover:bg-green-500 hover:text-white"
+            }`
+          }
+          onClick={() => {
+            handleNavLinkClick();
+            // Tooltip dropdown should close after clicking an item
+            toggleDropdown("monitor");
+          }}
+        >
+          {item.name}
+        </NavLink>
+      ))}
+    </div>
+  )}
+</div>
+
 
         {/* Other nav items */}
         {navItems.map(({ name, path, icon: Icon }, index) => (

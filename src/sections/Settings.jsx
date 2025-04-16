@@ -94,19 +94,11 @@ const Settings = ({ setUserProfileName }) => {
             alt="Profile"
             className="w-32 h-32 rounded-full object-cover"
           />
-          <div className="absolute inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <div className="absolute inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 rounded-full opacity-0">
             <label
               htmlFor="profilePictureInput"
               className="cursor-pointer text-white"
             >
-              <FaPencilAlt className="text-xl" />
-              <input
-                id="profilePictureInput"
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleProfilePictureChange}
-              />
             </label>
           </div>
         </div>
