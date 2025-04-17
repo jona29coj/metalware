@@ -3,12 +3,11 @@ import axios from 'axios';
 import { DateContext } from '../contexts/DateContext';
 import moment from 'moment-timezone';
 
-const getCurrentRate = (selectedDate) => {
-  const selectedDateObj = moment.tz(selectedDate, 'Asia/Kolkata'); // Ensures we get the correct hour in IST
-  const hours = selectedDateObj.hour(); // Use .hour() instead of getHours()
+const getCurrentRate = (selectedDateTime) => {
+  console.log("🕒 Using selectedDate for rate check:", selectedDateTime.format("YYYY-MM-DD HH:mm:ss"));
+  const hours = selectedDateTime.hour();
 
   let period, rate;
-
   if (hours >= 5 && hours < 10) {
     period = "Off-Peak Tariff (05:00 - 10:00)";
     rate = "₹6.035 per kVAh";
@@ -27,10 +26,13 @@ const getCurrentRate = (selectedDate) => {
 };
 
 
+
 const Edmc = () => {
   const { selectedDate } = useContext(DateContext); // Get the selectedDate from context
-  const { period, rate } = getCurrentRate(selectedDate);
-  const [consumption, setConsumption] = useState(null);
+  const nowTimeIST = moment.tz('Asia/Kolkata').format('HH:mm:ss');
+  const fullSelectedDateTime = moment.tz(`${selectedDate.split('T')[0]} ${nowTimeIST}`, 'Asia/Kolkata');
+  const { period, rate } = getCurrentRate(fullSelectedDateTime);
+    const [consumption, setConsumption] = useState(null);
   const [peakDemand, setPeakDemand] = useState(null);
   const [isSameDay, setIsSameDay] = useState(false);
   const [carbonFootprint, setCarbonFootprint] = useState(null);

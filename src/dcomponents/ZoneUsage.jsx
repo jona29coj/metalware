@@ -139,6 +139,7 @@ const ZoneUsage = () => {
 
       cube.position.set(xPos, yPos, 0);
       edges.position.set(xPos, yPos, 0);
+      edges.scale.set(1.01, 1.01, 1.01);
 
       cube.userData = { ...zone, originalColor: categoryColors[zone.category] };
 
@@ -242,7 +243,7 @@ const ZoneUsage = () => {
         ) : zoneData.length === 0 ? (
           <div className="text-center text-gray-500">No zone data available</div>
         ) : (
-          <div ref={mountRef} className="w-full h-[60%] overflow-hidden relative" />
+<div ref={mountRef} className="w-full min-h-[300px] aspect-[16/9] overflow-hidden relative" />
         )}
 
         <div className="flex space-x-12 pb-2 justify-center items-start">
