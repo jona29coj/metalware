@@ -36,7 +36,7 @@ const App = () => {
     if (authCookie === 'true') {
       setIsAuthenticated(true);
     } else {
-      window.location.href = 'https://elementsenergies.com/login';
+      //window.location.href = 'https://elementsenergies.com/login';
     }
   }, []);  
 
@@ -60,7 +60,7 @@ const App = () => {
     <DateProvider>
       <BrowserRouter>
         <ScrollToTop />
-        {isAuthenticated && ( 
+        {( 
           <div className="bg-main-bg min-h-screen flex">
             {/* Sidebar */}
             <div

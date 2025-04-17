@@ -101,10 +101,13 @@ const Edmc = () => {
   
       try {
         const costResponse = await axios.get('https://mw.elementsenergies.com/api/cc', {
-          params: { timestamp: formattedDate }
+          params: {
+            timestamp: formattedDate, // Selected date with current time in IST
+            currentDateTime: moment.tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss') // Current datetime in IST
+          }
         });
-        console.log("Cost Date:",formattedDate);
-  
+        console.log("Cost Date:", formattedDate);
+      
         setTotalCost(costResponse.data.totalCost);
         setLoading(prev => ({ ...prev, cost: false }));
       } catch (err) {

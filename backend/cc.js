@@ -41,15 +41,27 @@ router.get('/cc', async (req, res) => {
   console.log(`Request query parameters:`, req.query);
 
   try {
-    const { timestamp } = req.query;
-    const currentTime = new Date(timestamp);
-    console.log(`Processing consumption cost for timestamp: ${currentTime}`);
+    const { timestamp, currentDateTime } = req.query;
 
-    const midnight = new Date(currentTime);
-    midnight.setHours(0, 0, 0, 0);
-    console.log(`Calculating consumption from midnight: ${midnight}`);
+    if (!timestamp || !currentDateTime) {
+      return res.status(400).json({ error: "Timestamp and currentDateTime are required" });
+    }
 
-    const readings = await getKVAhReadingsFromDB(midnight, currentTime);
+    const currentTime = new Date(currentDateTime);
+    const selectedDate = new Date(timestamp);
+
+    console.log(`Processing consumption cost for timestamp: ${selectedDate}`);
+    console.log(`Current DateTime: ${currentTime}`);
+
+    // Determine the start and end of the range
+    const startOfDay = `${timestamp.split(' ')[0]} 00:00:00`;
+    const endOfDay = selectedDate.toDateString() === currentTime.toDateString()
+      ? currentDateTime
+      : `${timestamp.split(' ')[0]} 23:59:59`;
+
+    console.log(`Calculating consumption from ${startOfDay} to ${endOfDay}`);
+
+    const readings = await getKVAhReadingsFromDB(startOfDay, endOfDay);
 
     if (!readings || readings.length === 0) {
       console.error('No consumption data available for the specified period');
@@ -60,9 +72,6 @@ router.get('/cc', async (req, res) => {
 
     let totalCost = 0;
     let totalConsumption = 0;
-
-    let currentPeriodStart = new Date(midnight);
-    let currentPeriodEnd = new Date(midnight);
 
     const periods = [
       { start: 0, end: 3, rate: 8.165, type: "Peak" },
@@ -75,11 +84,14 @@ router.get('/cc', async (req, res) => {
     console.log('Starting period-based cost calculation (per energy meter)...');
 
     for (const period of periods) {
+      let currentPeriodStart = new Date(startOfDay);
+      let currentPeriodEnd = new Date(startOfDay);
+
       currentPeriodStart.setHours(period.start, 0, 0, 0);
       currentPeriodEnd.setHours(period.end, 0, 0, 0);
 
-      if (currentPeriodStart > currentTime) break;
-      if (currentPeriodEnd > currentTime) currentPeriodEnd = new Date(currentTime);
+      if (currentPeriodStart >= new Date(endOfDay)) break;
+      if (currentPeriodEnd > new Date(endOfDay)) currentPeriodEnd = new Date(endOfDay);
 
       console.log(`Processing ${period.type} period (${period.start}-${period.end}h)...`);
 
@@ -118,7 +130,7 @@ router.get('/cc', async (req, res) => {
       totalCost += periodCost;
     }
 
-    const currentRateInfo = getRateInfo(currentTime);
+    const currentRateInfo = getRateInfo(selectedDate);
     console.log(`Current rate information:
       Period: ${currentRateInfo.period}
       Rate: ₹${currentRateInfo.rate}/kVAh`);
@@ -159,8 +171,8 @@ async function getKVAhReadingsFromDB(startTime, endTime) {
        AND energy_meter_id BETWEEN 1 AND 11
        ORDER BY energy_meter_id ASC, timestamp ASC`,
       [
-        startTime.toISOString().slice(0, 19).replace('T', ' '),
-        endTime.toISOString().slice(0, 19).replace('T', ' ')
+        startTime,
+        endTime
       ]
     );
 
