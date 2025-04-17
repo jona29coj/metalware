@@ -48,7 +48,7 @@ const HConsumption = () => {
     };
 
     fetchData();
-  }, [localSelectedDate, consumptionType]); // Fetch data when local date or consumption type changes
+  }, [localSelectedDate, consumptionType]); 
 
   const handleLocalDateChange = (e) => {
     setLocalSelectedDate(e.target.value); // Update the local date state

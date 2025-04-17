@@ -10,7 +10,6 @@ const Profile = () => {
   return (
     <div className="p-4 bg-gray-100 min-h-screen space-y-5">
         <ModelC />
-        {/* <FacInf /> */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <DaylightFactorAnalysis />
         <Spa />

@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const mysql = require('mysql2');
 
-// Create a connection pool for MariaDB
 const pool = mysql.createPool({
   host: '18.188.231.51',
   user: 'admin',
@@ -13,7 +12,6 @@ const pool = mysql.createPool({
   queueLimit: 0,
 });
 
-// Fetch energy data for a specific date
 async function getTotalConsumptionForDate(date, currentDateTime) {
   const startOfDay = `${date} 00:00:00`;
   const endOfDay = new Date(date).toDateString() === new Date(currentDateTime).toDateString()
@@ -37,19 +35,28 @@ async function getTotalConsumptionForDate(date, currentDateTime) {
 
   const totalConsumptionByHour = {};
 
+  // Populate the totalConsumptionByHour map with data from the query
   rows.forEach((entry) => {
-    if (!totalConsumptionByHour[entry.hour]) {
-      totalConsumptionByHour[entry.hour] = 0;
-    }
-    totalConsumptionByHour[entry.hour] += parseFloat(entry.kWh_difference || 0); // Handle NULL values
+    totalConsumptionByHour[entry.hour] = (totalConsumptionByHour[entry.hour] || 0) + parseFloat(entry.kWh_difference || 0);
   });
 
-  const result = Object.keys(totalConsumptionByHour).map((hour) => ({
-    hour,
-    total_consumption: totalConsumptionByHour[hour].toFixed(1) // Round to one decimal point
-  }));
+  // Create an array of all hours from 00:00:00 to 23:59:59
+  const result = [];
+  let currentTime = new Date(startOfDay);
 
-  // Sort the result array by hour
+  while (currentTime <= new Date(endOfDay)) {
+    const hour = `${currentTime.getFullYear()}-${(currentTime.getMonth() + 1).toString().padStart(2, '0')}-${currentTime.getDate().toString().padStart(2, '0')} ${currentTime.getHours().toString().padStart(2, '0')}:00:00`;
+
+    // Check if we have consumption data for this hour, otherwise set it to 0
+    result.push({
+      hour,
+      total_consumption: (totalConsumptionByHour[hour] || 0).toFixed(1), // Set to 0 if not found
+    });
+
+    currentTime.setHours(currentTime.getHours() + 1);
+  }
+
+  // Sort the result array by hour (in case there are missing hours)
   result.sort((a, b) => new Date(a.hour) - new Date(b.hour));
 
   result.forEach((entry) => {
@@ -58,6 +65,7 @@ async function getTotalConsumptionForDate(date, currentDateTime) {
 
   return result;
 }
+
 
 
 // API handler

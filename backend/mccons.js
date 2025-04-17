@@ -20,13 +20,20 @@ const pool = mysql.createPool(dbConfig);
 const METER_COUNT = 11;
 const TIMESTAMP_REGEX = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/;
 
-// Helper function to get meter consumption with kWh > 0 condition
-async function getMeterConsumption(meterId, timestamp) {
+// Helper: Pad single-digit numbers with zero
+const pad = (n) => n.toString().padStart(2, '0');
+
+// Helper: Format date as "YYYY-MM-DD HH:mm:ss"
+const formatDate = (d, h = 0, m = 0, s = 0) =>
+  `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(h)}:${pad(m)}:${pad(s)}`;
+
+// Helper: Get meter consumption between two timestamps
+async function getMeterConsumption(meterId, startTimestamp, endTimestamp) {
   const [rows] = await pool.query(`
     SELECT 
       (SELECT kWh FROM modbus_data 
        WHERE energy_meter_id = ? 
-         AND DATE(timestamp) = DATE(?) 
+         AND timestamp >= ? 
          AND kWh > 0
        ORDER BY timestamp ASC LIMIT 1) as start,
       
@@ -35,18 +42,18 @@ async function getMeterConsumption(meterId, timestamp) {
          AND timestamp <= ? 
          AND kWh > 0
        ORDER BY timestamp DESC LIMIT 1) as end
-  `, [meterId, timestamp, meterId, timestamp]);
+  `, [meterId, startTimestamp, meterId, endTimestamp]);
 
-  if (!rows[0].start || !rows[0].end) return 0; // Handle cases where data doesn't exist
+  if (!rows[0].start || !rows[0].end) return 0;
 
-  return Math.max(0, rows[0].end - rows[0].start); // Ensure non-negative values
+  return Math.max(0, rows[0].end - rows[0].start);
 }
 
 // Calculate total consumption from all meters
 router.get('/mccons', async (req, res) => {
   try {
     const { timestamp } = req.query;
-    
+
     // Validate input
     if (!timestamp) {
       return res.status(400).json({ 
@@ -63,10 +70,19 @@ router.get('/mccons', async (req, res) => {
       });
     }
 
+    const inputDate = new Date(timestamp);
+    const now = new Date();
+    const isToday = inputDate.toDateString() === now.toDateString();
+
+    const startTimestamp = formatDate(inputDate, 0, 0, 0);
+    const endTimestamp = isToday 
+      ? formatDate(now, now.getHours(), now.getMinutes(), now.getSeconds()) 
+      : formatDate(inputDate, 23, 59, 59);
+
     // Process all meters in parallel
     const meterPromises = [];
     for (let meterId = 1; meterId <= METER_COUNT; meterId++) {
-      meterPromises.push(getMeterConsumption(meterId, timestamp));
+      meterPromises.push(getMeterConsumption(meterId, startTimestamp, endTimestamp));
     }
 
     const results = await Promise.all(meterPromises);
@@ -76,7 +92,8 @@ router.get('/mccons', async (req, res) => {
       success: true,
       consumption: parseFloat(totalConsumption.toFixed(2)),
       unit: "kWh",
-      timestamp,
+      startTimestamp,
+      endTimestamp,
       meterCount: METER_COUNT
     });
 

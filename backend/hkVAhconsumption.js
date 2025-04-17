@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const mysql = require('mysql2');
 
-// Create a connection pool for MariaDB
 const pool = mysql.createPool({
   host: '18.188.231.51',
   user: 'admin',
@@ -13,7 +12,6 @@ const pool = mysql.createPool({
   queueLimit: 0,
 });
 
-// Fetch energy data for a specific date
 async function getTotalConsumptionForDate(date, currentDateTime) {
   const startOfDay = `${date} 00:00:00`;
   const endOfDay = new Date(date).toDateString() === new Date(currentDateTime).toDateString()
@@ -41,15 +39,23 @@ async function getTotalConsumptionForDate(date, currentDateTime) {
     if (!totalConsumptionByHour[entry.hour]) {
       totalConsumptionByHour[entry.hour] = 0;
     }
-    totalConsumptionByHour[entry.hour] += parseFloat(entry.kVAh_difference || 0); // Handle NULL values
+    totalConsumptionByHour[entry.hour] += parseFloat(entry.kVAh_difference || 0);
   });
 
-  const result = Object.keys(totalConsumptionByHour).map((hour) => ({
-    hour,
-    total_consumption: totalConsumptionByHour[hour].toFixed(1) // Round to one decimal point
-  }));
+  const result = [];
+  let currentTime = new Date(startOfDay);
 
-  // Sort the result array by hour
+  while (currentTime <= new Date(endOfDay)) {
+    const hour = `${currentTime.getFullYear()}-${(currentTime.getMonth() + 1).toString().padStart(2, '0')}-${currentTime.getDate().toString().padStart(2, '0')} ${currentTime.getHours().toString().padStart(2, '0')}:00:00`;
+
+    result.push({
+      hour,
+      total_consumption: (totalConsumptionByHour[hour] || 0).toFixed(1)
+    });
+
+    currentTime.setHours(currentTime.getHours() + 1);
+  }
+
   result.sort((a, b) => new Date(a.hour) - new Date(b.hour));
 
   result.forEach((entry) => {
@@ -58,6 +64,7 @@ async function getTotalConsumptionForDate(date, currentDateTime) {
 
   return result;
 }
+
 
 
 // API handler

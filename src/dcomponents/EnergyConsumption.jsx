@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import Plot from "react-plotly.js";
-import "react-datepicker/dist/react-datepicker.css";
 import axios from "axios";
 import moment from "moment-timezone";
 import * as XLSX from "xlsx";

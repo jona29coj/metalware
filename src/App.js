@@ -3,7 +3,6 @@ import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import Sidebar from './components/Sidebar';
 import Navbar from './components/Navbar';
-import Reports from './sections/Reports';
 import Profile from './sections/Profile';
 import Files from './sections/Files';
 import BuildingOverview from './sections/Monitor/BuildingOverview';
@@ -37,7 +36,7 @@ const App = () => {
     if (authCookie === 'true') {
       setIsAuthenticated(true);
     } else {
-      window.location.href = 'https://elementsenergies.com/login';
+      //window.location.href = 'https://elementsenergies.com/login';
     }
   }, []);  
 
@@ -61,7 +60,7 @@ const App = () => {
     <DateProvider>
       <BrowserRouter>
         <ScrollToTop />
-        { isAuthenticated && ( 
+        { ( 
           <div className="bg-main-bg min-h-screen flex">
             {/* Sidebar */}
             <div
@@ -94,7 +93,6 @@ const App = () => {
                 <Routes>
                   <Route path="/dashboard" element={<EDashboard />} />
                   <Route path="/" element={<EDashboard />} />
-                  <Route path="/reports" element={<Reports />} />
                   <Route path="/profile" element={<Profile />} />
                   <Route path="/files" element={<Files />} />
                   <Route path="/monitor/overview" element={<BuildingOverview />} />

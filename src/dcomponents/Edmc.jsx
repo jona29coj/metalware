@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect,useContext } from 'react';
 import axios from 'axios';
+import { DateContext } from '../contexts/DateContext';
 import moment from 'moment-timezone';
 
-const getCurrentRate = () => {
-  const now = new Date();
-  const hours = now.getHours();
+const getCurrentRate = (selectedDate) => {
+  const selectedDateObj = moment.tz(selectedDate, 'Asia/Kolkata'); // Ensures we get the correct hour in IST
+  const hours = selectedDateObj.hour(); // Use .hour() instead of getHours()
+
   let period, rate;
 
   if (hours >= 5 && hours < 10) {
@@ -20,14 +22,17 @@ const getCurrentRate = () => {
     period = "Normal Tariff (03:00 - 05:00)";
     rate = "₹7.10 per kVAh";
   }
-  
+
   return { period, rate };
 };
 
+
 const Edmc = () => {
-  const { period, rate } = getCurrentRate();
+  const { selectedDate } = useContext(DateContext); // Get the selectedDate from context
+  const { period, rate } = getCurrentRate(selectedDate);
   const [consumption, setConsumption] = useState(null);
   const [peakDemand, setPeakDemand] = useState(null);
+  const [isSameDay, setIsSameDay] = useState(false);
   const [carbonFootprint, setCarbonFootprint] = useState(null);
   const [totalCost, setTotalCost] = useState(null);
   const [loading, setLoading] = useState({
@@ -42,55 +47,62 @@ const Edmc = () => {
   });
 
   useEffect(() => {
+    const currentDate = new Date();
+    const selectedDateObj = new Date(selectedDate);
+    setIsSameDay(currentDate.toDateString() === selectedDateObj.toDateString());
+  
     const fetchData = async () => {
-      const kolkataTime = moment()
-        .tz('Asia/Kolkata')
-        .format('YYYY-MM-DD HH:mm:ss');
-      
+      const pad = (n) => n.toString().padStart(2, '0');
+      const formattedDate = moment.tz(selectedDate, 'Asia/Kolkata').format('YYYY-MM-DD') + ' ' + moment.tz('Asia/Kolkata').format('HH:mm:ss');
+  
+      console.log("📅 Date sent to backend (timestamp):", formattedDate); // ✅ Console log date
+  
       try {
         const consumptionResponse = await axios.get('https://mw.elementsenergies.com/api/mccons', {
-          params: { timestamp: kolkataTime },
+          params: { timestamp: formattedDate },
           headers: { 'Content-Type': 'application/json' }
         });
-        
+  
         const consumptionValue = parseFloat(consumptionResponse.data.consumption.toString().replace(/,/g, '')) || 0;
         setConsumption(consumptionValue.toLocaleString());
-        
+  
         // Calculate carbon footprint
-        const emissions = (consumptionValue * 0.82).toFixed(2); // 0.82 kg CO₂ per kWh
-        const equivalentDistance = (emissions * 0.356).toFixed(0); // 1kg CO₂ ≈ 0.356 km driving
-        
+        const emissions = (consumptionValue * 0.82).toFixed(2);
+        const equivalentDistance = (emissions * 0.356).toFixed(0);
+  
         setCarbonFootprint({
           emissions: parseFloat(emissions).toLocaleString(),
           distance: equivalentDistance
         });
-        
+  
         setLoading(prev => ({ ...prev, consumption: false }));
       } catch (err) {
         setError(prev => ({ ...prev, consumption: 'Failed to fetch consumption' }));
         setLoading(prev => ({ ...prev, consumption: false }));
         console.error('Consumption API error:', err);
- 
       }
-
+  
       try {
         const peakDemandResponse = await axios.get('https://mw.elementsenergies.com/api/mcpeak', {
-          params: { timestamp: kolkataTime },
+          params: { timestamp: formattedDate },
           headers: { 'Content-Type': 'application/json' }
         });
+  
         setPeakDemand(peakDemandResponse.data.peakDemand.toLocaleString());
         setLoading(prev => ({ ...prev, peakDemand: false }));
       } catch (err) {
         setError(prev => ({ ...prev, peakDemand: 'Failed to fetch peak demand' }));
         setLoading(prev => ({ ...prev, peakDemand: false }));
         console.error('Peak demand API error:', err);
-        setPeakDemand('2,843'); 
+        setPeakDemand('2,843');
       }
-
+  
       try {
         const costResponse = await axios.get('https://mw.elementsenergies.com/api/cc', {
-          params: { timestamp: kolkataTime }
+          params: { timestamp: formattedDate }
         });
+        console.log("Cost Date:",formattedDate);
+  
         setTotalCost(costResponse.data.totalCost);
         setLoading(prev => ({ ...prev, cost: false }));
       } catch (err) {
@@ -99,13 +111,13 @@ const Edmc = () => {
         console.error('Cost API error:', err);
       }
     };
-
+  
     fetchData();
-
     const intervalId = setInterval(fetchData, 300000);
-
+  
     return () => clearInterval(intervalId);
-  }, []);
+  }, [selectedDate]);
+  
 
   const renderData = (data, loadingState, errorState, unit) => {
     if (loadingState) {
@@ -154,11 +166,13 @@ const Edmc = () => {
     {totalCost ? (
       <>
         <p className="text-lg font-bold text-gray-900">₹{totalCost}</p>
+        {isSameDay && (<>
         <p className="text-sm text-gray-900 flex items-center gap-1">
   <span className="text-red-500 text-xs">🔴</span>
   {period}
 </p>
         <p className="text-sm font-bold text-gray-900">{rate}</p>
+        </>)}
       </>
     ) : (
       <div className="animate-pulse flex space-x-4">
@@ -180,10 +194,8 @@ const Edmc = () => {
     </p>
   </div>
 </div>
-
-
     </div>
   );
 };
-
 export default Edmc;
+

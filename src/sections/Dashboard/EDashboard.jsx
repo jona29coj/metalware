@@ -1,5 +1,4 @@
 import React from "react";
-import 'react-datepicker/dist/react-datepicker.css';
 import Batteries from '../../dcomponents/Batteries';
 import EVChargerOverview from '../evchargers';
 import WheeledInSolar from "../../dcomponents/WheeledInSolar";
@@ -24,13 +23,15 @@ import EnergySources from "../../dcomponents/EnergySources";
 
 const EDashboard = () => {
   return (
-    <div className="min-h-screen flex flex-col bg-gray-100 p-3 gap-4">
-      <div className="" id="Facility Information Consumption Peak Demand Cost of Electricity Today's Total Cost Carbon Footprint">
-      <Edmc />
-      </div>
-      <div className="grid gap-4 grid-cols-1 xl:grid-cols-2 h-[80%] relative" id="Zone Usage Consumption">
-        <ZoneUsage />
-        <EnergySources />
+    <div className="flex flex-col bg-gray-100 p-3 gap-4">
+      <div className="flex flex-col bg-gray-100 gap-4">
+        <div className="">
+          <Edmc />
+        </div>
+        <div className="grid gap-4 grid-cols-1 xl:grid-cols-2 relative">
+          <ZoneUsage />
+          <EnergySources />
+        </div>
       </div>
       <HConsumption/>
       <MeterInfo />

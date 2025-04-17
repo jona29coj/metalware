@@ -1,8 +1,5 @@
 import React, { useState } from 'react';
 import evcharger from '../sections/ev.png';
-import { FaCalendarAlt } from 'react-icons/fa';
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
 
 // EV Charger Overview Component
 const EVChargerOverview = () => {
@@ -56,22 +53,11 @@ const EVChargerOverview = () => {
 
           {/* Date Picker Icon */}
           <div className="relative">
-            <DatePicker
-              selected={selectedDate}
-              onChange={(date) => setSelectedDate(date)}
-              popperPlacement="bottom-end"
-              popperModifiers={{
-                preventOverflow: {
-                  enabled: true,
-                  escapeWithReference: false,
-                  boundariesElement: "viewport",
-                },
-              }}
-              customInput={
-                <button className="text-gray-600 text-xl">
-                  <FaCalendarAlt />
-                </button>
-              }
+          <input
+              type="date"
+              value={selectedDate.toISOString().split('T')[0]} // Format the date as YYYY-MM-DD
+              onChange={(e) => setSelectedDate(new Date(e.target.value))}
+              className="text-gray-600 text-xl border border-gray-300 rounded-lg p-2"
             />
           </div>
         </div>

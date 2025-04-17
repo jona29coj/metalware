@@ -37,27 +37,36 @@ async function getTotalConsumptionForZone(date, currentDateTime, zone) {
 
   const totalConsumptionByHour = {};
 
+  // Accumulate actual consumption from query
   rows.forEach((entry) => {
-    if (!totalConsumptionByHour[entry.hour]) {
-      totalConsumptionByHour[entry.hour] = 0;
-    }
-    totalConsumptionByHour[entry.hour] += parseFloat(entry.kVAh_difference);
+    totalConsumptionByHour[entry.hour] = (totalConsumptionByHour[entry.hour] || 0) + parseFloat(entry.kVAh_difference || 0);
   });
 
-  const result = Object.keys(totalConsumptionByHour).map((hour) => ({
-    hour,
-    total_consumption: totalConsumptionByHour[hour].toFixed(1) // Round to one decimal point
-  }));
+  // Create hourly blocks between start and end time
+  const result = [];
+  let currentTime = moment(startOfDay);
+  const finalTime = moment(endOfDay);
 
-  // Sort the result array by hour
+  while (currentTime <= finalTime) {
+    const hour = currentTime.format('YYYY-MM-DD HH:00:00');
+    result.push({
+      hour,
+      total_consumption: (totalConsumptionByHour[hour] || 0).toFixed(1),
+    });
+    currentTime.add(1, 'hour');
+  }
+
+  // Final sorting (just to be sure)
   result.sort((a, b) => new Date(a.hour) - new Date(b.hour));
 
+  // Optional: log to console
   result.forEach((entry) => {
     console.log(`Hour: ${entry.hour}, Total Consumption: ${entry.total_consumption}`);
   });
 
   return result;
 }
+
 
 // API handler
 router.get('/zkVAhconsumption', async (req, res) => {
