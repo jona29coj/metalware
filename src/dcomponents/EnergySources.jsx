@@ -5,17 +5,17 @@ import axios from "axios";
 import moment from "moment-timezone";
 import { DateContext } from "../contexts/DateContext";
 const meterNames = [
-  { id: 1, name: "SPRAY+ EPL", category: "C-49" },
-  { id: 2, name: "PLATING", category: "C-49" },
-  { id: 3, name: "COMPRESSOR", category: "C-49" },
-  { id: 4, name: "BUFFING + VIBRATOR + ETP", category: "C-49" },
-  { id: 5, name: "Terrace", category: "C-49" },
-  { id: 6, name: "SPRAY+ EPL", category: "C-50" },
-  { id: 7, name: "CHINA BUFFING", category: "C-50" },
-  { id: 8, name: "BUFFING+CASTING M/C -7", category: "C-50" },
-  { id: 9, name: "DIE CASTING", category: "C-50" },
-  { id: 10, name: "RUMBLE", category: "C-50" },
-  { id: 11, name: "TOOL ROOM", category: "C-50" },
+  { id: 1, name: "PLATING", category: "C-49" },
+  { id: 2, name: "DIE CASTING + CHINA BUFFING + CNC", category: "C-49" },
+  { id: 3, name: "SCOTCH BUFFING", category: "C-50" },
+  { id: 4, name: "BUFFING", category: "C-49" },
+  { id: 5, name: "SPRAY+EPL-I", category: "C-49" },
+  { id: 6, name: "SPRAY+ EPL-II", category: "C-50" },
+  { id: 7, name: "RUMBLE", category: "C-50" },
+  { id: 8, name: "AIR COMPRESSOR", category: "C-49" },
+  { id: 9, name: "TERRACE", category: "C-49" },
+  { id: 10, name: "TOOL ROOM", category: "C-50" },
+  { id: 11, name: "ADMIN BLOCK", category: "C-50" },
 ];
 
 const getMeterName = (id) => {

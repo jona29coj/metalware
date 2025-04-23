@@ -6,17 +6,17 @@ import 'tailwindcss/tailwind.css';
 import { DateContext } from "../contexts/DateContext";
 
 const zoneDetails = {
-  1: { name: "SPRAY+ EPL", category: "C-49" },
-  2: { name: "PLATING", category: "C-49" },
-  3: { name: "COMPRESSOR", category: "C-49" },
-  4: { name: "BUFFING + VIBRATOR + ETP", category: "C-49" },
-  5: { name: "Terrace", category: "C-49" },
-  6: { name: "SPRAY+ EPL", category: "C-50" },
-  7: { name: "CHINA BUFFING", category: "C-50" },
-  8: { name: "BUFFING+CASTING M/C -7", category: "C-50" },
-  9: { name: "DIE CASTING", category: "C-50" },
-  10: { name: "RUMBLE", category: "C-50" },
-  11: { name: "TOOL ROOM", category: "C-50" },
+    1: { name: "PLATING", category: "C-49" },
+    2: { name: "DIE CASTING + CHINA BUFFING + CNC", category: "C-49" },
+    3: { name: "SCOTCH BUFFING", category: "C-50" },
+    4: { name: "BUFFING", category: "C-49" },
+    5: { name: "SPRAY+EPL-I", category: "C-49" },
+    6: { name: "SPRAY+ EPL-II", category: "C-50" },
+    7: { name: "RUMBLE", category: "C-50" },
+    8: { name: "AIR COMPRESSOR", category: "C-49" },
+    9: { name: "TERRACE", category: "C-49" },
+    10: { name: "TOOL ROOM", category: "C-50" },
+    11: { name: "ADMIN BLOCK", category: "C-50" },
 };
 
 const getZoneNameAndCategory = (id) => {
