@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const mysql = require('mysql2/promise');
 
-// MySQL connection pool
 const pool = mysql.createPool({
   host: '18.188.231.51',
   user: 'admin',
@@ -13,139 +12,52 @@ const pool = mysql.createPool({
   queueLimit: 0,
 });
 
-// Helper function to determine rate period
-const getRateInfo = (date) => {
-  const hours = date.getHours();
-  let period, rate;
-
-  if (hours >= 5 && hours < 10) {
-    period = "Off-Peak Hour (05:00:00 - 10:00:00)";
-    rate = 6.035;
-  } else if (hours >= 10 && hours < 19) {
-    period = "Normal Hour (10:00:00 - 19:00:00)";
-    rate = 7.10;
-  } else if ((hours >= 19 && hours <= 23) || (hours >= 0 && hours < 3)) {
-    period = "Peak Hour (19:00:00 - 03:00:00)";
-    rate = 8.165;
-  } else if (hours >= 3 && hours < 5) {
-    period = "Normal Hour (03:00:00 - 05:00:00)";
-    rate = 7.10;
-  }
-
-  return { period, rate };
-};
-
-// GET /cc - Calculate consumption cost
 router.get('/cc', async (req, res) => {
-  console.log(`[${new Date().toISOString()}] Received request for consumption cost calculation`);
-  console.log(`Request query parameters:`, req.query);
-
   try {
-    const { timestamp, currentDateTime } = req.query;
+    const { startDateTime, endDateTime } = req.query;
+    const query = `
+      SELECT 
+        SUM(consumption) AS totalConsumption,
+        ROUND(SUM(cost),1) AS totalCost,
+        MAX(CASE 
+          WHEN HOUR(NOW()) BETWEEN 5 AND 9 THEN 6.035
+          WHEN HOUR(NOW()) BETWEEN 10 AND 18 THEN 7.10
+          WHEN HOUR(NOW()) BETWEEN 19 AND 23 OR HOUR(NOW()) BETWEEN 0 AND 2 THEN 8.165
+          ELSE 7.10
+        END) AS currentRate,
+        CASE
+          WHEN HOUR(NOW()) BETWEEN 5 AND 9 THEN "Off-Peak Hour (05:00:00 - 10:00:00)"
+          WHEN HOUR(NOW()) BETWEEN 10 AND 18 THEN "Normal Hour (10:00:00 - 19:00:00)"
+          WHEN HOUR(NOW()) BETWEEN 19 AND 23 OR HOUR(NOW()) BETWEEN 0 AND 2 THEN "Peak Hour (19:00:00 - 03:00:00)"
+          ELSE "Normal Hour (03:00:00 - 05:00:00)"
+        END AS currentPeriod
+      FROM (
+        SELECT 
+          energy_meter_id,
+          ROUND(MAX(kVAh) - MIN(kVAh), 2) AS consumption,
+          CASE
+            WHEN HOUR(timestamp) BETWEEN 5 AND 9 THEN (MAX(kVAh) - MIN(kVAh)) * 6.035
+            WHEN HOUR(timestamp) BETWEEN 10 AND 18 THEN (MAX(kVAh) - MIN(kVAh)) * 7.10
+            WHEN HOUR(timestamp) BETWEEN 19 AND 23 OR HOUR(timestamp) BETWEEN 0 AND 2 THEN (MAX(kVAh) - MIN(kVAh)) * 8.165
+            ELSE (MAX(kVAh) - MIN(kVAh)) * 7.10
+          END AS cost
+        FROM modbus_data
+        WHERE timestamp BETWEEN ? AND ?
+          AND energy_meter_id BETWEEN 1 AND 11
+        GROUP BY energy_meter_id, HOUR(timestamp)
+      ) AS period_data;
+    `;
 
-    if (!timestamp || !currentDateTime) {
-      return res.status(400).json({ error: "Timestamp and currentDateTime are required" });
-    }
+    const [rows] = await pool.query(query, [startDateTime, endDateTime]);
 
-    const currentTime = new Date(currentDateTime);
-    const selectedDate = new Date(timestamp);
-
-    console.log(`Processing consumption cost for timestamp: ${selectedDate}`);
-    console.log(`Current DateTime: ${currentTime}`);
-
-    // Determine the start and end of the range
-    const startOfDay = `${timestamp.split(' ')[0]} 00:00:00`;
-    const endOfDay = selectedDate.toDateString() === currentTime.toDateString()
-      ? currentDateTime
-      : `${timestamp.split(' ')[0]} 23:59:59`;
-
-    console.log(`Calculating consumption from ${startOfDay} to ${endOfDay}`);
-
-    const readings = await getKVAhReadingsFromDB(startOfDay, endOfDay);
-
-    if (!readings || readings.length === 0) {
-      console.error('No consumption data available for the specified period');
+    if (!rows || rows.length === 0) {
       return res.status(404).json({ error: "No consumption data available" });
     }
 
-    console.log(`Retrieved ${readings.length} readings from database`);
+    const result = rows[0];
 
-    let totalCost = 0;
-    let totalConsumption = 0;
-
-    const periods = [
-      { start: 0, end: 3, rate: 8.165, type: "Peak" },
-      { start: 3, end: 5, rate: 7.10, type: "Normal" },
-      { start: 5, end: 10, rate: 6.035, type: "Off-Peak" },
-      { start: 10, end: 19, rate: 7.10, type: "Normal" },
-      { start: 19, end: 24, rate: 8.165, type: "Peak" }
-    ];
-
-    console.log('Starting period-based cost calculation (per energy meter)...');
-
-    for (const period of periods) {
-      let currentPeriodStart = new Date(startOfDay);
-      let currentPeriodEnd = new Date(startOfDay);
-
-      currentPeriodStart.setHours(period.start, 0, 0, 0);
-      currentPeriodEnd.setHours(period.end, 0, 0, 0);
-
-      if (currentPeriodStart >= new Date(endOfDay)) break;
-      if (currentPeriodEnd > new Date(endOfDay)) currentPeriodEnd = new Date(endOfDay);
-
-      console.log(`Processing ${period.type} period (${period.start}-${period.end}h)...`);
-
-      const periodReadings = readings.filter(r => {
-        const readingTime = new Date(r.timestamp);
-        return readingTime >= currentPeriodStart && readingTime < currentPeriodEnd;
-      });
-
-      if (periodReadings.length === 0) {
-        console.log(`  No readings found for this period`);
-        continue;
-      }
-
-      let periodTotal = 0;
-
-      for (let meterId = 1; meterId <= 11; meterId++) {
-        const meterReadings = periodReadings.filter(r => r.energy_meter_id === meterId);
-
-        if (meterReadings.length > 0) {
-          const meterKVAh = meterReadings.map(r => r.kVAh);
-          const max = Math.max(...meterKVAh);
-          const min = Math.min(...meterKVAh);
-          const consumption = max - min;
-          periodTotal += consumption;
-
-          console.log(`    Meter ${meterId} | Min: ${min}, Max: ${max}, Consumed: ${consumption.toFixed(2)} kVAh`);
-        }
-      }
-
-      const periodCost = periodTotal * period.rate;
-
-      console.log(`  Period Total Consumption: ${periodTotal.toFixed(2)} kVAh`);
-      console.log(`  Period Cost: ₹${periodCost.toFixed(2)}`);
-
-      totalConsumption += periodTotal;
-      totalCost += periodCost;
-    }
-
-    const currentRateInfo = getRateInfo(selectedDate);
-    console.log(`Current rate information:
-      Period: ${currentRateInfo.period}
-      Rate: ₹${currentRateInfo.rate}/kVAh`);
-
-    console.log(`Calculation complete:
-      Total Consumption: ${totalConsumption.toFixed(2)} kVAh
-      Total Cost: ₹${totalCost.toFixed(2)}
-      Current Rate: ₹${currentRateInfo.rate}/kVAh`);
-
-    res.json({
-      totalConsumption: totalConsumption.toFixed(2),
-      totalCost: totalCost.toFixed(2),
-      currentRate: currentRateInfo.rate,
-      currentPeriod: currentRateInfo.period,
-      currency: "₹"
+    res.status(200).json({
+      totalCost: result.totalCost || 0,
     });
 
   } catch (error) {
@@ -156,35 +68,5 @@ router.get('/cc', async (req, res) => {
     });
   }
 });
-
-// Fetch readings from modbus_data grouped by energy_meter_id, filtered by kVAh > 0
-async function getKVAhReadingsFromDB(startTime, endTime) {
-  console.log(`Querying database for readings between ${startTime} and ${endTime}`);
-
-  try {
-    const connection = await pool.getConnection();
-
-    const [rows] = await connection.execute(
-      `SELECT timestamp, kVAh, energy_meter_id FROM modbus_data 
-       WHERE timestamp BETWEEN ? AND ?
-       AND kVAh > 0
-       AND energy_meter_id BETWEEN 1 AND 11
-       ORDER BY energy_meter_id ASC, timestamp ASC`,
-      [
-        startTime,
-        endTime
-      ]
-    );
-
-    connection.release();
-
-    console.log(`Fetched ${rows.length} readings from the database`);
-    return rows;
-
-  } catch (error) {
-    console.error('Error fetching readings from database:', error);
-    throw error;
-  }
-}
 
 module.exports = router;

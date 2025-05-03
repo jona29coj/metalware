@@ -2,7 +2,6 @@ const express = require('express');
 const mysql = require('mysql2');
 const router = express.Router();
 
-// Create a connection pool for MariaDB
 const pool = mysql.createPool({
   host: '18.188.231.51',
   user: 'admin',
@@ -13,11 +12,7 @@ const pool = mysql.createPool({
   queueLimit: 0,
 });
 
-// Fetch peak demand data for every minute of a specific date
-async function getPeakDemandForDate(date, currentDateTime) {
-  const startOfDay = `${date} 00:00:00`;
-  const endOfDay = date === currentDateTime.split(' ')[0] ? currentDateTime : `${date} 23:59:59`;
-
+async function getPeakDemandForDate(startDateTime, endDateTime) {  
   const [rows] = await pool.promise().query(
     `
     SELECT
@@ -29,36 +24,26 @@ async function getPeakDemandForDate(date, currentDateTime) {
     GROUP BY minute
     ORDER BY minute
     `,
-    [startOfDay, endOfDay]
+    [startDateTime, endDateTime]
   );
 
   const result = rows.map(entry => ({
     minute: entry.minute,
-    total_kVA: parseFloat(entry.total_kVA).toFixed(1) // Round to one decimal point
+    total_kVA: parseFloat(entry.total_kVA).toFixed(1) 
   }));
-
-  // Log values with their timestamps
-  result.forEach(entry => {
-    console.log(`Timestamp: ${entry.minute}, Total kVA: ${entry.total_kVA}`);
-  });
 
   return result;
 }
 
-// API handler
 router.get('/opeakdemand', async (req, res) => {
-  const { date, currentDateTime } = req.query;
+  const { startDateTime, endDateTime } = req.query;
 
-  if (!date || !currentDateTime) {
-    return res.status(400).json({ error: 'Date and currentDateTime are required' });
+  if (!startDateTime || !endDateTime) {
+    return res.status(400).json({ error: 'startDateTime and endDateTime are required' });
   }
 
-  // Log the received parameters
-  console.log('Date received from frontend:', date);
-  console.log('Current DateTime received from frontend:', currentDateTime);
-
   try {
-    const peakDemandData = await getPeakDemandForDate(date, currentDateTime);
+    const peakDemandData = await getPeakDemandForDate(startDateTime, endDateTime);
     res.status(200).json({ peakDemandData });
   } catch (error) {
     console.error('Database error:', error);

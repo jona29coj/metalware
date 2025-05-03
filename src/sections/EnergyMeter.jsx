@@ -1,17 +1,16 @@
 import React, { useEffect, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from 'axios';
-import moment from 'moment-timezone';
 import 'tailwindcss/tailwind.css';
 import { DateContext } from "../contexts/DateContext";
 
 const zoneDetails = {
     1: { name: "PLATING", category: "C-49" },
-    2: { name: "DIE CASTING + CHINA BUFFING + CNC", category: "C-49" },
+    2: { name: "DIE CASTING + CHINA BUFFING + CNC", category: "C-50" },
     3: { name: "SCOTCH BUFFING", category: "C-50" },
     4: { name: "BUFFING", category: "C-49" },
-    5: { name: "SPRAY+EPL-I", category: "C-49" },
-    6: { name: "SPRAY+ EPL-II", category: "C-50" },
+    5: { name: "SPRAY+EPL-I", category: "C-50" },
+    6: { name: "SPRAY+ EPL-II", category: "C-49" },
     7: { name: "RUMBLE", category: "C-50" },
     8: { name: "AIR COMPRESSOR", category: "C-49" },
     9: { name: "TERRACE", category: "C-49" },
@@ -29,7 +28,6 @@ const EnergyMeter = ({ name, consumption, id }) => {
 
   return (
     <div className="group relative bg-white rounded-lg w-full h-50 flex flex-col justify-between items-center text-center p-4 border border-gray-500">
-      {/* Tooltip container */}
       <div className="absolute hidden group-hover:block -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs font-medium py-1 px-2 rounded whitespace-nowrap z-10">
         <div className="font-bold">{zoneInfo.name}</div>
         <div className="text-gray-300">Category: {zoneInfo.category}</div>
@@ -55,31 +53,34 @@ const EnergyMeter = ({ name, consumption, id }) => {
 };
 
 const MeterInfo = () => {
-  const { selectedDate: globalSelectedDate } = useContext(DateContext); // Get date from context
+  const { selectedDate: globalSelectedDate, startDateTime: globalStartDateTime, endDateTime: globalEndDateTime } = useContext(DateContext);
   const [energyMeters, setEnergyMeters] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const currentDateTime = moment().tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss');
         const response = await axios.get(`https://mw.elementsenergies.com/api/econsumption`, {
-          params: { date: globalSelectedDate, currentDateTime }
+          params: {
+            startDateTime: globalStartDateTime,
+            endDateTime: globalEndDateTime
+          }
         });
-
+  
         const formattedData = response.data.consumptionData.map((entry) => ({
           id: entry.energy_meter_id,
           name: `Zone ${entry.energy_meter_id}`,
           consumption: parseFloat(entry.consumption)
         }));
-
+  
         setEnergyMeters(formattedData);
       } catch (error) {
         console.error('Error fetching data:', error);
       }
     };
-
+  
     fetchData();
-  }, [globalSelectedDate]); // Fetch data when the global date changes
+  }, [globalStartDateTime, globalEndDateTime]);
+  
 
   return (
     <div className="p-6 bg-white rounded-lg shadow-md flex flex-col">

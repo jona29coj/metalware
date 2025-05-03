@@ -17,10 +17,10 @@ const pool = mysql.createPool(dbConfig);
 async function getTotalConsumption(startDateTime, endDateTime) {
   const query = `
   SELECT 
-    ROUND(SUM(kWh_difference), 1) AS consumption
+    ROUND(SUM(kVAh_difference), 1) AS consumption
   FROM (
     SELECT 
-      (MAX(kWh) - MIN(kWh)) AS kWh_difference
+      (MAX(kVAh) - MIN(kVAh)) AS kVAh_difference
     FROM 
       modbus_data
     WHERE 
@@ -35,7 +35,7 @@ async function getTotalConsumption(startDateTime, endDateTime) {
   return rows[0]?.consumption || 0; 
 }
 
-router.get('/mccons', async (req, res) => {
+router.get('/mcapcons', async (req, res) => {
   try {
     const { startDateTime, endDateTime } = req.query;
 

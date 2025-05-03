@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const mysql = require('mysql2');
-const moment = require('moment-timezone');
 
 const pool = mysql.createPool({
   host: '18.188.231.51',
@@ -13,61 +12,35 @@ const pool = mysql.createPool({
   queueLimit: 0,
 });
 
-async function getTotalConsumptionForZone(date, currentDateTime, zone) {
-  const startOfDay = `${date} 00:00:00`;
-  const endOfDay = moment(date).isSame(moment(currentDateTime), 'day')
-    ? currentDateTime
-    : `${date} 23:59:59`;
-
+async function getTotalConsumptionForZone(startDateTime,endDateTime,zone) {  
   const [rows] = await pool.promise().query(
     `
     SELECT
       DATE_FORMAT(timestamp, '%Y-%m-%d %H:00:00') AS hour,
       energy_meter_id,
-      MAX(CASE WHEN kWh > 0 THEN kWh ELSE NULL END) - MIN(CASE WHEN kWh > 0 THEN kWh ELSE NULL END) AS kWh_difference
-    FROM modbus_data
+      ROUND(
+        MAX(CASE WHEN kWh > 0 THEN kWh ELSE NULL END) - MIN(CASE WHEN kWh > 0 THEN kWh ELSE NULL END),
+        1
+      ) AS kWh_difference    FROM modbus_data
     WHERE timestamp BETWEEN ? AND ?
       AND energy_meter_id = ?
-      AND kWh > 0
     GROUP BY energy_meter_id, hour
     `,
-    [startOfDay, endOfDay, zone]
+    [startDateTime, endDateTime, zone]
   );
 
-  const totalConsumptionByHour = {};
-  rows.forEach((entry) => {
-    totalConsumptionByHour[entry.hour] = (totalConsumptionByHour[entry.hour] || 0) + parseFloat(entry.kWh_difference || 0);
-  });
-
-  // Generate full list of hourly periods for the given date
-  const result = [];
-  let currentTime = moment(startOfDay);
-
-  const finalTime = moment(endOfDay);
-  while (currentTime <= finalTime) {
-    const hour = currentTime.format('YYYY-MM-DD HH:00:00');
-
-    result.push({
-      hour,
-      total_consumption: (totalConsumptionByHour[hour] || 0).toFixed(1),
-    });
-
-    currentTime.add(1, 'hour');
-  }
-
-  return result;
+  return rows;
 }
 
-
 router.get('/zconsumption', async (req, res) => {
-  const { date, currentDateTime, zone } = req.query;
+  const { startDateTime, endDateTime, zone } = req.query;
 
-  if (!date || !currentDateTime || !zone) {
-    return res.status(400).json({ error: 'Date, currentDateTime, and zone are required' });
+  if (!startDateTime || !endDateTime || !zone)  {
+    return res.status(400).json({ error: 'startDateTime, endDateTime, and zone are required' });
   }
 
   try {
-    const consumptionData = await getTotalConsumptionForZone(date, currentDateTime, zone);
+    const consumptionData = await getTotalConsumptionForZone(startDateTime, endDateTime, zone);
     res.status(200).json({ consumptionData });
   } catch (error) {
     console.error('Database error:', error);

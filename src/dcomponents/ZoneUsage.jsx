@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState, useContext } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-import moment from "moment-timezone";
+import axios from 'axios';
 import { DateContext } from "../contexts/DateContext";
 
 const categoryColors = {
@@ -15,7 +15,7 @@ const highlightColors = {
 };
 
 const ZoneUsage = () => {
-  const { selectedDate: globalSelectedDate } = useContext(DateContext);
+  const { selectedDate: globalSelectedDate, startDateTime: globalStartDateTime, endDateTime: globalEndDateTime } = useContext(DateContext);
   const mountRef = useRef(null);
   const tooltipRef = useRef(null);
   const [hoveredZone, setHoveredZone] = useState(null);
@@ -25,11 +25,11 @@ const ZoneUsage = () => {
 
   const meterToZoneMap = {
     1: { name: "PLATING", category: "C-49" },
-    2: { name: "DIE CASTING + CHINA BUFFING + CNC", category: "C-49" },
+    2: { name: "DIE CASTING + CHINA BUFFING + CNC", category: "C-50" },
     3: { name: "SCOTCH BUFFING", category: "C-50" },
     4: { name: "BUFFING", category: "C-49" },
-    5: { name: "SPRAY+EPL-I", category: "C-49" },
-    6: { name: "SPRAY+ EPL-II", category: "C-50" },
+    5: { name: "SPRAY+EPL-I", category: "C-50" },
+    6: { name: "SPRAY+ EPL-II", category: "C-49" },
     7: { name: "RUMBLE", category: "C-50" },
     8: { name: "AIR COMPRESSOR", category: "C-49" },
     9: { name: "TERRACE", category: "C-49" },
@@ -40,53 +40,34 @@ const ZoneUsage = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        setLoading(true);
-        const currentDateTime = moment().tz("Asia/Kolkata").format("YYYY-MM-DD HH:mm:ss");
-
-        const response = await fetch(
-          `https://mw.elementsenergies.com/api/econsumption?date=${globalSelectedDate}&currentDateTime=${currentDateTime}`,
-          {
-            headers: {
-              Accept: "application/json",
-              "Content-Type": "application/json",
-            },
-          }
-        );
-
-        const contentType = response.headers.get("content-type");
-        if (!contentType || !contentType.includes("application/json")) {
-          const text = await response.text();
-          throw new Error(`Invalid response: ${text.substring(0, 100)}`);
-        }
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        const transformedData = data.consumptionData
-          .filter((item) => meterToZoneMap[item.energy_meter_id])
-          .map((item) => {
-            const zoneInfo = meterToZoneMap[item.energy_meter_id];
-            return {
-              name: zoneInfo.name,
-              kWh: parseFloat(item.consumption) || 0,
-              category: zoneInfo.category,
-            };
-          });
-
-        setZoneData(transformedData);
-      } catch (err) {
-        console.error("Error fetching data:", err);
-        setError(err.message);
-      } finally {
+        const response = await axios.get(`https://mw.elementsenergies.com/api/econsumption`, {
+          params: {
+            startDateTime: globalStartDateTime,
+            endDateTime: globalEndDateTime,
+          },
+        });
+  
+        const formattedData = response.data.consumptionData.map((entry) => {
+          const zoneInfo = meterToZoneMap[entry.energy_meter_id];
+          return {
+            id: entry.energy_meter_id,
+            name: zoneInfo?.name || `Zone ${entry.energy_meter_id}`,
+            category: zoneInfo?.category || "Unknown",
+            consumption: parseFloat(entry.consumption),
+          };
+        });
+  
+        setZoneData(formattedData);
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setError("Failed to fetch zone data");
         setLoading(false);
       }
     };
-
+  
     fetchData();
-  }, [globalSelectedDate]);
+  }, [globalStartDateTime, globalEndDateTime]);
 
   useEffect(() => {
     if (loading || error || !mountRef.current || zoneData.length === 0) return;
@@ -164,26 +145,26 @@ const ZoneUsage = () => {
       const rect = mount.getBoundingClientRect();
       mouse.x = ((x - rect.left) / rect.width) * 2 - 1;
       mouse.y = -((y - rect.top) / rect.height) * 2 + 1;
-  
+    
       raycaster.setFromCamera(mouse, camera);
       const intersects = raycaster.intersectObjects(cubes);
-  
+    
       if (intersects.length > 0) {
         const intersected = intersects[0].object;
         if (intersected !== currentIntersected) {
           if (currentIntersected) {
             currentIntersected.material.color.set(currentIntersected.userData.originalColor);
           }
-  
+    
           currentIntersected = intersected;
           intersected.material.color.set(highlightColors[intersected.userData.category]);
           setHoveredZone(intersected.userData);
-  
+    
           tooltipRef.current.style.display = "block";
           tooltipRef.current.style.left = `${x + 10}px`;
           tooltipRef.current.style.top = `${y + 10}px`;
-          tooltipRef.current.innerHTML = `${intersected.userData.name}: ${intersected.userData.kWh} kWh`;
-  
+          tooltipRef.current.innerHTML = `${intersected.userData.name}: ${intersected.userData.consumption} kWh`;
+    
           mount.style.cursor = "pointer";
         }
         return true;

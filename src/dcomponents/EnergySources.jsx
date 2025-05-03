@@ -2,11 +2,11 @@ import React, { useEffect, useState, useContext } from "react";
 import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
 import axios from "axios";
-import moment from "moment-timezone";
 import { DateContext } from "../contexts/DateContext";
+
 const meterNames = [
   { id: 1, name: "PLATING", category: "C-49" },
-  { id: 2, name: "DIE CASTING + CHINA BUFFING + CNC", category: "C-49" },
+  { id: 2, name: "DIE CASTING + CHINA BUFFING + CNC", category: "C-50" },
   { id: 3, name: "SCOTCH BUFFING", category: "C-50" },
   { id: 4, name: "BUFFING", category: "C-49" },
   { id: 5, name: "SPRAY+EPL-I", category: "C-49" },
@@ -24,49 +24,43 @@ const getMeterName = (id) => {
 };
 
 const EnergySources = () => {
-  const { selectedDate: globalSelectedDate } = useContext(DateContext); // Get date from context
+  const { selectedDate: globalSelectedDate, startDateTime: globalStartDateTime, endDateTime: globalEndDateTime } = useContext(DateContext); 
   const [zones, setZones] = useState([]);
-  const [localSelectedDate, setLocalSelectedDate] = useState(globalSelectedDate); // Local date state
   const [highZone, setHighZone] = useState({ meter_id: "N/A", consumption: 0 });
   const [lowZone, setLowZone] = useState({ meter_id: "N/A", consumption: 0 });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    setLocalSelectedDate(globalSelectedDate);
   }, [globalSelectedDate]);
 
-  // Fetch data from the backend
-  const fetchConsumptionData = async (date) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const currentDateTime = moment().tz("Asia/Kolkata").format("YYYY-MM-DD HH:mm:ss");
+const fetchConsumptionData = async (date) => {
+  setLoading(true);
+  setError(null);
+  try {
+    const response = await axios.get("https://mw.elementsenergies.com/api/hlcons", {
+      params: {
+        startDateTime: globalStartDateTime,
+        endDateTime: globalEndDateTime,
+      },
+    });
 
-      const response = await axios.get("https://mw.elementsenergies.com/api/hlcons", {
-        params: { date, currentDateTime },
-      });
-
-      if (response.data) {
-        setZones(response.data.consumptionData);
-        setHighZone(response.data.highZone);
-        setLowZone(response.data.lowZone);
-      }
-    } catch (err) {
-      setError("Failed to fetch data");
-      console.error("Error fetching data:", err);
+    if (response.data) {
+      setZones(response.data.consumptionData);
+      setHighZone(response.data.highZone);
+      setLowZone(response.data.lowZone);
     }
-    setLoading(false);
-  };
+  } catch (err) {
+    setError("Failed to fetch data");
+    console.error("Error fetching data:", err);
+  }
+  setLoading(false);
+};
 
-  // Fetch data when the local date changes
-  useEffect(() => {
-    fetchConsumptionData(localSelectedDate);
-  }, [localSelectedDate]);
+useEffect(() => {
+  fetchConsumptionData(); 
+}, [globalStartDateTime, globalEndDateTime]);
 
-  const handleLocalDateChange = (e) => {
-    setLocalSelectedDate(e.target.value);
-  };
 
   const totalConsumption = zones.reduce((sum, zone) => sum + parseFloat(zone.consumption), 0);
 
@@ -112,15 +106,6 @@ const EnergySources = () => {
     <div className="bg-white xl:h-[100%] p-7 rounded-lg shadow-md flex flex-col space-y-7">
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-semibold">Facility Overview</h2>
-        <div className="relative">
-          <input
-            type="date"
-            value={localSelectedDate} // Use local state
-            onChange={handleLocalDateChange} // Update local state
-            className="pl-2 pr-2 py-1 border border-gray-300 rounded-md text-sm"
-            max={moment().tz('Asia/Kolkata').format('YYYY-MM-DD')}
-          />
-        </div>
       </div>
 
       {loading ? (

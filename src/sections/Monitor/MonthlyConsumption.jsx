@@ -45,16 +45,16 @@ const MonthlyConsumption = () => {
       title: {
         text: null
       },
-      gridLineWidth: 0,  // Disable x-axis grid lines
-      lineWidth: 0,  // Disable x-axis line
+      gridLineWidth: 0,  
+      lineWidth: 0,  
     },
     yAxis: {
       min: 0,
       title: {
         text: 'Energy (kWh)'
       },
-      gridLineWidth: 0,  // Disable y-axis grid lines
-      lineWidth: 0,  // Disable y-axis line
+      gridLineWidth: 0,  
+      lineWidth: 0,  
     },
     series: [
       {
@@ -75,6 +75,15 @@ const MonthlyConsumption = () => {
           enabled: true
         },
         enableMouseTracking: true
+      }
+    },
+    exporting: {
+      enabled: true,
+      filename: `Yearly Consumption - ${year}`, 
+      buttons: {
+        contextButton: {
+          menuItems: ['downloadXLS'] 
+        }
       }
     }
   };

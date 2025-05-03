@@ -36,7 +36,7 @@ const App = () => {
     if (authCookie === 'true') {
       setIsAuthenticated(true);
     } else {
-      window.location.href = 'https://elementsenergies.com/login';
+        window.location.href = 'https://elementsenergies.com/login';
     }
   }, []);  
 
@@ -54,7 +54,6 @@ const App = () => {
     setRefreshKey((prevKey) => prevKey + 1);
   };
 
-  console.log(` Cookies Value : ${document.cookie}`);
 
   return (
     <DateProvider>
@@ -62,7 +61,6 @@ const App = () => {
         <ScrollToTop />
         {isAuthenticated &&( 
           <div className="bg-main-bg min-h-screen flex">
-            {/* Sidebar */}
             <div
               className={`bg-white shadow-md transition-all duration-300 fixed top-0 left-0 h-full ${
                 isCollapsed ? 'w-[9%]' : 'w-[15.5%]'
@@ -72,7 +70,6 @@ const App = () => {
               <Sidebar isCollapsed={isCollapsed} setIsCollapsed={toggleSidebar} />
             </div>
 
-            {/* Navbar */}
             <div
               className={`fixed top-0 transition-all duration-300 ${
                 isCollapsed ? 'left-[9%] w-[91%]' : 'left-[15.5%] w-[84.5%]'
@@ -82,7 +79,6 @@ const App = () => {
               <Navbar isCollapsed={isCollapsed} setIsCollapsed={toggleSidebar} />
             </div>
 
-            {/* Main Content */}
             <div
               key={refreshKey}
               className={`flex-1 flex flex-col min-h-screen overflow-hidden max-w-full transition-all duration-300 ${

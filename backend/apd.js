@@ -1,9 +1,7 @@
-// apd.js
 const express = require('express');
 const mysql = require('mysql2');
 const router = express.Router();
 
-// Create a connection pool for MariaDB
 const pool = mysql.createPool({
   host: '18.188.231.51',
   user: 'admin',
@@ -14,11 +12,7 @@ const pool = mysql.createPool({
   queueLimit: 0,
 });
 
-// Fetch peak demand data for every minute of a specific date and filter kVA > 558.75
-async function getPeakDemandAboveThreshold(date, currentDateTime, threshold = 558.75) {
-  const startOfDay = `${date} 00:00:00`;
-  const endOfDay = date === currentDateTime.split(' ')[0] ? currentDateTime : `${date} 23:59:59`;
-
+async function getPeakDemandAboveThreshold(startDateTime, endDateTime) {
   const [rows] = await pool.promise().query(
     `
     SELECT
@@ -28,13 +22,12 @@ async function getPeakDemandAboveThreshold(date, currentDateTime, threshold = 55
     WHERE energy_meter_id BETWEEN 1 AND 11
       AND timestamp BETWEEN ? AND ?
     GROUP BY minute
-    HAVING SUM(total_kVA) > ?
+    HAVING SUM(total_kVA) > 558.75
     ORDER BY minute DESC
     `,
-    [startOfDay, endOfDay, threshold]
+    [startDateTime, endDateTime]
   );
 
-  // Process the data with auto-incrementing IDs
   const result = [];
   let id = 1;
 
@@ -46,29 +39,19 @@ async function getPeakDemandAboveThreshold(date, currentDateTime, threshold = 55
       total_kVA: kVA
     };
     result.push(entryWithId);
-
-    // Log values with their timestamps
-    console.log(`Timestamp (Above ${threshold}): ${entry.minute}, Total kVA: ${kVA}`);
   });
 
   return result;
 }
 
-// API handler to return kVA values above the threshold
-router.get('/apd', async (req, res) => { // Changed the route to '/' as requested
-  const { date, currentDateTime } = req.query;
-  const threshold = 558.75; // Define the threshold here
-
-  if (!date || !currentDateTime) {
+router.get('/apd', async (req, res) => { 
+  const { startDateTime, endDateTime } = req.query;
+  if (!startDateTime || !endDateTime) {
     return res.status(400).json({ error: 'Date and currentDateTime are required' });
   }
 
-  // Log the received parameters
-  console.log('Date received from frontend:', date);
-  console.log('Current DateTime received from frontend:', currentDateTime);
-
   try {
-    const peakDemandAboveThresholdData = await getPeakDemandAboveThreshold(date, currentDateTime, threshold);
+    const peakDemandAboveThresholdData = await getPeakDemandAboveThreshold(startDateTime, endDateTime);
     res.status(200).json({
       peakDemandAboveThreshold: peakDemandAboveThresholdData
     });

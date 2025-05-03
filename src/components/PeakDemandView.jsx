@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { DateContext } from '../contexts/DateContext';
+import * as XLSX from 'xlsx'; 
 
 const PeakDemandView = () => {
-  const [peakDemandData, setPeakDemandData] = useState(null); // Initialize as null
+  const [peakDemandData, setPeakDemandData] = useState(null); 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const { selectedDate } = useContext(DateContext);
+  const { startDateTime, endDateTime } = useContext(DateContext); 
 
-  // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 13;
 
@@ -18,9 +18,9 @@ const PeakDemandView = () => {
         setLoading(true);
         const response = await axios.get('https://mw.elementsenergies.com/api/apd', {
           params: {
-            date: selectedDate,
-            currentDateTime: new Date().toISOString() // Just send current time as-is
-          }
+            startDateTime,
+            endDateTime,
+          },
         });
         setPeakDemandData(response.data.peakDemandAboveThreshold);
         setLoading(false);
@@ -30,14 +30,15 @@ const PeakDemandView = () => {
       }
     };
 
-    fetchPeakDemandData();
-    setCurrentPage(1);
-  }, [selectedDate]);
+    if (startDateTime && endDateTime) {
+      fetchPeakDemandData();
+      setCurrentPage(1);
+    }
+  }, [startDateTime, endDateTime]); 
 
-  // Format timestamp from backend (assuming format is "YYYY-MM-DD HH:mm:ss")
   const formatTime = (timestamp) => {
-    if (!timestamp) return ''; // Handle undefined timestamp
-    return timestamp.split(' ')[1].substring(0, 5); // Extracts just "HH:mm"
+    if (!timestamp) return ''; 
+    return timestamp.split(' ')[1].substring(0, 5); 
   };
 
   const formatDisplayDate = (dateString) => {
@@ -45,9 +46,29 @@ const PeakDemandView = () => {
     const [year, month, day] = dateString.split('-');
     return `${parseInt(day)}/${parseInt(month)}/${year}`;
   };
-  
 
-  // Calculate pagination values
+  const handleDownloadExcel = () => {
+    if (!peakDemandData || peakDemandData.length === 0) {
+      alert("No data available to download.");
+      return;
+    }
+
+    const dataForExcel = peakDemandData.map((item) => ({
+      ID: item.id,
+      Date: formatDisplayDate(item.minute.split(' ')[0]),
+      Time: formatTime(item.minute),
+      Alert: 'Peak Demand',
+      Limit: '558.75 kVA',
+      Value: item.total_kVA,
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(dataForExcel);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Peak Demand Data');
+
+    XLSX.writeFile(workbook, 'PeakDemandData.xlsx');
+  };
+
   const totalPages = peakDemandData ? Math.ceil(peakDemandData.length / itemsPerPage) : 0;
   const currentItems = peakDemandData ? peakDemandData.slice(
     (currentPage - 1) * itemsPerPage,
@@ -61,37 +82,41 @@ const PeakDemandView = () => {
   return (
     <div className="p-6 bg-gradient-to-br from-gray-100 to-gray-200 min-h-screen">
       <div className="bg-white shadow-lg rounded-lg p-6 mb-6">
-      <h1 className="text-2xl font-bold mb-4 text-center">
-  Alert Logs
-</h1>
-
+        <div className="flex justify-between items-center mb-4">
+          <h1 className="text-2xl font-bold">Alert Logs</h1>
+          <button
+            onClick={handleDownloadExcel}
+            className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition"
+          >
+            Download Excel
+          </button>
+        </div>
 
         <div className="overflow-x-auto">
           <table className="min-w-full bg-white">
-          <thead className="bg-gray-200">
-  <tr>
-    <th className="py-2 px-4 text-left">ID</th>
-    <th className="py-2 px-4 text-left">Date</th>
-    <th className="py-2 px-4 text-left">Time</th>
-    <th className="py-2 px-4 text-left">Alert</th>
-    <th className="py-2 px-4 text-left">Limit</th>
-    <th className="py-2 px-4 text-left">Value</th>
-  </tr>
-</thead>
+            <thead className="bg-gray-200">
+              <tr>
+                <th className="py-2 px-4 text-left">ID</th>
+                <th className="py-2 px-4 text-left">Date</th>
+                <th className="py-2 px-4 text-left">Time</th>
+                <th className="py-2 px-4 text-left">Alert</th>
+                <th className="py-2 px-4 text-left">Limit</th>
+                <th className="py-2 px-4 text-left">Value</th>
+              </tr>
+            </thead>
 
-<tbody>
-  {currentItems.map((item) => (
-    <tr key={item.id} className="border-b hover:bg-gray-50">
-      <td className="py-2 px-4">{item.id}</td>
-      <td className="py-2 px-4">{formatDisplayDate(item.minute.split(' ')[0])}</td>
-      <td className="py-2 px-4">{formatTime(item.minute)}</td>
-      <td className="py-2 px-4">Peak Demand</td>
-      <td className="py-2 px-4">558.75 kVA</td>
-      <td className="py-2 px-4">{item.total_kVA}</td>
-    </tr>
-  ))}
-</tbody>
-
+            <tbody>
+              {currentItems.map((item) => (
+                <tr key={item.id} className="border-b hover:bg-gray-50">
+                  <td className="py-2 px-4">{item.id}</td>
+                  <td className="py-2 px-4">{formatDisplayDate(item.minute.split(' ')[0])}</td>
+                  <td className="py-2 px-4">{formatTime(item.minute)}</td>
+                  <td className="py-2 px-4">Peak Demand</td>
+                  <td className="py-2 px-4">558.75 kVA</td>
+                  <td className="py-2 px-4">{item.total_kVA}</td>
+                </tr>
+              ))}
+            </tbody>
           </table>
         </div>
 

@@ -6,7 +6,6 @@ import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 
 
-// Function to format date to Asia/Kolkata timezone before sending to backend
 const formatDateForBackend = (date) => {
   return moment(date).tz("Asia/Kolkata").format("YYYY-MM-DD HH:mm:ss");
 };
@@ -14,7 +13,6 @@ const formatDateForBackend = (date) => {
 const EnergyConsumptionChart = ({ consumptionData, dateRange }) => {
   if (!consumptionData?.length) return <div className="text-center py-10">No data available</div>;
 
-  // Generate heatmap data
   const daysDiff = Math.ceil((dateRange.endDate - dateRange.startDate) / (86400000)) + 1;
   const heatmapData = Array(24).fill().map(() => Array(daysDiff).fill(null));
   
@@ -31,7 +29,6 @@ const EnergyConsumptionChart = ({ consumptionData, dateRange }) => {
     }
   });
 
-  // Generate labels and month separators
   const { labels, monthSeparators } = dateArray.reduce((acc, _, i) => {
     const date = new Date(dateRange.startDate);
     date.setDate(date.getDate() + i);
@@ -134,7 +131,7 @@ const EnergyConsumption = () => {
   
     const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
     const data = new Blob([excelBuffer], { type: "application/octet-stream" });
-    saveAs(data, `Energy_Consumption_${moment(dateRange.startDate).format("YYYYMMDD")}_${moment(dateRange.endDate).format("YYYYMMDD")}.xlsx`);
+    saveAs(data, `Heat_Map_${moment(dateRange.startDate).format("YYYY_MM_DD")}_to_${moment(dateRange.endDate).format("YYYY_MM_DD")}.xlsx`);
   };
   
 

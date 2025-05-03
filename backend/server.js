@@ -9,6 +9,7 @@ const mbConsumptionRoutes = require('./mbconsumption');
 const mcconspeakRoutes = require('./mcconspeak');
 const ConsumptionRoutes = require('./consumption');
 const mcconsRoutes = require('./mccons');
+const mcapconsRoutes = require('./mcapcons')
 const hlconsRoutes = require('./hlcons');
 const mcpeakRoutes = require('./mcpeak');
 const pfRoutes = require('./pf');
@@ -17,6 +18,7 @@ const zkVAhConsumptionRoutes = require('./zkVAhconsumption');
 const ccRoutes = require('./cc');
 const apdRoutes = require('./apd');
 const DashboardRoutes = require('./dashboard');
+const hcostconsumptionRoutes = require('./hcostconsumption');
 
 const app = express();
 const port = 3001;
@@ -44,6 +46,8 @@ app.use('/api', zkVAhConsumptionRoutes);
 app.use('/api', ccRoutes);
 app.use('/api', apdRoutes);
 app.use('/api', DashboardRoutes);
+app.use('/api', hcostconsumptionRoutes);
+app.use('/api', mcapconsRoutes);
 
 
 app.use((err, req, res, next) => {
