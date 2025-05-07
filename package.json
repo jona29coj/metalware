@@ -24,6 +24,7 @@
     "chartjs-chart-sankey": "^0.14.0",
     "chartjs-plugin-datalabels": "^2.2.0",
     "cors": "^2.8.5",
+    "crypto-js": "^4.2.0",
     "d3-sankey": "^0.12.3",
     "date-fns": "^4.1.0",
     "echarts": "^5.5.1",

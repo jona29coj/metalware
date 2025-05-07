@@ -32,12 +32,34 @@ const App = () => {
   const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
-    const authCookie = Cookies.get('auth');
-    if (authCookie === 'true') {
-      setIsAuthenticated(true);
-    } else {
+    const checkAuth = async () => {
+      const token = Cookies.get('auth');
+
+      if (!token) {
         window.location.href = 'https://elementsenergies.com/login';
-    }
+        return;
+      }
+
+      try {
+        const response = await fetch('https://mw.elementsenergies.com/api/auth', {
+          method: 'GET',
+          headers: {
+            'Authorization':`Bearer ${token}`,
+          },
+          credentials: 'include'
+        });
+
+        if (response.ok) {
+          setIsAuthenticated(true);
+        }else {
+          window.location.href = 'https://elementsenergies.com/login';
+        }
+      }
+      catch (error) {
+        window.location.href = 'https://elementsenergies.com/login';        
+      }
+    };
+    checkAuth();
   }, []);  
 
   useEffect(() => {
@@ -53,8 +75,7 @@ const App = () => {
     setIsCollapsed((prev) => !prev);
     setRefreshKey((prevKey) => prevKey + 1);
   };
-
-
+  
   return (
     <DateProvider>
       <BrowserRouter>
