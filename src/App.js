@@ -43,9 +43,6 @@ const App = () => {
       try {
         const response = await fetch('https://mw.elementsenergies.com/api/auth', {
           method: 'GET',
-          headers: {
-            'Authorization':`Bearer ${token}`,
-          },
           credentials: 'include'
         });
 
