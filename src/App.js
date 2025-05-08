@@ -31,7 +31,7 @@ const App = () => {
   const [isCollapsed, setIsCollapsed] = useState(window.innerWidth < 1024);
   const [refreshKey, setRefreshKey] = useState(0);
 
-  /*useEffect(() => {
+  useEffect(() => {
     const checkAuth = async () => {
       const token = Cookies.get('auth');
 
@@ -57,7 +57,7 @@ const App = () => {
       }
     };
     checkAuth();
-  }, []);  */
+  }, []);  
 
   useEffect(() => {
     const handleResize = () => {
@@ -77,7 +77,7 @@ const App = () => {
     <DateProvider>
       <BrowserRouter>
         <ScrollToTop />
-        {( 
+        {isAuthenticated &&( 
           <div className="bg-main-bg min-h-screen flex">
             <div
               className={`bg-white shadow-md transition-all duration-300 fixed top-0 left-0 h-full ${
