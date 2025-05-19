@@ -4,6 +4,8 @@ import HighchartsReact from "highcharts-react-official";
 import axios from "axios";
 import moment from "moment-timezone";
 import { DateContext } from "../contexts/DateContext";
+import * as XLSX from 'xlsx'; 
+
 
 const PeakDemand = () => {
   const { startDateTime, endDateTime } = useContext(DateContext); 
@@ -28,6 +30,32 @@ const PeakDemand = () => {
       fetchPeakDemandData(startDateTime, endDateTime);
     }
   }, [startDateTime, endDateTime]);
+
+  const downloadExcel = () => {
+    if (!peakDemandData || peakDemandData.length === 0) {
+      alert("No data available to download.");
+      return;
+    }
+
+    const headerRow = [`Start: ${startDateTime}`, `End: ${endDateTime}`, ""]; 
+
+    const columnHeaders = ["Date", "Time", "Peak Demand (kVA)"];
+
+    const formattedData = peakDemandData.map((item) => [
+      moment(item.minute).format("YYYY-MM-DD"), 
+      moment(item.minute).format("HH:mm"), 
+      parseFloat(item.total_kVA), 
+    ]);
+
+    const dataForExcel = [headerRow, columnHeaders, ...formattedData];
+
+    const worksheet = XLSX.utils.aoa_to_sheet(dataForExcel);
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Peak Demand Data");
+
+    XLSX.writeFile(workbook, `Peak_Demand_${startDateTime}_to_${endDateTime}.xlsx`);
+  };
 
   const options = {
     chart: {
@@ -79,12 +107,12 @@ const PeakDemand = () => {
           },
         },
         {
-          value: 558.75,
+          value: 596,
           color: "red",
           dashStyle: "Dash",
           width: 2,
           label: {
-            text: "Lower Ceiling (558.75 kVA)",
+            text: "Lower Ceiling (596 kVA)",
             align: "right",
             x: -10,
             style: {
@@ -134,13 +162,7 @@ const PeakDemand = () => {
       enabled: false,
     },
     exporting: {
-      enabled: true,
-      filename: `Peak Demand ${startDateTime} - ${endDateTime}`,
-      buttons: {
-        contextButton: {
-          menuItems: ["downloadXLS"],
-        },
-      },
+      enabled: false,
     },
     responsive: {
       rules: [
@@ -164,6 +186,12 @@ const PeakDemand = () => {
     <div className="bg-white shadow-lg rounded-lg p-6 w-full h-full">
       <div className="flex justify-between items-center pb-6">
         <h2 className="text-xl font-semibold">Peak Demand</h2>
+        <button
+          onClick={downloadExcel}
+          className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition"
+        >
+          Download Excel
+        </button>
       </div>
       <div className="w-full h-[400px] -translate-x-4">
         <HighchartsReact highcharts={Highcharts} options={options} />

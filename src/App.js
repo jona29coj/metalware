@@ -57,7 +57,7 @@ const App = () => {
       }
     };
     checkAuth();
-  }, []);  
+  }, []); 
 
   useEffect(() => {
     const handleResize = () => {
@@ -77,7 +77,7 @@ const App = () => {
     <DateProvider>
       <BrowserRouter>
         <ScrollToTop />
-        {isAuthenticated &&( 
+        {isAuthenticated && ( 
           <div className="bg-main-bg min-h-screen flex">
             <div
               className={`bg-white shadow-md transition-all duration-300 fixed top-0 left-0 h-full ${
@@ -89,7 +89,7 @@ const App = () => {
             </div>
 
             <div
-              className={`fixed top-0 transition-all duration-300 ${
+              className={`fixed top-0 h-[55px] transition-all duration-300 ${
                 isCollapsed ? 'left-[9%] w-[91%]' : 'left-[15.5%] w-[84.5%]'
               }`}
               style={{ zIndex: 40 }}

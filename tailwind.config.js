@@ -8,7 +8,10 @@ module.exports = {
       },
       extend: {
         screens: {
-          'custom': '1150px',
+          'custom-sm': {'max':'931px'},
+          'custom-dsm': {'max':'750px'},
+          'custom-msm': {'max':'970px'},
+          'custom-mmsm': {'max':'520px'}
         },
         fontSize: {
           14: '14px',

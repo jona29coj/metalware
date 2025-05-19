@@ -7,6 +7,8 @@ import moment from 'moment-timezone';
 import { DateContext } from "../contexts/DateContext";
 import Exporting from 'highcharts/modules/exporting';
 import ExportData from 'highcharts/modules/export-data';
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 
 if (Exporting && typeof Exporting === 'function') {
   Exporting(Highcharts);
@@ -18,6 +20,8 @@ if (ExportData && typeof ExportData === 'function') {
 
 const HConsumption = () => {
   const { startDateTime, endDateTime } = useContext(DateContext); 
+  const options = ['kWh', 'kVAh', '₹'];
+
   const [energyData, setEnergyData] = useState({});
   const [consumptionType, setConsumptionType] = useState('kWh'); 
 
@@ -54,6 +58,32 @@ const HConsumption = () => {
 
   }, [startDateTime, endDateTime, consumptionType]);
 
+  const downloadExcel = () => {
+    const headerRow = [`Start: ${startDateTime}`, `End: ${endDateTime}`, ""]; 
+  
+    const columnHeaders = ["Date", "Time", `Value (${consumptionType})`];
+    const formattedData = Object.entries(energyData).map(([timestamp, value]) => [
+      moment(timestamp, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD'), 
+      moment(timestamp, 'YYYY-MM-DD HH:mm:ss').format('HH:mm'), 
+      parseFloat(value), 
+    ]);
+  
+    const dataForExcel = [
+      headerRow, 
+      columnHeaders, 
+      ...formattedData, 
+    ];
+  
+    const worksheet = XLSX.utils.aoa_to_sheet(dataForExcel);
+  
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Hourly Consumption");
+  
+    const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+    const fileName = `Hourly_Consumption_${startDateTime}_to_${endDateTime}.xlsx`;
+    saveAs(new Blob([excelBuffer], { type: "application/octet-stream" }), fileName);
+  };
+
 
 const chartOptions = {
   chart: {
@@ -77,8 +107,7 @@ const chartOptions = {
   plotOptions: {
     column: {
       dataLabels: {
-        enabled: true,
-        style: { fontWeight: "bold", color: "black" },
+        enabled: false,
       },
     },
   },
@@ -113,57 +142,46 @@ const chartOptions = {
   legend: { enabled: false },
   credits: { enabled: false },
   exporting: {
-    enabled: true,
-    filename: `Hourly Consumption ${startDateTime} - ${endDateTime}`,
-    buttons: {
-      contextButton: {
-        menuItems: ['downloadXLS']
-      }
-    }
+    enabled:false ,
   },
 };
-
 
   return (
     <div className="w-full flex flex-col p-6 bg-white shadow-lg rounded-lg">
       <div className="flex justify-between items-center pb-6">
         <h2 className="text-xl font-semibold">Hourly Energy Consumption</h2>
         <div className="flex items-center space-x-4">
-          <div className="flex items-center space-x-2">
-            <span className="text-sm font-medium">kWh</span>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input
-                type="radio"
-                name="consumptionType"
-                className="sr-only peer"
-                checked={consumptionType === 'kWh'}
-                onChange={() => setConsumptionType('kWh')}
-              />
-              <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-            </label>
-            <span className="text-sm font-medium">kVAh</span>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input
-                type="radio"
-                name="consumptionType"
-                className="sr-only peer"
-                checked={consumptionType === 'kVAh'}
-                onChange={() => setConsumptionType('kVAh')}
-              />
-              <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-            </label>
-            <span className="text-sm font-medium">₹</span>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input
-                type="radio"
-                name="consumptionType"
-                className="sr-only peer"
-                checked={consumptionType === '₹'}
-                onChange={() => setConsumptionType('₹')}
-              />
-              <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-            </label>
-          </div>
+        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-4">
+        <div className="relative flex items-center bg-gray-50 rounded-full w-56 h-12 shadow-md border border-gray-200">
+  {options.map((option, index) => (
+    <React.Fragment key={option}>
+      <button
+        className={`flex-1 h-full flex items-center justify-center text-sm font-medium rounded-full transition-all duration-300 ${
+          consumptionType === option
+            ? 'bg-blue-500 text-white shadow-md'
+            : 'text-gray-500 hover:text-gray-700'
+        }`}
+        onClick={() => setConsumptionType(option)}
+      >
+        {option}
+      </button>
+      {index < options.length - 1 && (
+        <div className="w-px h-8 bg-gray-200 mx-1"></div> 
+      )}
+    </React.Fragment>
+  ))}
+</div>
+  <button
+            onClick={downloadExcel}
+            className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition"
+          >
+            Download Excel
+          </button>
+</div>
+</div>
+    </div>
         </div>
       </div>
       <div className="w-full h-[400px]">

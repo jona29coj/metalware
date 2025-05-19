@@ -104,16 +104,14 @@ useEffect(() => {
 
   return (
     <div className="bg-white xl:h-[100%] p-7 rounded-lg shadow-md flex flex-col space-y-7">
-      <div className="flex justify-between items-center">
         <h2 className="text-xl font-semibold">Facility Overview</h2>
-      </div>
 
       {loading ? (
         <p className="text-center text-gray-600">Loading...</p>
       ) : error ? (
         <p className="text-center text-red-500">{error}</p>
       ) : (
-        <div className="grid grid-cols-2 gap-6 xl justify-start items-start">
+        <div className="grid grid-cols-2 gap-6">
           <div>
             <div className="xl:space-y-5 lg:space-y-4 md:space-y-4">
               <div className="border border-red-500 p-3 rounded-lg shadow">

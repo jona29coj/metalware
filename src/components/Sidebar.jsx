@@ -14,7 +14,7 @@ const links = {
 const navItems = [
   { name: "Alerts", path: "/alerts", icon: FiAlertCircle },
   { name: "Building Profile", path: "/profile", icon: FiUser },
-  { name: "Settings", path: "/settings", icon: FiSettings }, // Add the Settings tab here
+  { name: "Settings", path: "/settings", icon: FiSettings }, 
 ];
 
 const Sidebar = ({ isCollapsed }) => {
@@ -27,7 +27,7 @@ const Sidebar = ({ isCollapsed }) => {
       isActive ? "bg-green-600 text-white shadow" : "text-gray-700 hover:bg-green-500 hover:text-white"
     } ${isCollapsed ? "justify-center" : ""}`;
 
-  const iconClass = "text-xl mx-auto lg:mx-0 min-w-[24px] min-h-[24px]"; // Add min size for all icons
+  const iconClass = "text-xl mx-auto lg:mx-0 min-w-[24px] min-h-[24px]"; 
 
   const toggleDropdown = (section) => {
     setDropdown((prev) => ({ ...prev, [section]: !prev[section] }));

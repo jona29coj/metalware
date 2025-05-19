@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useContext } from 'react';
-import { FaBell } from 'react-icons/fa';
+import { FaArrowRight, FaBell,FaCalendarAlt } from 'react-icons/fa';
 import moment from 'moment-timezone';
 import Cookies from 'js-cookie';
 import { DateContext } from '../contexts/DateContext';
@@ -13,10 +13,29 @@ const Navbar = () => {
   const { startDateTime, endDateTime, handleDateChange } = useContext(DateContext);
   const [tempStartDateTime, setTempStartDateTime] = useState(startDateTime);
   const [tempEndDateTime, setTempEndDateTime] = useState(endDateTime);
+  const [isStartPickerOpen, setIsStartPickerOpen] = useState(false);
+  const [isEndPickerOpen, setIsEndPickerOpen] = useState(false);
 
   const profileRef = useRef(null);
   const notificationRef = useRef(null);
   const datePickerRef = useRef(null);
+
+  const handleStartChange = (e) => {
+    setTempStartDateTime(e.target.value);
+  };
+
+  const handleEndChange = (e) => {
+    setTempEndDateTime(e.target.value);
+  };
+
+  const closeStartPicker = () => {
+    setIsStartPickerOpen(false); // Close overlay for Start
+  };
+
+  const closeEndPicker = () => {
+    setIsEndPickerOpen(false); // Close overlay for End
+  };
+
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 100);
@@ -82,28 +101,86 @@ const Navbar = () => {
   };
 
   return (
-    <div className={`bg-white w-full px-4 py-2 shadow-md transition-shadow ${isScrolled ? 'shadow-lg' : ''}`}>
-      <div className="flex justify-end items-center gap-2">  
-                <label className="block text-sm text-gray-600">Start</label>
+    <div className='bg-white w-full h-full flex flex-end p-3 justify-end space-x-3 items-center shadow-md'>
+      <div className='custom-dsm:hidden space-x-3'>
+                <label className="text-sm text-gray-600">Start</label>
                 <input
-    type="datetime-local"
-    value={moment(tempStartDateTime).format('YYYY-MM-DDTHH:mm')}
-    onChange={(e) => setTempStartDateTime(e.target.value)}
-    className="border rounded px-2 py-1 text-sm"
-  />
-
-                <label className="block text-sm text-gray-600">End</label>
+                  type="datetime-local"
+                  value={moment(tempStartDateTime).format('YYYY-MM-DDTHH:mm')}
+                  onChange={(e) => setTempStartDateTime(e.target.value)}
+                  className="border rounded px-2 py-1 text-sm"
+                />
+      </div>
+      <div className="custom-dsm:flex items-center hidden space-x-2">
+        <label className="text-sm text-gray-600">Start</label>
+        <button
+          onClick={() => setIsStartPickerOpen(true)}
+          className="p-2 bg-gray-200 rounded-full hover:bg-gray-300"
+        >
+          <FaCalendarAlt className="text-gray-600" />
+        </button>
+      </div>
+      {isStartPickerOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white p-4 rounded shadow-md">
+            <label className="text-sm text-gray-600 block">Select Start Date</label>
+            <input
+              type="datetime-local"
+              value={tempStartDateTime}
+              onChange={handleStartChange}
+              className="border rounded px-2 py-1 text-sm w-full"
+            />
+            <button
+              onClick={closeStartPicker}
+              className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-md text-sm hover:bg-blue-600"
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      )}
+      <div className='custom-dsm:hidden space-x-3'>
+                <label className="text-sm text-gray-600">End</label>
                 <input
-    type="datetime-local"
-    value={moment(tempEndDateTime).format('YYYY-MM-DDTHH:mm')}
-    onChange={(e) => setTempEndDateTime(e.target.value)}
-    className="border rounded px-2 py-1 text-sm"
-  />
+                  type="datetime-local"
+                  value={moment(tempEndDateTime).format('YYYY-MM-DDTHH:mm')}
+                  onChange={(e) => setTempEndDateTime(e.target.value)}
+                  className="border rounded px-2 py-1 text-sm"
+                />
+      </div>
+      <div className="custom-dsm:flex items-center hidden space-x-2">
+        <label className="text-sm text-gray-600">End</label>
+        <button
+          onClick={() => setIsEndPickerOpen(true)}
+          className="p-2 bg-gray-200 rounded-full hover:bg-gray-300"
+        >
+          <FaCalendarAlt className="text-gray-600" />
+        </button>
+      </div>
+      {isEndPickerOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white p-4 rounded shadow-md">
+            <label className="text-sm text-gray-600 block">Select End Date</label>
+            <input
+              type="datetime-local"
+              value={tempEndDateTime}
+              onChange={handleEndChange}
+              className="border rounded px-2 py-1 text-sm w-full"
+            />
+            <button
+              onClick={closeEndPicker}
+              className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-md text-sm hover:bg-blue-600"
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      )}         
              <button
             onClick={handleSubmit}
             className="px-4 py-2 bg-blue-500 text-white rounded-md text-sm hover:bg-blue-600"
           >
-            Submit
+            <FaArrowRight/>
           </button>
         <div ref={notificationRef} className="relative">
           <div onClick={() => {
@@ -157,7 +234,6 @@ const Navbar = () => {
             </div>
           )}
         </div>
-      </div>
     </div>
   );
 };

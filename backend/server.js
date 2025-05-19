@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
 const energyRoutes = require('./hconsumption');
 const meterRoutes = require('./econsumption');
 const ehConsumptionRoutes = require('./ehconsumption');

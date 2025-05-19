@@ -222,7 +222,7 @@ const ZoneUsage = () => {
 
   return (
     <>
-      <div className="relative bg-white p-7 rounded-lg shadow-md w-full flex flex-col space-y-8">
+      <div className="bg-white p-7 h-[70vh] rounded-lg shadow-md w-full flex flex-col space-y-8">
         <h2 className="text-xl font-semibold">Energy - Zone wise</h2>
 
         {loading ? (

@@ -52,21 +52,28 @@ const PeakDemandView = () => {
       alert("No data available to download.");
       return;
     }
-
-    const dataForExcel = peakDemandData.map((item) => ({
-      ID: item.id,
-      Date: formatDisplayDate(item.minute.split(' ')[0]),
-      Time: formatTime(item.minute),
-      Alert: 'Peak Demand',
-      Limit: '558.75 kVA',
-      Value: item.total_kVA,
-    }));
-
-    const worksheet = XLSX.utils.json_to_sheet(dataForExcel);
+  
+    const headerRow = [`Start: ${startDateTime}`, `End: ${endDateTime}`, "", "", ""]; 
+  
+    const columnHeaders = ["ID", "Date", "Time", "Alert", "Limit", "Value (kVA)"];
+  
+    const dataRows = peakDemandData.map((item) => [
+      item.id,
+      formatDisplayDate(item.minute.split(' ')[0]),
+      formatTime(item.minute),
+      "Peak Demand",
+      "558.75 kVA",
+      item.total_kVA,
+    ]);
+  
+    const dataForExcel = [headerRow, columnHeaders, ...dataRows];
+  
+    const worksheet = XLSX.utils.aoa_to_sheet(dataForExcel);
+  
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Peak Demand Data');
-
-    XLSX.writeFile(workbook, 'PeakDemandData.xlsx');
+  
+    XLSX.writeFile(workbook, 'Alerts.xlsx');
   };
 
   const totalPages = peakDemandData ? Math.ceil(peakDemandData.length / itemsPerPage) : 0;

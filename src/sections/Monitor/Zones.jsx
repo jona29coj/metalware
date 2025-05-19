@@ -6,6 +6,9 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { DateContext } from '../../contexts/DateContext';
 import Exporting from 'highcharts/modules/exporting';
 import ExportData from 'highcharts/modules/export-data';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
+import moment from "moment-timezone";
 
 if (Exporting && typeof Exporting === 'function') Exporting(Highcharts);
 if (ExportData && typeof ExportData === 'function') ExportData(Highcharts);
@@ -84,6 +87,43 @@ const Zones = () => {
     fetchZoneData();
   }, [startDateTime, endDateTime, consumptionType, selectedView, selectedZone]);
 
+  const downloadExcel = () => {
+    if (!zoneData?.length) return;
+    const headerRow = [`Start: ${startDateTime}`, `End: ${endDateTime}`, "", "", ""]; 
+    const columnHeaders = ["Date", "Time", ...zoneData.map((zone) => zone.zoneName)];
+    const uniqueTimes = [
+      ...new Set(
+        zoneData.flatMap((zone) =>
+          zone.data.map((item) => moment(item.hour).format("YYYY-MM-DD HH:mm"))
+        )
+      ),
+    ].sort(); 
+    const formattedData = uniqueTimes.map((time) => {
+      const [date, hour] = time.split(" ");
+      const row = [date, hour];
+  
+      zoneData.forEach((zone) => {
+        const zoneDataForTime = zone.data.find(
+          (item) => moment(item.hour).format("YYYY-MM-DD HH:mm") === time
+        );
+        row.push(zoneDataForTime ? zoneDataForTime.value : 0);
+      });
+  
+      return row;
+    });
+  
+    const dataForExcel = [headerRow, columnHeaders, ...formattedData];
+  
+    const worksheet = XLSX.utils.aoa_to_sheet(dataForExcel);
+  
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Zones Consumption");
+  
+    const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+    const fileName = `Zones_Consumption_${startDateTime}_to_${endDateTime}.xlsx`;
+    saveAs(new Blob([excelBuffer], { type: "application/octet-stream" }), fileName);
+  };
+
   const chartOptionsAllZones = {
     chart: {
       type: 'column',
@@ -104,13 +144,6 @@ const Zones = () => {
       min: 0,
       title: { text: `Energy Consumption (${consumptionType})` },
       gridLineWidth: 0, 
-      stackLabels: {
-        enabled: true, 
-        style: {
-          fontWeight: 'bold',
-          color: Highcharts.defaultOptions.title.style?.color || 'gray',
-        },
-      },
     },
     tooltip: {
       pointFormat:
@@ -137,13 +170,8 @@ const Zones = () => {
       enabled: false,
     },
     exporting: {
-      enabled: true,
-      filename: `All_Zones_${startDateTime} - ${endDateTime}`,
-      buttons: {
-        contextButton: {
-          menuItems: ['downloadXLS'],
-        },
-      },
+      enabled: false,
+     
     },
     
   };
@@ -166,43 +194,23 @@ const Zones = () => {
       {
         name: zone.zoneName,
         data: zone.data.map((item) => item.value),
-        dataLabels: {
-          enabled: true, 
-          formatter: function () {
-            return `${this.y}`; 
-          },
-          style: {
-            fontSize: '12px',
-            fontWeight: 'bold',
-            color: '#000',
-          },
-        },
       },
     ],
     plotOptions: {
       column: {
         dataLabels: {
-          enabled: true, 
-          formatter: function () {
-            return `${this.y}`; 
-          },
-          style: {
-            fontSize: '12px',
-            fontWeight: 'bold',
-            color: '#000',
-          },
+          enabled: false,
         },
       },
     },
     credits: { enabled: false },
     exporting: {
-      enabled: true,
-      filename: `${zone.zoneName}_${startDateTime} - ${endDateTime}`,
-      buttons: {
-        contextButton: {
-          menuItems: ['downloadXLS'],
-        },
-      },
+      enabled: false,
+    },
+    tooltip: {
+      shared: true,
+      valueSuffix: ` ${consumptionType}`,
+      style: { zIndex: 1 },
     },
   });
 
@@ -253,24 +261,32 @@ const Zones = () => {
        </select>
         )}
         </div>
-        <div className="flex bg-white rounded-full p-1 space-x-1">
+        <div className='flex flex-end space-x-3'>
+          <div className="flex bg-white rounded-full p-1 space-x-1">
+            <button
+              onClick={() => setConsumptionType('kWh')}
+              className={`px-6 py-2 text-sm font-medium rounded-full transition ${
+                consumptionType === 'kWh' ? 'bg-blue-600 text-white' : 'bg-transparent text-gray-700 hover:bg-blue-50'
+              }`}
+            >
+              kWh
+            </button>
+            <button
+              onClick={() => setConsumptionType('kVAh')}
+              className={`px-6 py-2 text-sm font-medium rounded-full transition ${
+                consumptionType === 'kVAh' ? 'bg-blue-600 text-white' : 'bg-transparent text-gray-700 hover:bg-blue-50'
+              }`}
+            >
+              kVAh
+            </button>
+          </div>
           <button
-            onClick={() => setConsumptionType('kWh')}
-            className={`px-6 py-2 text-sm font-medium rounded-full transition ${
-              consumptionType === 'kWh' ? 'bg-blue-600 text-white' : 'bg-transparent text-gray-700 hover:bg-blue-50'
-            }`}
-          >
-            kWh
-          </button>
-          <button
-            onClick={() => setConsumptionType('kVAh')}
-            className={`px-6 py-2 text-sm font-medium rounded-full transition ${
-              consumptionType === 'kVAh' ? 'bg-blue-600 text-white' : 'bg-transparent text-gray-700 hover:bg-blue-50'
-            }`}
-          >
-            kVAh
-          </button>
-        </div>
+              onClick={downloadExcel}
+              className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition"
+            >
+              Download Excel
+            </button>
+          </div>
       </div>
 
       {isLoading ? (

@@ -5,7 +5,6 @@ import moment from "moment-timezone";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 
-
 const formatDateForBackend = (date) => {
   return moment(date).tz("Asia/Kolkata").format("YYYY-MM-DD HH:mm:ss");
 };
@@ -119,13 +118,26 @@ const EnergyConsumption = () => {
   const handleDownloadExcel = () => {
     if (!consumptionData?.length) return;
   
-    const formattedData = consumptionData.map((item) => ({
-      Date: item.day,
-      Hour: `${item.hour}:00`,
-      "Energy Consumed (kWh)": item.total_consumption
-    }));
+    const headerRow = [`Start: ${moment(dateRange.startDate).format("YYYY-MM-DD HH:mm:ss")}`, 
+                       `End: ${moment(dateRange.endDate).format("YYYY-MM-DD HH:mm:ss")}`, 
+                       ""];
   
-    const worksheet = XLSX.utils.json_to_sheet(formattedData);
+    const columnHeaders = ["Date", "Hour", "Energy Consumed (kWh)"];
+  
+    const formattedData = consumptionData.map((item) => [
+      item.day,
+      `${item.hour}:00`,
+      parseFloat(item.total_consumption),
+    ]);
+  
+    const dataForExcel = [
+      headerRow,
+      columnHeaders,
+      ...formattedData,
+    ];
+  
+    const worksheet = XLSX.utils.aoa_to_sheet(dataForExcel);
+  
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "EnergyConsumption");
   

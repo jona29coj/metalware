@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import HighchartsReact from 'highcharts-react-official';
 import Highcharts from 'highcharts';
 import axios from 'axios';
+import * as XLSX from 'xlsx'; 
+
 
 const MonthlyConsumption = () => {
   const [year, setYear] = useState(new Date().getFullYear());
@@ -32,6 +34,29 @@ const MonthlyConsumption = () => {
   const handleYearChange = (e) => {
     setYear(e.target.value);
   };
+
+  const downloadExcel = () => {
+    if (!monthlyConsumption || monthlyConsumption.length === 0) {
+      alert("No data available to download.");
+      return;
+    }
+
+    const headerRow = [`Year: ${year}`, "", "", "", ""];
+    const columnHeaders = ["Month", "Consumption (kWh)"];
+
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const formattedData = monthlyConsumption.map((value, index) => [months[index], value]);
+
+    const dataForExcel = [headerRow, columnHeaders, ...formattedData];
+
+    const worksheet = XLSX.utils.aoa_to_sheet(dataForExcel);
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Monthly Consumption");
+
+    XLSX.writeFile(workbook, `Monthly_Consumption_${year}.xlsx`);
+  };
+
 
   const chartOptions = {
     chart: {
@@ -72,26 +97,22 @@ const MonthlyConsumption = () => {
     plotOptions: {
       column: {
         dataLabels: {
-          enabled: true
+          enabled: false
         },
         enableMouseTracking: true
       }
     },
     exporting: {
-      enabled: true,
-      filename: `Yearly Consumption - ${year}`, 
-      buttons: {
-        contextButton: {
-          menuItems: ['downloadXLS'] 
-        }
-      }
+      enabled: false
     }
   };
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-semibold mb-12">Grid Consumption (kWh)</h2>
+    <div className="flex justify-between items-center mb-4">
+      <h2 className="text-lg font-semibold">Grid Consumption (kWh)</h2>
+  
+      <div className="flex items-center space-x-4">
         <div className="flex items-center">
           <label htmlFor="year-picker" className="mr-2 text-sm font-medium">Year:</label>
           <input 
@@ -104,10 +125,17 @@ const MonthlyConsumption = () => {
             className="border rounded p-1 text-sm w-20"
           />
         </div>
+        <button
+          onClick={downloadExcel}
+          className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition"
+        >
+          Download Excel
+        </button>
       </div>
-
-      <HighchartsReact highcharts={Highcharts} options={chartOptions} />
     </div>
+  
+    <HighchartsReact highcharts={Highcharts} options={chartOptions} />
+  </div>
   );
 };
 
