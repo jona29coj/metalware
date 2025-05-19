@@ -68,34 +68,6 @@ const App = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  useEffect(() => {
-    const sendHeartbeat = async () => {
-      try {
-        const response = await fetch('http://localhost:3001/api/heartbeat', {
-          method: 'POST',
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-
-        if (!response.ok) {
-          console.warn('Session invalid or expired, redirecting to login...');
-          window.location.href = 'https://elementsenergies.com/login';
-        } else {
-          console.log('Heartbeat sent successfully');
-        }
-      } catch (error) {
-        console.error('Error sending heartbeat:', error);
-        window.location.href = 'https://elementsenergies.com/login';
-      }
-    };
-
-    const interval = setInterval(sendHeartbeat, 5 * 60 * 1000);
-
-    return () => clearInterval(interval);
-  }, []);
-
   const toggleSidebar = () => {
     setIsCollapsed((prev) => !prev);
     setRefreshKey((prevKey) => prevKey + 1);
@@ -105,7 +77,7 @@ const App = () => {
     <DateProvider>
       <BrowserRouter>
         <ScrollToTop />
-        {isAuthenticated &&( 
+        {isAuthenticated && ( 
           <div className="bg-main-bg min-h-screen flex">
             <div
               className={`bg-white shadow-md transition-all duration-300 fixed top-0 left-0 h-full ${
