@@ -33,7 +33,7 @@ const App = () => {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const token = Cookies.get('auth');
+      const token = Cookies.get('authData');
 
       if (!token) {
         window.location.href = 'https://elementsenergies.com/login';
