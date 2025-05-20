@@ -60,6 +60,27 @@ const App = () => {
   }, []); 
 
   useEffect(() => {
+    if (!isAuthenticated) return;
+
+    const sendHeartbeat = () => {
+      fetch('https://mw.elementsenergies.com/api/heartbeat', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }).catch((error) => {
+        console.error('Heartbeat failed:', error);
+      });
+    };
+
+    sendHeartbeat(); 
+    const intervalId = setInterval(sendHeartbeat, 5 * 60 * 1000); 
+
+    return () => clearInterval(intervalId); 
+  }, [isAuthenticated]);
+
+  useEffect(() => {
     const handleResize = () => {
       setIsCollapsed(window.innerWidth < 1024);
     };

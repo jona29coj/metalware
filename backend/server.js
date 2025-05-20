@@ -21,6 +21,7 @@ const apdRoutes = require('./apd');
 const DashboardRoutes = require('./dashboard');
 const hcostconsumptionRoutes = require('./hcostconsumption');
 const authRoute = require('./auth');
+const heartBeatRoute = require('./heartbeat');
 
 const app = express();
 const port = 3001;
@@ -52,6 +53,7 @@ app.use('/api', DashboardRoutes);
 app.use('/api', hcostconsumptionRoutes);
 app.use('/api', mcapconsRoutes);
 app.use('/api',authRoute);
+app.use('/api', heartBeatRoute);
 
 
 app.use((err, req, res, next) => {

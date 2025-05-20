@@ -1,6 +1,8 @@
 const express = require('express');
 const crypto = require('crypto');
 const mysql = require('mysql2');
+const moment = require('moment-timezone');
+
 
 const pool = mysql.createPool({
   host: '18.188.231.51',
@@ -50,6 +52,28 @@ router.get('/auth', (req, res) => {
       return res.status(401).json({ message: 'Invalid authentication token.'})
     }
 
+    const { username, deviceName, ipAddress} = cookieData;
+    const login_time = moment().tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss');
+    const last_active = login_time;
+
+
+    pool.query(
+      'INSERT INTO user_sessions (username, login_time, last_active, device_name, ip_address) VALUES (?, ?, ?, ?, ?)',
+      [username, login_time, last_active, deviceName, ipAddress],
+      (err,result) => {
+        if (err) {
+          console.error('Error inserting session record:', err.message);
+          return res.status(500).json({ message: 'Database error' });
+        }
+        const sessionId = result.insertId;
+
+        res.cookie('sessionId', sessionId, {
+          httpOnly: true,
+          secure: true,
+          sameSite: 'Strict',
+          maxAge: 24 * 60 * 60 * 1000, 
+        });
+
     return res.status(200).json({
       message: 'Valid token',
       authenticated: true,
@@ -57,6 +81,10 @@ router.get('/auth', (req, res) => {
       deviceName: cookieData.deviceName,
       ipAddress: cookieData.ipAddress,
     });
+
+      }
+    )
+
   } catch (error) {
     console.error('Authentication error:', error.message);
     res.status(401).json({ message: 'Invalid token or authentication failed.' });
