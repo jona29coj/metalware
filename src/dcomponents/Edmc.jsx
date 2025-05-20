@@ -58,57 +58,64 @@ const Edmc = () => {
     <p className="text-md font-extrabold text-gray-900">{value} {unit}</p>;
 
   return (
-    <div className="bg-white shadow-md p-3 rounded-lg w-full">
-      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-        
-        <div className="flex flex-col justify-center items-center border-b sm:border-b-0 sm:border-r border-gray-300 sm:pr-4 h-full space-y-2">
-          <h4 className="text-md text-gray-900">Facility Information</h4>
-          <p className="font-bold text-gray-900">Metalware Corporation</p>
-          <p className="text-sm"><span className="text-gray-900">BUA: </span><span className="font-bold">50,000 sq.ft.</span></p>
-          <p className="text-sm"><span className="text-gray-900">Location: </span><span className="font-bold">Noida, India</span></p>
-        </div>
-
-        <div className="flex flex-col justify-center items-center border-b sm:border-b-0 sm:border-r border-gray-300 sm:pr-4 h-full space-y-2">
+    <div className="bg-white shadow-md p-4 rounded-lg w-full">
+    <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+  
+      <div className="flex flex-col items-center text-center border-b sm:border-b-0 sm:border-r border-gray-300 sm:pr-4 h-full space-y-1">
+        <h4 className="text-md text-gray-900">Facility Information</h4>
+        <p className="text-md font-bold text-gray-900">Metalware Corporation</p>
+        <p className="text-md text-gray-900">
+          BUA: <span className="font-bold">50,000 sq.ft.</span>
+        </p>
+        <p className="text-md text-gray-900">
+          Location: <span className="font-bold">Noida, India</span>
+        </p>
+      </div>
+  
+      <div className="flex flex-col items-center text-center border-b sm:border-b-0 sm:border-r border-gray-300 sm:pr-4 h-full space-y-1">
         <h4 className="text-md text-gray-900">Consumption</h4>
         {loading ? (
-          <div className="animate-pulse h-6 w-20 bg-gray-200 rounded"></div>
+          <div className="animate-pulse h-6 w-20 bg-gray-200 rounded" />
         ) : error ? (
-          <p className="text-sm text-red-500">{error}</p>
+          <p className="text-md text-red-500">{error}</p>
         ) : (
-          <p className="text-md font-extrabold text-gray-900">
+          <p className="text-md font-bold text-gray-900">
             {`${data.consumption} kWh / ${data.apconsumption} kVAh`}
           </p>
         )}
-          <h4 className="text-md text-gray-900">Peak Demand</h4>
-          {renderValue(data.peakDemand, "kVA")}
-        </div>
-
-        <div className="flex flex-col justify-center items-center border-b sm:border-b-0 sm:border-r border-gray-300 sm:pr-4 h-full space-y-2">
-          <h4 className="text-md text-gray-900">Cost of Electricity</h4>
-          {loading ? (
-            <div className="animate-pulse h-6 w-20 bg-gray-200 rounded"></div>
-          ) : (
-            <>
-              <p className="font-bold text-lg text-gray-900">₹{data.totalCost}</p>
-              <p className="text-sm text-gray-900">{period}</p>
-              <p className="text-sm font-bold text-gray-900">{rate}</p>
-            </>
-          )}
-        </div>
-
-      
-        <div className="flex flex-col justify-start items-center h-full pt-1 space-y-1 text-center">
-    <h4 className="text-md text-gray-900">Carbon Footprint</h4>
-    <p className="text-lg font-bold text-gray-900">
-    {data.carbonFootprint ? `${data.carbonFootprint.emissions} kg CO₂` : "Loading..."}
-    </p>
-    <p className="text-sm text-gray-900">
-    Equivalent to driving <span className="font-bold">{data.carbonFootprint?.distance || "Loading..."} km</span>
-
-    </p>
-  </div>
+        <h4 className="text-md text-gray-900">Peak Demand</h4>
+        <p className="text-md font-bold text-gray-900">{renderValue(data.peakDemand, "kVA")}</p>
       </div>
+  
+      <div className="flex flex-col items-center text-center border-b sm:border-b-0 sm:border-r border-gray-300 sm:pr-4 h-full space-y-1">
+        <h4 className="text-md text-gray-900">Cost of Electricity</h4>
+        {loading ? (
+          <div className="animate-pulse h-6 w-20 bg-gray-200 rounded" />
+        ) : (
+          <>
+            <p className="text-md font-bold text-gray-900">₹{data.totalCost}</p>
+            <p className="text-md text-gray-900">{period}</p>
+            <p className="text-md font-bold text-gray-900">{rate}</p>
+          </>
+        )}
+      </div>
+  
+      <div className="flex flex-col items-center text-center h-full space-y-1">
+        <h4 className="text-md text-gray-900">Carbon Footprint</h4>
+        <p className="text-md font-bold text-gray-900">
+          {data.carbonFootprint ? `${data.carbonFootprint.emissions} kg CO₂` : "Loading..."}
+        </p>
+        <p className="text-md text-gray-900">
+          Equivalent to driving 
+        </p>
+        <p className="font-bold">
+            {data.carbonFootprint?.distance || "Loading..."} km
+          </p>
+      </div>
+  
     </div>
+  </div>
+  
   );
 };
 

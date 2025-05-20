@@ -28,7 +28,7 @@ const ScrollToTop = () => {
 
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isCollapsed, setIsCollapsed] = useState(window.innerWidth < 1024);
+  const [isCollapsed, setIsCollapsed] = useState(window.innerWidth < 1250);
   const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
@@ -82,7 +82,7 @@ const App = () => {
 
   useEffect(() => {
     const handleResize = () => {
-      setIsCollapsed(window.innerWidth < 1024);
+      setIsCollapsed(window.innerWidth < 1250);
     };
 
     window.addEventListener('resize', handleResize);
@@ -98,7 +98,7 @@ const App = () => {
     <DateProvider>
       <BrowserRouter>
         <ScrollToTop />
-        {isAuthenticated && ( 
+        {isAuthenticated &&( 
           <div className="bg-main-bg min-h-screen flex">
             <div
               className={`bg-white shadow-md transition-all duration-300 fixed top-0 left-0 h-full ${
