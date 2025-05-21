@@ -90,7 +90,7 @@ const Zones = () => {
   const downloadExcel = () => {
     if (!zoneData?.length) return;
     const headerRow = [`Start: ${startDateTime}`, `End: ${endDateTime}`, "", "", ""]; 
-    const columnHeaders = ["Date", "Time", ...zoneData.map((zone) => zone.zoneName)];
+    const columnHeaders = ["Date", "Time", ...zoneData.map((zone) => `${zone.zoneName} (${zone.category}) - ${consumptionType}`)];
     const uniqueTimes = [
       ...new Set(
         zoneData.flatMap((zone) =>
@@ -161,7 +161,7 @@ const Zones = () => {
       },
     },
     series: zoneData.map((zone) => ({
-      name: zone.zoneName,
+      name: `${zone.zoneName} (${zone.category})`, 
       data: [
         ...new Set(zoneData.flatMap((zone) => zone.data.map((item) => item.hour))),
       ].map((hour) => zone.data.find((item) => item.hour === hour)?.value || 0),

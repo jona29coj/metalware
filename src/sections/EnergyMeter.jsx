@@ -6,7 +6,7 @@ import { DateContext } from "../contexts/DateContext";
 
 const zoneDetails = {
     1: { name: "PLATING", category: "C-49" },
-    2: { name: "DIE CASTING + CHINA BUFFING + CNC", category: "C-50" },
+    2: { name: "DIE CASTING+CB+CNC", category: "C-50" },
     3: { name: "SCOTCH BUFFING", category: "C-50" },
     4: { name: "BUFFING", category: "C-49" },
     5: { name: "SPRAY+EPL-I", category: "C-50" },
@@ -27,10 +27,10 @@ const EnergyMeter = ({ name, consumption, id }) => {
   const zoneInfo = getZoneNameAndCategory(id);
 
   return (
-    <div className="group relative bg-white rounded-lg w-full h-50 flex flex-col justify-between items-center text-center p-4 border border-gray-500">
-      <div className="absolute hidden group-hover:block -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs font-medium py-1 px-2 rounded whitespace-nowrap z-10">
+    <div className="bg-white rounded-lg w-full h-50 flex flex-col justify-between items-center text-center p-4 border border-gray-500">
+      <div className="bg-green-500 text-white text-xs font-medium py-1 w-40 rounded whitespace-nowrap max-w-[150px]">
         <div className="font-bold">{zoneInfo.name}</div>
-        <div className="text-gray-300">Category: {zoneInfo.category}</div>
+        <div className="text-white">Block: {zoneInfo.category}</div>
       </div>
 
       <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-green-500 text-white text-xs font-medium py-1 px-2 rounded-full">

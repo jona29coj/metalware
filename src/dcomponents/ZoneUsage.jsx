@@ -163,8 +163,12 @@ const ZoneUsage = () => {
           tooltipRef.current.style.display = "block";
           tooltipRef.current.style.left = `${x + 10}px`;
           tooltipRef.current.style.top = `${y + 10}px`;
-          tooltipRef.current.innerHTML = `${intersected.userData.name}: ${intersected.userData.consumption} kWh`;
-    
+          tooltipRef.current.innerHTML = `
+          <div><strong>${intersected.userData.name}</strong></div>
+          <div>Block: ${intersected.userData.category}</div>
+          <div>Consumption: ${intersected.userData.consumption} kWh</div>
+        `;
+            
           mount.style.cursor = "pointer";
         }
         return true;
@@ -189,6 +193,18 @@ const ZoneUsage = () => {
         tooltipRef.current.style.display = "none";
       }
     };
+
+    const handleScroll = () => {
+      if (tooltipRef.current) {
+        tooltipRef.current.style.display = "none";
+      }
+      if (currentIntersected) {
+        currentIntersected.material.color.set(currentIntersected.userData.originalColor);
+        currentIntersected = null; 
+      }
+    };
+    window.addEventListener("scroll", handleScroll);
+    
   
     mount.addEventListener("mousemove", handleMouseMove);
     mount.addEventListener("mouseover", handleMouseOver);
@@ -216,6 +232,7 @@ const ZoneUsage = () => {
       window.removeEventListener("resize", handleResize);
       mount.removeEventListener("mousemove", handleMouseMove);
       mount.removeEventListener("mouseover", handleMouseOver);
+      window.removeEventListener("scroll", handleScroll);
     };
   }, [zoneData, loading, error]);
   
