@@ -33,10 +33,6 @@ const EnergyMeter = ({ name, consumption, id }) => {
         <div className="text-white">Block: {zoneInfo.category}</div>
       </div>
 
-      <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-green-500 text-white text-xs font-medium py-1 px-2 rounded-full">
-        {name}
-      </div>
-
       <div className="pt-4 flex flex-col items-center">
         <div className="text-2xl font-bold text-gray-800 whitespace-nowrap">{consumption.toFixed(1)} kWh</div>
         <div className="text-xs text-gray-400">Consumption</div>
