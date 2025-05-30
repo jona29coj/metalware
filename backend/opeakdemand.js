@@ -17,11 +17,10 @@ async function getPeakDemandForDate(startDateTime, endDateTime) {
     `
     SELECT
       DATE_FORMAT(timestamp, '%Y-%m-%d %H:%i:00') AS minute,
-      SUM(total_kVA) AS total_kVA
+      total_kVA
     FROM modbus_data
-    WHERE energy_meter_id BETWEEN 1 AND 11
+    WHERE energy_meter_id = 12
       AND timestamp BETWEEN ? AND ?
-    GROUP BY minute
     ORDER BY minute
     `,
     [startDateTime, endDateTime]

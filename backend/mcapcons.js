@@ -17,10 +17,10 @@ const pool = mysql.createPool(dbConfig);
 async function getTotalConsumption(startDateTime, endDateTime) {
   const query = `
   SELECT 
-    ROUND(SUM(kVAh_difference), 1) AS consumption
+    ROUND(SUM(emw_cons_kVAh), 1) AS consumption
   FROM (
     SELECT 
-      (MAX(kVAh) - MIN(kVAh)) AS kVAh_difference
+      (MAX(kVAh) - MIN(kVAh)) AS emw_cons_kVAh
     FROM 
       modbus_data
     WHERE 

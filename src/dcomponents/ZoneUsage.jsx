@@ -166,7 +166,7 @@ const ZoneUsage = () => {
           tooltipRef.current.innerHTML = `
           <div><strong>${intersected.userData.name}</strong></div>
           <div>Block: ${intersected.userData.category}</div>
-          <div>Consumption: ${intersected.userData.consumption} kWh</div>
+          <div>Consumption: ${intersected.userData.consumption} kVAh</div>
         `;
             
           mount.style.cursor = "pointer";

@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const mysql = require('mysql2');
 
-// Create a connection pool for MariaDB
 const pool = mysql.createPool({
   host: '18.188.231.51',
   user: 'admin',
@@ -13,7 +12,6 @@ const pool = mysql.createPool({
   queueLimit: 0,
 });
 
-// Fetch hourly energy data for a specific date range
 async function getHourlyConsumptionForRange(startDate, endDate, currentDateTime) {
   console.log(`Querying database from ${startDate} to ${endDate}, current time: ${currentDateTime}`);
 
@@ -24,20 +22,19 @@ async function getHourlyConsumptionForRange(startDate, endDate, currentDateTime)
         DATE_FORMAT(timestamp, '%Y-%m-%d') AS day,
         HOUR(timestamp) AS hour,
         energy_meter_id,
-        MAX(kWh) - MIN(kWh) AS kWh_difference
+        MAX(kVAh) - MIN(kVAh) AS kVAh_difference
       FROM modbus_data
       WHERE timestamp BETWEEN ? AND ?
         AND energy_meter_id BETWEEN 1 AND 11
-        AND kWh > 0
+        AND kVAh > 0
         AND timestamp <= ?  -- Only include data up to current time
       GROUP BY day, hour, energy_meter_id
-      HAVING MIN(kWh) > 0 AND MAX(kWh) > 0
+      HAVING MIN(kVAh) > 0 AND MAX(kVAh) > 0
       ORDER BY day, hour, energy_meter_id;
       `,
       [startDate, endDate, currentDateTime]
     );
 
-    // Rest of the function remains the same...
     const hourlyConsumption = {};
 
     rows.forEach((entry) => {
@@ -47,7 +44,7 @@ async function getHourlyConsumptionForRange(startDate, endDate, currentDateTime)
       if (!hourlyConsumption[entry.day][entry.hour]) {
         hourlyConsumption[entry.day][entry.hour] = 0;
       }
-      hourlyConsumption[entry.day][entry.hour] += parseFloat(entry.kWh_difference);
+      hourlyConsumption[entry.day][entry.hour] += parseFloat(entry.kVAh_difference);
     });
 
     const result = [];
@@ -69,12 +66,10 @@ async function getHourlyConsumptionForRange(startDate, endDate, currentDateTime)
   }
 }
 
-// API handler
 router.get('/ehconsumption', async (req, res) => {
   const { startDate, endDate, currentDateTime } = req.query;
 
   if (!startDate || !endDate || !currentDateTime) {
-    // Default to last 30 days if no dates provided
     const endDate = new Date();
     const startDate = new Date();
     startDate.setDate(endDate.getDate() - 30);

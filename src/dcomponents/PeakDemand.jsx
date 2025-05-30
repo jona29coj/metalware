@@ -6,7 +6,6 @@ import moment from "moment-timezone";
 import { DateContext } from "../contexts/DateContext";
 import * as XLSX from 'xlsx'; 
 
-
 const PeakDemand = () => {
   const { startDateTime, endDateTime } = useContext(DateContext); 
   const [peakDemandData, setPeakDemandData] = useState([]);

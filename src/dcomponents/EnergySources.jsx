@@ -74,7 +74,7 @@ useEffect(() => {
     },
     title: { text: "" },
     xAxis: { categories: ["Total Consumption"] },
-    yAxis: { title: { text: "Consumption (kWh)" } },
+    yAxis: { title: { text: "Consumption (kVAh)" } },
     plotOptions: {
       series: {
         stacking: "normal",
@@ -85,9 +85,9 @@ useEffect(() => {
     tooltip: {
       formatter: function () {
         if (this.series.name === "Other Zones") {
-          return `<b>Other Zones:</b> ${otherZonesConsumption} kWh`;
+          return `<b>Other Zones:</b> ${otherZonesConsumption} kVAh`;
         }
-        return `<b>${this.series.name}:</b> ${this.y} kWh`;
+        return `<b>${this.series.name}:</b> ${this.y} kVAh`;
       },
     },
     series: [
@@ -117,18 +117,18 @@ useEffect(() => {
               <div className="border border-red-500 p-3 rounded-lg shadow">
                 <h3 className="md:text-sm l:text-md xl:text-md font-semibold text-red-700">High Zone</h3>
                 <p className="md:text-xs l:text-xs xl:text-sm text-gray-900 text-sm mt-2">Zone: {getMeterName(highZone.meter_id)}</p>
-                <p className="md:text-xs l:text-xs xl:text-sm text-gray-900 text-sm mt-1">{highZone.consumption} kWh</p>
+                <p className="md:text-xs l:text-xs xl:text-sm text-gray-900 text-sm mt-1">{highZone.consumption} kVAh</p>
                 <p className="md:text-xs l:text-xs xl:text-sm text-sm text-gray-600 mt-1">{((highZone.consumption / totalConsumption) * 100).toFixed(1)}% of Total Consumption</p>
               </div>
               <div className="border border-green-500 p-3 rounded-lg shadow">
                 <h3 className="md:text-sm l:text-md xl:text-md font-semibold text-green-700">Low Zone</h3>
                 <p className="md:text-xs l:text-xs xl:text-sm text-gray-900 text-sm mt-2">Zone: {getMeterName(lowZone.meter_id)}</p>
-                <p className="md:text-xs l:text-xs xl:text-sm text-gray-900 text-sm mt-1">{lowZone.consumption} kWh</p>
+                <p className="md:text-xs l:text-xs xl:text-sm text-gray-900 text-sm mt-1">{lowZone.consumption} kVAh</p>
                 <p className="md:text-xs l:text-xs xl:text-sm text-sm text-gray-600 mt-1">{((lowZone.consumption / totalConsumption) * 100).toFixed(1)}% of Total Consumption</p>
               </div>
               <div className="border border-blue-500 p-3 rounded-lg shadow">
                 <h3 className="md:text-sm l:text-md xl:text-md font-semibold text-blue-700">Other Zones</h3>
-                <p className="md:text-xs l:text-xs xl:text-sm text-gray-900 text-sm mt-1">{otherZonesConsumption} kWh</p>
+                <p className="md:text-xs l:text-xs xl:text-sm text-gray-900 text-sm mt-1">{otherZonesConsumption} kVAh</p>
                 <p className="md:text-xs l:text-xs xl:text-sm text-sm text-gray-600 mt-1">{((parseFloat(otherZonesConsumption) / totalConsumption) * 100).toFixed(1)}% of Total Consumption</p>
               </div>
             </div>

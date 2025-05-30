@@ -17,6 +17,7 @@ import UPSControl from './sections/UPSControl';
 import Settings from './sections/Settings';
 import { DateProvider } from './contexts/DateContext';
 import PeakDemandView from './components/PeakDemandView';
+import PeakAnalysis from './components/PeakAnalysis';
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
@@ -96,56 +97,57 @@ const App = () => {
   
   return (
     <DateProvider>
-      <BrowserRouter>
-        <ScrollToTop />
-        {isAuthenticated &&( 
-          <div className="bg-main-bg min-h-screen flex">
-            <div
-              className={`bg-white shadow-md transition-all duration-300 fixed top-0 left-0 h-full ${
-                isCollapsed ? 'w-[9%]' : 'w-[15.5%]'
-              }`}
-              style={{ zIndex: 50 }}
-            >
-              <Sidebar isCollapsed={isCollapsed} setIsCollapsed={toggleSidebar} />
-            </div>
+        <BrowserRouter>
+          <ScrollToTop />
+          {isAuthenticated &&( 
+            <div className="bg-main-bg min-h-screen flex">
+              <div
+                className={`bg-white shadow-md transition-all duration-300 fixed top-0 left-0 h-full ${
+                  isCollapsed ? 'w-[9%]' : 'w-[15.5%]'
+                }`}
+                style={{ zIndex: 50 }}
+              >
+                <Sidebar isCollapsed={isCollapsed} setIsCollapsed={toggleSidebar} />
+              </div>
 
-            <div
-              className={`fixed top-0 h-[55px] transition-all duration-300 ${
-                isCollapsed ? 'left-[9%] w-[91%]' : 'left-[15.5%] w-[84.5%]'
-              }`}
-              style={{ zIndex: 40 }}
-            >
-              <Navbar isCollapsed={isCollapsed} setIsCollapsed={toggleSidebar} />
-            </div>
+              <div
+                className={`fixed top-0 h-[55px] transition-all duration-300 ${
+                  isCollapsed ? 'left-[9%] w-[91%]' : 'left-[15.5%] w-[84.5%]'
+                }`}
+                style={{ zIndex: 40 }}
+              >
+                <Navbar isCollapsed={isCollapsed} setIsCollapsed={toggleSidebar} />
+              </div>
 
-            <div
-              key={refreshKey}
-              className={`flex-1 flex flex-col min-h-screen overflow-hidden max-w-full transition-all duration-300 ${
-                isCollapsed ? 'ml-[9%]' : 'ml-[15.5%]'
-              }`}
-            >
-              <div className="flex-1 overflow-auto max-w-full mt-[52px]">
-                <Routes>
-                  <Route path="/dashboard" element={<EDashboard />} />
-                  <Route path="/" element={<EDashboard />} />
-                  <Route path="/profile" element={<Profile />} />
-                  <Route path="/files" element={<Files />} />
-                  <Route path="/monitor/overview" element={<BuildingOverview />} />
-                  <Route path="/monitor/zones" element={<Zones />} />
-                  <Route path="/monitor/diesel" element={<Diesel />} />
-                  <Route path="/meter/:id" element={<Emd />} />
-                  <Route path="/control/ltobattery" element={<LTOControl />} />
-                  <Route path="/control/ioebattery" element={<IOEBatteryControl />} />
-                  <Route path="/control/upsbattery" element={<UPSControl />} />
-                  <Route path="/generator/:id" element={<Dgd />} />
-                  <Route path="/settings" element={<Settings />} />
-                  <Route path="/alerts" element={<PeakDemandView />} />
-                </Routes>
+              <div
+                key={refreshKey}
+                className={`flex-1 flex flex-col min-h-screen overflow-hidden max-w-full transition-all duration-300 ${
+                  isCollapsed ? 'ml-[9%]' : 'ml-[15.5%]'
+                }`}
+              >
+                <div className="flex-1 overflow-auto max-w-full mt-[52px]">
+                  <Routes>
+                    <Route path="/dashboard" element={<EDashboard />} />
+                    <Route path="/" element={<EDashboard />} />
+                    <Route path="/profile" element={<Profile />} />
+                    <Route path="/files" element={<Files />} />
+                    <Route path="/monitor/overview" element={<BuildingOverview />} />
+                    <Route path="/monitor/zones" element={<Zones />} />
+                    <Route path="/monitor/diesel" element={<Diesel />} />
+                    <Route path="/monitor/peakanalysis" element={<PeakAnalysis />} />
+                    <Route path="/meter/:id" element={<Emd />} />
+                    <Route path="/control/ltobattery" element={<LTOControl />} />
+                    <Route path="/control/ioebattery" element={<IOEBatteryControl />} />
+                    <Route path="/control/upsbattery" element={<UPSControl />} />
+                    <Route path="/generator/:id" element={<Dgd />} />
+                    <Route path="/settings" element={<Settings />} />
+                    <Route path="/alerts" element={<PeakDemandView />} />
+                  </Routes>
+                </div>
               </div>
             </div>
-          </div>
-         )}
-      </BrowserRouter>
+          )}
+        </BrowserRouter>
     </DateProvider>
   );
 };

@@ -80,7 +80,7 @@ const Edmc = () => {
           <p className="text-md text-red-500">{error}</p>
         ) : (
           <p className="text-md font-bold text-gray-900">
-            {`${data.consumption} kWh / ${data.apconsumption} kVAh`}
+            {`${data.apconsumption} kVAh / ${data.consumption} kWh`}
           </p>
         )}
         <h4 className="text-md text-gray-900">Peak Demand</h4>

@@ -34,7 +34,7 @@ const EnergyMeter = ({ name, consumption, id }) => {
       </div>
 
       <div className="pt-4 flex flex-col items-center">
-        <div className="text-2xl font-bold text-gray-800 whitespace-nowrap">{consumption.toFixed(1)} kWh</div>
+        <div className="text-2xl font-bold text-gray-800 whitespace-nowrap">{consumption.toFixed(1)} kVAh</div>
         <div className="text-xs text-gray-400">Consumption</div>
       </div>
 

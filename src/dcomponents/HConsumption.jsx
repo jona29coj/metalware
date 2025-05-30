@@ -20,10 +20,10 @@ if (ExportData && typeof ExportData === 'function') {
 
 const HConsumption = () => {
   const { startDateTime, endDateTime } = useContext(DateContext); 
-  const options = ['kWh', 'kVAh', '₹'];
+  const options = ['kVAh', 'kWh', '₹'];
 
   const [energyData, setEnergyData] = useState({});
-  const [consumptionType, setConsumptionType] = useState('kWh'); 
+  const [consumptionType, setConsumptionType] = useState('kVAh'); 
 
   useEffect(() => {
     const fetchData = async () => {

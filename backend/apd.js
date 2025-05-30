@@ -22,7 +22,7 @@ async function getPeakDemandAboveThreshold(startDateTime, endDateTime) {
     WHERE energy_meter_id BETWEEN 1 AND 11
       AND timestamp BETWEEN ? AND ?
     GROUP BY minute
-    HAVING SUM(total_kVA) > 558.75
+    HAVING SUM(total_kVA) > 596
     ORDER BY minute DESC
     `,
     [startDateTime, endDateTime]

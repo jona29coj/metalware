@@ -16,6 +16,7 @@ const Navbar = () => {
   const [isStartPickerOpen, setIsStartPickerOpen] = useState(false);
   const [isEndPickerOpen, setIsEndPickerOpen] = useState(false);
 
+
   const profileRef = useRef(null);
   const notificationRef = useRef(null);
   const datePickerRef = useRef(null);
@@ -29,11 +30,11 @@ const Navbar = () => {
   };
 
   const closeStartPicker = () => {
-    setIsStartPickerOpen(false); // Close overlay for Start
+    setIsStartPickerOpen(false); 
   };
 
   const closeEndPicker = () => {
-    setIsEndPickerOpen(false); // Close overlay for End
+    setIsEndPickerOpen(false); 
   };
 
 
@@ -70,7 +71,7 @@ const Navbar = () => {
       if (data?.peakDemandAboveThreshold) {
         const formatted = data.peakDemandAboveThreshold.map((entry) => ({
           id: entry.id,
-          text: `Apparent Power → ${entry.total_kVA} kVA ${moment(entry.minute).format("HH:mm")} crossing 558.75 → Lower Ceiling`,
+          text: `Apparent Power → ${entry.total_kVA} kVA ${moment(entry.minute).format("HH:mm")} crossing 596 → Lower Ceiling`,
           read: false,
         }));
         setNotifications(formatted);

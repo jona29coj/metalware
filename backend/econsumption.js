@@ -16,18 +16,17 @@ async function fetchConsumption(startDateTime,endDateTime) {
   const [rows] = await pool.promise().query(
     `SELECT 
       energy_meter_id,
-      MAX(CASE WHEN kWh > 0 THEN kWh ELSE NULL END) -
-      MIN(CASE WHEN kWh > 0 THEN kWh ELSE NULL END) AS kWh_difference
+      MAX(CASE WHEN kVAh > 0 THEN kVAh ELSE NULL END) -
+      MIN(CASE WHEN kVAh > 0 THEN kVAh ELSE NULL END) AS kVAh_difference
      FROM modbus_data
      WHERE timestamp BETWEEN ? AND ?
       AND energy_meter_id BETWEEN 1 AND 11
-      AND kWh > 0
      GROUP BY energy_meter_id`,
      [startDateTime,endDateTime]
   );
-  return rows.map(({ energy_meter_id,kWh_difference})=>({
+  return rows.map(({ energy_meter_id,kVAh_difference})=>({
     energy_meter_id,
-    consumption: kWh_difference !== null ? parseFloat(kWh_difference).toFixed(1) : 0
+    consumption: kVAh_difference !== null ? parseFloat(kVAh_difference).toFixed(1) : 0
   }));
 }
 

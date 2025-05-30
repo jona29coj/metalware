@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
+
 const energyRoutes = require('./hconsumption');
 const meterRoutes = require('./econsumption');
 const ehConsumptionRoutes = require('./ehconsumption');
@@ -22,10 +23,16 @@ const DashboardRoutes = require('./dashboard');
 const hcostconsumptionRoutes = require('./hcostconsumption');
 const authRoute = require('./auth');
 const heartBeatRoute = require('./heartbeat');
-
+const filesRoute = require('./fileF');
+const mrRoute = require('./meterreading');
+const zkVARoute = require('./zkVA');
+const zkVAazRoute = require('./zkVAaz');
 const app = express();
 const port = 3001;
-const path = require('path');
+
+const baseFolderPath = '/Users/jonathanprince/Documents/Work/filesTest';
+
+app.use('/uploads', express.static(baseFolderPath));
 
 
 app.use(cors());
@@ -52,9 +59,12 @@ app.use('/api', apdRoutes);
 app.use('/api', DashboardRoutes);
 app.use('/api', hcostconsumptionRoutes);
 app.use('/api', mcapconsRoutes);
-app.use('/api',authRoute);
+app.use('/api', authRoute);
 app.use('/api', heartBeatRoute);
-
+app.use('/api', filesRoute);
+app.use('/api', mrRoute);
+app.use('/api', zkVARoute);
+app.use('/api',zkVAazRoute);
 
 app.use((err, req, res, next) => {
   console.error(err.stack);

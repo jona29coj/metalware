@@ -17,18 +17,20 @@ const pool = mysql.createPool(dbConfig);
 async function getTotalConsumption(startDateTime, endDateTime) {
   const query = `
   SELECT 
-    ROUND(SUM(kWh_difference), 1) AS consumption
-  FROM (
-    SELECT 
-      (MAX(kWh) - MIN(kWh)) AS kWh_difference
-    FROM 
-      modbus_data
-    WHERE 
-      energy_meter_id BETWEEN 1 AND 11
-      AND timestamp BETWEEN ? AND ?
-    GROUP BY 
-      energy_meter_id
-  ) AS subquery;
+  ROUND(SUM(kWh_difference), 1) AS consumption
+FROM (
+  SELECT 
+    energy_meter_id,
+    DATE(timestamp) AS day,
+    (MAX(kWh) - MIN(kWh)) AS kWh_difference
+  FROM 
+    modbus_data
+  WHERE 
+    energy_meter_id BETWEEN 1 AND 11
+    AND timestamp BETWEEN ? AND ?
+  GROUP BY 
+    energy_meter_id
+) AS subquery;
   `;
 
   const [rows] = await pool.query(query, [startDateTime, endDateTime]);

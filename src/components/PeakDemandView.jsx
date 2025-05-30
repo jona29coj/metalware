@@ -119,7 +119,7 @@ const PeakDemandView = () => {
                   <td className="py-2 px-4">{formatDisplayDate(item.minute.split(' ')[0])}</td>
                   <td className="py-2 px-4">{formatTime(item.minute)}</td>
                   <td className="py-2 px-4">Peak Demand</td>
-                  <td className="py-2 px-4">558.75 kVA</td>
+                  <td className="py-2 px-4">596 kVA</td>
                   <td className="py-2 px-4">{item.total_kVA}</td>
                 </tr>
               ))}

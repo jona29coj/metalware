@@ -55,7 +55,7 @@ const EnergyConsumptionChart = ({ consumptionData, dateRange }) => {
         zmin: 0,
         zmax: Math.max(...heatmapData.flat().filter(Boolean)) || 1,
         colorbar: { title: "Energy (kWh)", thickness: 15, len: 0.8 },
-        hovertemplate: "<b>Date:</b> %{x}<br><b>Hour:</b> %{y}<br><b>Consumption:</b> %{z:.2f} kWh<extra></extra>"
+        hovertemplate: "<b>Date:</b> %{x}<br><b>Hour:</b> %{y}<br><b>Consumption:</b> %{z:.2f} kVAh<extra></extra>"
       }]}
       layout={{
         xaxis: {
@@ -122,7 +122,7 @@ const EnergyConsumption = () => {
                        `End: ${moment(dateRange.endDate).format("YYYY-MM-DD HH:mm:ss")}`, 
                        ""];
   
-    const columnHeaders = ["Date", "Hour", "Energy Consumed (kWh)"];
+    const columnHeaders = ["Date", "Hour", "Energy Consumed (kVAh)"];
   
     const formattedData = consumptionData.map((item) => [
       item.day,

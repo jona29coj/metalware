@@ -13,15 +13,18 @@ const pool = mysql.createPool({
 
 async function fetchHourlyConsumption(startDateTime, endDateTime) {
   const query = `
-    SELECT
-      DATE_FORMAT(timestamp, '%Y-%m-%d %H:00:00') AS hour,
-      energy_meter_id,
-      MAX(CASE WHEN kWh > 0 THEN kWh ELSE NULL END) - MIN(CASE WHEN kWh > 0 THEN kWh ELSE NULL END) AS kWh_difference
-    FROM modbus_data
-    WHERE timestamp BETWEEN ? AND ?
-      AND energy_meter_id BETWEEN 1 AND 11
-    GROUP BY energy_meter_id, hour
-    ORDER BY hour ASC
+  SELECT
+    DATE_FORMAT(timestamp, '%Y-%m-%d %H:00:00') AS hour,
+    energy_meter_id,
+    MAX(kWh) - COALESCE(
+      LAG(MAX(kWh)) OVER (PARTITION BY energy_meter_id ORDER BY DATE_FORMAT(timestamp, '%Y-%m-%d %H:00:00')),
+      MIN(kWh)
+    ) AS kWh_difference
+  FROM modbus_data
+  WHERE timestamp BETWEEN ? AND ?
+    AND energy_meter_id BETWEEN 1 AND 11
+  GROUP BY energy_meter_id, hour
+  ORDER BY hour ASC;
   `;
 
   try {
@@ -33,10 +36,9 @@ async function fetchHourlyConsumption(startDateTime, endDateTime) {
       return acc;
     }, {});
 
-
     return hourlyConsumption;
   } catch (error) {
-    throw error; 
+    throw error;
   }
 }
 

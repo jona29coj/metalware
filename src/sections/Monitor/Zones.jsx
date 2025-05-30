@@ -40,7 +40,7 @@ const Zones = () => {
     parseInt(new URLSearchParams(location.search).get('zone')) || 1
   );
   const [isLoading, setIsLoading] = useState(true);
-  const [consumptionType, setConsumptionType] = useState('kWh');
+  const [consumptionType, setConsumptionType] = useState('kVAh');
 
   useEffect(() => {
     const fetchZoneData = async () => {
@@ -179,9 +179,10 @@ const Zones = () => {
   const chartOptionsSingleZone = (zone) => ({
     chart: { type: 'column', backgroundColor: 'white' },
     title: {
-      text: `${zone.zoneName} <span style="font-size: 12px; font-weight: normal; color: gray;">(${zone.category})</span>`,
-      useHTML: true, 
-    },    xAxis: {
+      text: `${zone.zoneName} <span style="font-size: 12px; font-weight: normal; color: gray;">(${zone.category})</span> - Hourly Consumption`,
+      useHTML: true,
+    },   
+    xAxis: {
       categories: zone.data.map((item) => item.hour.substring(11, 16)),
       gridLineWidth: 0,
     },
@@ -264,20 +265,20 @@ const Zones = () => {
         <div className='flex flex-end space-x-3'>
           <div className="flex bg-white rounded-full p-1 space-x-1">
             <button
-              onClick={() => setConsumptionType('kWh')}
-              className={`px-6 py-2 text-sm font-medium rounded-full transition ${
-                consumptionType === 'kWh' ? 'bg-blue-600 text-white' : 'bg-transparent text-gray-700 hover:bg-blue-50'
-              }`}
-            >
-              kWh
-            </button>
-            <button
               onClick={() => setConsumptionType('kVAh')}
               className={`px-6 py-2 text-sm font-medium rounded-full transition ${
                 consumptionType === 'kVAh' ? 'bg-blue-600 text-white' : 'bg-transparent text-gray-700 hover:bg-blue-50'
               }`}
             >
               kVAh
+            </button>
+            <button
+              onClick={() => setConsumptionType('kWh')}
+              className={`px-6 py-2 text-sm font-medium rounded-full transition ${
+                consumptionType === 'kWh' ? 'bg-blue-600 text-white' : 'bg-transparent text-gray-700 hover:bg-blue-50'
+              }`}
+            >
+              kWh
             </button>
           </div>
           <button

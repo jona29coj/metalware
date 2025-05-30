@@ -24,17 +24,10 @@ router.get('/mcpeak', async (req, res) => {
   try {
     const [rows] = await pool.query(
       `
-      SELECT 
-    MAX(peakDemand) AS peakDemand
-FROM (
-    SELECT 
-        SUM(ROUND(total_kVA, 1)) AS peakDemand
-    FROM modbus_data
-    WHERE DATE(timestamp) = DATE(?)
-      AND timestamp <= ?
-      AND energy_meter_id BETWEEN 1 AND 11
-    GROUP BY DATE_FORMAT(timestamp, '%Y-%m-%d %H:%i:00')
-) AS subquery;
+      SELECT MAX(total_kVA) AS peakDemand
+      FROM modbus_data
+      WHERE energy_meter_id = 12
+        AND timestamp BETWEEN ? AND ?
     `,
       [startDateTime, endDateTime]
     );

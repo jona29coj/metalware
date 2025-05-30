@@ -1,19 +1,21 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { MdKeyboardArrowDown, MdKeyboardArrowUp } from "react-icons/md";
-import { FiMonitor, FiAlertCircle, FiFileText, FiHome, FiBook, FiUser, FiSettings } from "react-icons/fi";
+import { FiMonitor, FiAlertCircle, FiFileText, FiHome, FiBook, FiUser, FiSettings, FiFile, FiFolder } from "react-icons/fi";
 import logo from "../logo2.png";
 
 const links = {
   monitor: [
-    { name: "Building Overview", path: "/monitor/overview" },
+    { name: "eLog", path: "/monitor/overview" },
     { name: "Zones", path: "/monitor/zones" },
+    { name: "Peak Analysis", path: "/monitor/peakanalysis" },
   ],
 };
 
 const navItems = [
   { name: "Alerts", path: "/alerts", icon: FiAlertCircle },
   { name: "Building Profile", path: "/profile", icon: FiUser },
+  { name: "Files", path: "/files", icon: FiFolder },
   { name: "Settings", path: "/settings", icon: FiSettings }, 
 ];
 
@@ -65,22 +67,18 @@ const Sidebar = ({ isCollapsed }) => {
 
   return (
     <div ref={sidebarRef} className="h-full w-full overflow-visible bg-white shadow-lg transition-all duration-300 flex flex-col relative">
-      {/* Logo */}
       <div className="flex justify-center items-center bg-white p-5">
         <Link to="/dashboard">
           <img src={logo} alt="logo" className="h-auto w-auto object-contain min-w-[49px]" />
         </Link>
       </div>
 
-      {/* Sidebar Links */}
       <div className="mt-8 flex flex-col w-full">
-        {/* Dashboard */}
         <NavLink to="/dashboard" className={({ isActive }) => linkClass(isActive, isCollapsed)}>
           <FiHome className={iconClass} />
           <span className={`${isCollapsed ? "hidden" : "block"}`}>Dashboard</span>
         </NavLink>
 
-        {/* Monitor Section */}
         <div className="relative">
           <div
             className={`cursor-pointer ${linkClass(false, isCollapsed)} relative`}
@@ -107,7 +105,6 @@ const Sidebar = ({ isCollapsed }) => {
                   }
                   onClick={() => {
                     handleNavLinkClick();
-                    // Only collapse dropdown if sidebar is collapsed
                     if (isCollapsed) toggleDropdown("monitor");
                   }}
                 >
@@ -117,10 +114,8 @@ const Sidebar = ({ isCollapsed }) => {
             </div>
           )}
 
-          {/* Tooltip when collapsed */}
           {isCollapsed && dropdown.monitor && (
             <div className="absolute left-full top-1/2 transform -translate-y-1/2 ml-2 bg-white shadow-xl rounded-lg w-48 p-2 z-[99999] border border-gray-300">
-              {/* Arrow pointing to the Monitor button */}
               <div className="absolute -left-2 top-1/2 transform -translate-y-1/2 w-0 h-0 border-t-8 border-b-8 border-r-8 border-transparent border-r-gray-300"></div>
 
               {links.monitor.map((item, index) => (
@@ -134,7 +129,6 @@ const Sidebar = ({ isCollapsed }) => {
                   }
                   onClick={() => {
                     handleNavLinkClick();
-                    // Tooltip dropdown should close after clicking an item
                     toggleDropdown("monitor");
                   }}
                 >
@@ -145,7 +139,6 @@ const Sidebar = ({ isCollapsed }) => {
           )}
         </div>
 
-        {/* Other nav items */}
         {navItems.map(({ name, path, icon: Icon }, index) => (
           <NavLink key={index} to={path} className={({ isActive }) => linkClass(isActive, isCollapsed)}>
             <Icon className={iconClass} />

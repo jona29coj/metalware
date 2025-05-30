@@ -16,36 +16,32 @@ router.get('/cc', async (req, res) => {
   try {
     const { startDateTime, endDateTime } = req.query;
     const query = `
-      SELECT 
-        SUM(consumption) AS totalConsumption,
-        ROUND(SUM(cost),1) AS totalCost,
-        MAX(CASE 
-          WHEN HOUR(NOW()) BETWEEN 5 AND 9 THEN 6.035
-          WHEN HOUR(NOW()) BETWEEN 10 AND 18 THEN 7.10
-          WHEN HOUR(NOW()) BETWEEN 19 AND 23 OR HOUR(NOW()) BETWEEN 0 AND 2 THEN 8.165
-          ELSE 7.10
-        END) AS currentRate,
-        CASE
-          WHEN HOUR(NOW()) BETWEEN 5 AND 9 THEN "Off-Peak Hour (05:00:00 - 10:00:00)"
-          WHEN HOUR(NOW()) BETWEEN 10 AND 18 THEN "Normal Hour (10:00:00 - 19:00:00)"
-          WHEN HOUR(NOW()) BETWEEN 19 AND 23 OR HOUR(NOW()) BETWEEN 0 AND 2 THEN "Peak Hour (19:00:00 - 03:00:00)"
-          ELSE "Normal Hour (03:00:00 - 05:00:00)"
-        END AS currentPeriod
-      FROM (
-        SELECT 
-          energy_meter_id,
-          ROUND(MAX(kVAh) - MIN(kVAh), 2) AS consumption,
-          CASE
-            WHEN HOUR(timestamp) BETWEEN 5 AND 9 THEN (MAX(kVAh) - MIN(kVAh)) * 6.035
-            WHEN HOUR(timestamp) BETWEEN 10 AND 18 THEN (MAX(kVAh) - MIN(kVAh)) * 7.10
-            WHEN HOUR(timestamp) BETWEEN 19 AND 23 OR HOUR(timestamp) BETWEEN 0 AND 2 THEN (MAX(kVAh) - MIN(kVAh)) * 8.165
-            ELSE (MAX(kVAh) - MIN(kVAh)) * 7.10
-          END AS cost
-        FROM modbus_data
-        WHERE timestamp BETWEEN ? AND ?
-          AND energy_meter_id BETWEEN 1 AND 11
-        GROUP BY energy_meter_id, HOUR(timestamp)
-      ) AS period_data;
+    SELECT 
+  period,
+  SUM(consumption) AS totalConsumption,
+  ROUND(SUM(consumption * rate), 2) AS totalCost
+FROM (
+  SELECT 
+    energy_meter_id,
+    CASE
+      WHEN HOUR(timestamp) BETWEEN 5 AND 9 THEN "Off-Peak"
+      WHEN HOUR(timestamp) BETWEEN 10 AND 18 THEN "Normal"
+      WHEN HOUR(timestamp) BETWEEN 19 AND 23 OR HOUR(timestamp) BETWEEN 0 AND 2 THEN "Peak"
+      ELSE "Normal"
+    END AS period,
+    MAX(kVAh) - MIN(kVAh) AS consumption,
+    CASE
+      WHEN HOUR(timestamp) BETWEEN 5 AND 9 THEN 6.035
+      WHEN HOUR(timestamp) BETWEEN 10 AND 18 THEN 7.10
+      WHEN HOUR(timestamp) BETWEEN 19 AND 23 OR HOUR(timestamp) BETWEEN 0 AND 2 THEN 8.165
+      ELSE 7.10
+    END AS rate
+  FROM modbus_data
+  WHERE timestamp BETWEEN ? AND ?
+    AND energy_meter_id BETWEEN 1 AND 11
+  GROUP BY energy_meter_id, period
+) AS period_data
+GROUP BY period;
     `;
 
     const [rows] = await pool.query(query, [startDateTime, endDateTime]);

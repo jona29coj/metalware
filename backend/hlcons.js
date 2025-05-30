@@ -19,9 +19,9 @@ router.get('/hlcons', async (req, res) => {
     SELECT 
     energy_meter_id,
     ROUND(
-      MAX(CASE WHEN kWh > 0 THEN kWh ELSE NULL END) - MIN(CASE WHEN kWh > 0 THEN kWh ELSE NULL END),
+      MAX(CASE WHEN kVAh > 0 THEN kVAh ELSE NULL END) - MIN(CASE WHEN kVAh > 0 THEN kVAh ELSE NULL END),
       1
-    ) AS kWh_difference
+    ) AS kVAh_difference
   FROM modbus_data
   WHERE energy_meter_id BETWEEN 1 AND 11
     AND timestamp BETWEEN ? AND ?
@@ -31,7 +31,7 @@ router.get('/hlcons', async (req, res) => {
 
     const consumptionData = rows.map(row => ({
       meter_id: row.energy_meter_id,
-      consumption: row.kWh_difference || 0,
+      consumption: row.kVAh_difference || 0,
     }));
 
     const highZone = consumptionData.reduce(
