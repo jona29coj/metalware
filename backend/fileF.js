@@ -1,3 +1,4 @@
+const fs = require('fs');
 const express = require('express');
 const multer = require('multer');
 const path = require('path');
@@ -60,7 +61,6 @@ router.post('/uploadF', upload.single('file'), (req, res) => {
     res.status(200).send({ message: 'File uploaded successfully', fileUrl });
   });
 
-  const fs = require('fs');
 
   router.get('/listF', (req, res) => {
     let category = req.query.category;

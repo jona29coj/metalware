@@ -16,8 +16,9 @@ const zoneDetails = {
     9: { name: "TERRACE", category: "C-49" },
     10: { name: "TOOL ROOM", category: "C-50" },
     11: { name: "ADMIN BLOCK", category: "C-50" },
+    12: { name: "TRANSFORMER"}
 };
-
+ 
 const getZoneNameAndCategory = (id) => {
   return zoneDetails[id] || { name: "Unknown Zone", category: "N/A" };
 };
@@ -28,10 +29,13 @@ const EnergyMeter = ({ name, consumption, id }) => {
 
   return (
     <div className="bg-white rounded-lg w-full h-50 flex flex-col justify-between items-center text-center p-4 border border-gray-500">
-      <div className="bg-green-500 text-white text-xs font-medium py-1 w-40 rounded whitespace-nowrap max-w-[150px]">
+      <div className={`text-white text-xs font-medium w-40 rounded whitespace-nowrap max-w-[150px] ${
+    zoneInfo.category ? 'py-1 bg-green-500' : 'bg-orange-500 py-3'
+  }`}>
         <div className="font-bold">{zoneInfo.name}</div>
-        <div className="text-white">Block: {zoneInfo.category}</div>
-      </div>
+        {zoneInfo.category && (
+    <div className="text-white">Block: {zoneInfo.category}</div>
+  )}      </div>
 
       <div className="pt-4 flex flex-col items-center">
         <div className="text-2xl font-bold text-gray-800 whitespace-nowrap">{consumption.toFixed(1)} kVAh</div>

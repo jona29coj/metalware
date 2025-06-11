@@ -100,7 +100,7 @@ const App = () => {
         <BrowserRouter>
           <ScrollToTop />
           {isAuthenticated &&( 
-            <div className="bg-main-bg min-h-screen flex">
+            <div className="min-h-screen flex bg-gray-100">
               <div
                 className={`bg-white shadow-md transition-all duration-300 fixed top-0 left-0 h-full ${
                   isCollapsed ? 'w-[9%]' : 'w-[15.5%]'

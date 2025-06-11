@@ -13,8 +13,6 @@ const pool = mysql.createPool({
 });
 
 async function getTotalKVAForAllZonesPerMinute(startDateTime, endDateTime) {
-  // Query to select data for all relevant energy_meter_ids (1 to 11)
-  // for the given time range.
   const [rows] = await pool.promise().query(
     `
     SELECT
@@ -23,7 +21,7 @@ async function getTotalKVAForAllZonesPerMinute(startDateTime, endDateTime) {
       total_kVA
     FROM modbus_data
     WHERE timestamp BETWEEN ? AND ?
-      AND energy_meter_id BETWEEN 1 AND 11
+      AND energy_meter_id BETWEEN 1 AND 12
     ORDER BY energy_meter_id ASC, timestamp ASC
     `,
     [startDateTime, endDateTime]
@@ -41,7 +39,6 @@ router.get('/zkVAaz', async (req, res) => {
 
   try {
     const kvaAllZonesData = await getTotalKVAForAllZonesPerMinute(startDateTime, endDateTime);
-    // Respond with an array containing data for all zones
     res.status(200).json({ kvaAllZonesData });
   } catch (error) {
     console.error('Database error:', error);

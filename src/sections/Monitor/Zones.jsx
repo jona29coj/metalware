@@ -25,6 +25,7 @@ const zoneMetadata = [
   { id: 9, name: "TERRACE", category: "C-49" },
   { id: 10, name: "TOOL ROOM", category: "C-50" },
   { id: 11, name: "ADMIN BLOCK", category: "C-50" },
+  { id: 12, name: "TRANSFORMER" }
 ];
 
 const Zones = () => {
@@ -90,7 +91,7 @@ const Zones = () => {
   const downloadExcel = () => {
     if (!zoneData?.length) return;
     const headerRow = [`Start: ${startDateTime}`, `End: ${endDateTime}`, "", "", ""]; 
-    const columnHeaders = ["Date", "Time", ...zoneData.map((zone) => `${zone.zoneName} (${zone.category}) - ${consumptionType}`)];
+    const columnHeaders = ["Date", "Time", ...zoneData.map((zone) => `${zone.zoneName}${zone.category ? ` (${zone.category})` : ''} - ${consumptionType}`)];
     const uniqueTimes = [
       ...new Set(
         zoneData.flatMap((zone) =>
@@ -128,10 +129,12 @@ const Zones = () => {
     chart: {
       type: 'column',
       backgroundColor: 'white',
-      spacingTop: 40,
+      spacingTop: 20,
+      height: 500
     },
     title: {
-      text: null,
+      text: 'Hourly Consumption',
+      useHTML: true,
     },
     xAxis: {
       categories: [
@@ -179,7 +182,7 @@ const Zones = () => {
   const chartOptionsSingleZone = (zone) => ({
     chart: { type: 'column', backgroundColor: 'white' },
     title: {
-      text: `${zone.zoneName} <span style="font-size: 12px; font-weight: normal; color: gray;">(${zone.category})</span> - Hourly Consumption`,
+      text: `${zone.zoneName} ${zone.category ? `<span style="font-size: 12px; font-weight: normal; color: gray;">(${zone.category})</span>` : ''} - Hourly Consumption`,
       useHTML: true,
     },   
     xAxis: {
@@ -256,7 +259,7 @@ const Zones = () => {
        >
          {zoneMetadata.map((zone) => (
            <option key={zone.id} value={zone.id}>
-             {zone.name} ({zone.category})
+             {zone.name} {zone.category ? `(${zone.category})` : ''}
            </option>
          ))}
        </select>

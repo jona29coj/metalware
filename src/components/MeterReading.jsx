@@ -17,6 +17,7 @@ const meterToZoneMap = {
   9: { name: "TERRACE", category: "C-49" },
   10: { name: "TOOL ROOM", category: "C-50" },
   11: { name: "ADMIN BLOCK", category: "C-50" },
+  12: { name: "TRANSFORMER"}
 };
 
 const MeterReading = () => {
@@ -26,7 +27,7 @@ const MeterReading = () => {
     const fetchData = async () => {
       if (startDateTime && endDateTime) {
         try {
-          const response = await axios.get('https://mw.elementsenergies.com/api/meterreading', {
+          const response = await axios.get('http://localhost:3001/api/meterreading', {
             params: {
               startDateTime: startDateTime,
               endDateTime: endDateTime,
@@ -52,8 +53,8 @@ const MeterReading = () => {
   
     meterData.forEach((zone) => {
       const zoneName = meterToZoneMap[zone.zone]?.name || "Unknown";
-      const category = meterToZoneMap[zone.zone]?.category || "Unknown";
-      const zoneDisplay = `${zoneName} (${category})`; 
+      const category = meterToZoneMap[zone.zone]?.category;
+      const zoneDisplay = category ? `${zoneName} (${category})` : zoneName;
   
       rows.push([
         zoneDisplay,
@@ -107,7 +108,7 @@ const MeterReading = () => {
               <tr className="hover:bg-gray-50">
                 <td rowSpan={2} className="border border-gray-300 px-2 py-2 text-center align-middle">
                   <div className="font-medium">{meterToZoneMap[zoneData.zone]?.name || "Unknown"}</div>
-                  <div className="text-xs text-gray-500">{meterToZoneMap[zoneData.zone]?.category || "Unknown"}</div>
+                  <div className="text-xs text-gray-500">{meterToZoneMap[zoneData.zone]?.category}</div>
                 </td>
                 <td className="border border-gray-300 px-4 py-2 text-center font-semibold">
                   Start D&T: {zoneData.min?.timestamp || "N/A"}

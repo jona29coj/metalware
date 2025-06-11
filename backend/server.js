@@ -27,6 +27,11 @@ const filesRoute = require('./fileF');
 const mrRoute = require('./meterreading');
 const zkVARoute = require('./zkVA');
 const zkVAazRoute = require('./zkVAaz');
+const dgdcRoute = require('./dgdc');
+const dgdRoute = require('./dgd');
+const dgdcvRoute = require('./dgdcv');
+const dgdrtRoute = require('./dgdrt');
+const dgdkWhdiffRoute = require('./dgdkWhdiff');
 const app = express();
 const port = 3001;
 
@@ -65,6 +70,11 @@ app.use('/api', filesRoute);
 app.use('/api', mrRoute);
 app.use('/api', zkVARoute);
 app.use('/api',zkVAazRoute);
+app.use('/api', dgdcRoute);
+app.use('/api', dgdRoute);
+app.use('/api', dgdcvRoute);
+app.use('/api', dgdrtRoute);
+app.use('/api', dgdkWhdiffRoute);
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
@@ -74,6 +84,8 @@ app.use((err, req, res, next) => {
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
 });
+
+
 
 
 

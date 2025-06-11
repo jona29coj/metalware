@@ -14,17 +14,14 @@ const pool = mysql.createPool({
 async function fetchHourlyConsumption(startDateTime, endDateTime) {
   const query = `
   SELECT
-    DATE_FORMAT(timestamp, '%Y-%m-%d %H:00:00') AS hour,
-    energy_meter_id,
-    MAX(kVAh) - COALESCE(
-      LAG(MAX(kVAh)) OVER (PARTITION BY energy_meter_id ORDER BY DATE_FORMAT(timestamp, '%Y-%m-%d %H:00:00')),
-      MIN(kVAh)
-    ) AS kVAh_difference
-  FROM modbus_data
-  WHERE timestamp BETWEEN ? AND ?
-    AND energy_meter_id BETWEEN 1 AND 11
-  GROUP BY energy_meter_id, hour
-  ORDER BY hour ASC;
+      DATE_FORMAT(timestamp, '%Y-%m-%d %H:00:00') AS hour,
+      energy_meter_id,
+      MAX(kVAh) - MIN(kVAh) AS kVAh_difference
+    FROM modbus_data
+    WHERE timestamp BETWEEN ? AND ?
+      AND energy_meter_id BETWEEN 1 AND 11
+    GROUP BY energy_meter_id, hour
+    ORDER BY hour ASC;
   `;
 
   try {

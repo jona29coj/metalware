@@ -16,44 +16,94 @@ router.get('/cc', async (req, res) => {
   try {
     const { startDateTime, endDateTime } = req.query;
     const query = `
-    SELECT 
-  period,
-  SUM(consumption) AS totalConsumption,
-  ROUND(SUM(consumption * rate), 2) AS totalCost
-FROM (
-  SELECT 
-    energy_meter_id,
-    CASE
-      WHEN HOUR(timestamp) BETWEEN 5 AND 9 THEN "Off-Peak"
-      WHEN HOUR(timestamp) BETWEEN 10 AND 18 THEN "Normal"
-      WHEN HOUR(timestamp) BETWEEN 19 AND 23 OR HOUR(timestamp) BETWEEN 0 AND 2 THEN "Peak"
-      ELSE "Normal"
-    END AS period,
-    MAX(kVAh) - MIN(kVAh) AS consumption,
-    CASE
-      WHEN HOUR(timestamp) BETWEEN 5 AND 9 THEN 6.035
-      WHEN HOUR(timestamp) BETWEEN 10 AND 18 THEN 7.10
-      WHEN HOUR(timestamp) BETWEEN 19 AND 23 OR HOUR(timestamp) BETWEEN 0 AND 2 THEN 8.165
-      ELSE 7.10
-    END AS rate
-  FROM modbus_data
-  WHERE timestamp BETWEEN ? AND ?
-    AND energy_meter_id BETWEEN 1 AND 11
-  GROUP BY energy_meter_id, period
-) AS period_data
-GROUP BY period;
+    SELECT '00:00-03:00' AS period, 8.165 AS rate,
+    SUM(consumption) AS totalConsumption,
+    ROUND(SUM(consumption * 8.165), 2) AS totalCost
+  FROM (
+    SELECT energy_meter_id, DATE(timestamp) as day,
+      MAX(kVAh) - MIN(kVAh) AS consumption
+    FROM modbus_data
+    WHERE TIME(timestamp) BETWEEN '00:00:00' AND '02:59:59'
+      AND timestamp BETWEEN ? AND ?
+      AND energy_meter_id BETWEEN 1 AND 11
+    GROUP BY energy_meter_id, day
+  ) AS p1
+
+  UNION ALL
+
+  SELECT '03:00-05:00' AS period, 7.10 AS rate,
+    SUM(consumption),
+    ROUND(SUM(consumption * 7.10), 2)
+  FROM (
+    SELECT energy_meter_id, DATE(timestamp) as day,
+      MAX(kVAh) - MIN(kVAh) AS consumption
+    FROM modbus_data
+    WHERE TIME(timestamp) BETWEEN '03:00:00' AND '04:59:59'
+      AND timestamp BETWEEN ? AND ?
+      AND energy_meter_id BETWEEN 1 AND 11
+    GROUP BY energy_meter_id, day
+  ) AS p2
+
+  UNION ALL
+
+  SELECT '05:00-10:00' AS period, 6.035 AS rate,
+    SUM(consumption),
+    ROUND(SUM(consumption * 6.035), 2)
+  FROM (
+    SELECT energy_meter_id, DATE(timestamp) as day,
+      MAX(kVAh) - MIN(kVAh) AS consumption
+    FROM modbus_data
+    WHERE TIME(timestamp) BETWEEN '05:00:00' AND '09:59:59'
+      AND timestamp BETWEEN ? AND ?
+      AND energy_meter_id BETWEEN 1 AND 11
+    GROUP BY energy_meter_id, day
+  ) AS p3
+
+  UNION ALL
+
+  SELECT '10:00-19:00' AS period, 7.10 AS rate,
+    SUM(consumption),
+    ROUND(SUM(consumption * 7.10), 2)
+  FROM (
+    SELECT energy_meter_id, DATE(timestamp) as day,
+      MAX(kVAh) - MIN(kVAh) AS consumption
+    FROM modbus_data
+    WHERE TIME(timestamp) BETWEEN '10:00:00' AND '18:59:59'
+      AND timestamp BETWEEN ? AND ?
+      AND energy_meter_id BETWEEN 1 AND 11
+    GROUP BY energy_meter_id, day
+  ) AS p4
+
+  UNION ALL
+
+  SELECT '19:00-23:59' AS period, 8.165 AS rate,
+    SUM(consumption),
+    ROUND(SUM(consumption * 8.165), 2)
+  FROM (
+    SELECT energy_meter_id, DATE(timestamp) as day,
+      MAX(kVAh) - MIN(kVAh) AS consumption
+    FROM modbus_data
+    WHERE TIME(timestamp) BETWEEN '19:00:00' AND '23:59:59'
+      AND timestamp BETWEEN ? AND ?
+      AND energy_meter_id BETWEEN 1 AND 11
+    GROUP BY energy_meter_id, day
+  ) AS p5
     `;
 
-    const [rows] = await pool.query(query, [startDateTime, endDateTime]);
+    const params = Array(5).fill([startDateTime, endDateTime]).flat();
+
+    const [rows] = await pool.query(query, params);
 
     if (!rows || rows.length === 0) {
       return res.status(404).json({ error: "No consumption data available" });
     }
 
-    const result = rows[0];
-
+    const totalCost = parseFloat(
+      rows.reduce((sum, row) => sum + (row.totalCost || 0), 0).toFixed(2)
+    );
     res.status(200).json({
-      totalCost: result.totalCost || 0,
+      totalCost,
+      breakdown: rows, 
     });
 
   } catch (error) {

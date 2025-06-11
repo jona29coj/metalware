@@ -22,18 +22,38 @@ router.get('/mcpeak', async (req, res) => {
   }
 
   try {
-    const [rows] = await pool.query(
-      `
-      SELECT MAX(total_kVA) AS peakDemand
-      FROM modbus_data
-      WHERE energy_meter_id = 12
-        AND timestamp BETWEEN ? AND ?
-    `,
-      [startDateTime, endDateTime]
-    );
+    const cutoff = new Date('2025-05-15T00:00:00');
+    const start = new Date(startDateTime);
+
+    let query, params;
+
+    if (start > cutoff) {
+      query = `
+        SELECT MAX(total_kVA) AS peakDemand
+        FROM modbus_data
+        WHERE energy_meter_id = 12
+          AND timestamp BETWEEN ? AND ?
+      `;
+      params = [startDateTime, endDateTime];
+    } else {
+      query = `
+      SELECT MAX(peakDemand) AS peakDemand
+        FROM (
+          SELECT 
+            SUM(ROUND(total_kVA, 1)) AS peakDemand
+          FROM modbus_data
+          WHERE timestamp BETWEEN ? AND ?
+            AND energy_meter_id BETWEEN 1 AND 11
+          GROUP BY DATE_FORMAT(timestamp, '%Y-%m-%d %H:%i:00')
+        ) AS subquery;
+      `;
+      params = [startDateTime, endDateTime];
+    }
+
+    const [rows] = await pool.query(query, params);
 
     res.status(200).json({
-      peakDemand: rows[0]?.peakDemand || 0, 
+      peakDemand: rows[0]?.peakDemand || 0,
     });
   } catch (err) {
     console.error('Error fetching peak demand:', err);

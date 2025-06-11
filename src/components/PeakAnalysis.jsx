@@ -25,6 +25,7 @@ const zoneMetadata = [
   { id: 9, name: "TERRACE", category: "C-49" },
   { id: 10, name: "TOOL ROOM", category: "C-50" },
   { id: 11, name: "ADMIN BLOCK", category: "C-50" },
+  { id: 12, name: "TRANSFORMER" }
 ];
 
 const PeakAnalysis = () => {
@@ -113,10 +114,12 @@ const PeakAnalysis = () => {
     chart: {
       type: 'line',
       backgroundColor: 'white',
-      spacingTop: 40,
+      spacingTop: 20,
+      height: 500
     },
     title: {
-      text: null,
+      text: 'Peak Demand',
+      useHTML: true
     },
     xAxis: {
       categories: uniqueTimesCategories, 
@@ -138,7 +141,9 @@ const PeakAnalysis = () => {
       borderRadius: 10,
     },
     series: peakData.map((zone) => ({
-      name: `${zone.zoneName} (${zone.category})`,
+      name: zone.category
+      ? `${zone.zoneName} (${zone.category})`
+      : zone.zoneName,      
       data: uniqueTimesCategories.map((hourCategory) => {
         const fullHourTimestamp = peakData.flatMap(z => z.data)
                                           .find(item => item.hour.substring(11,16) === hourCategory)?.hour;
@@ -163,11 +168,13 @@ const PeakAnalysis = () => {
   };
 
   const chartOptionsSingleZone = (zone) => ({
-    chart: { type: 'line', backgroundColor: 'white' },
+    chart: { type: 'line', backgroundColor: 'white', height: 500 },
     title: {
-      text: `${zone.zoneName} <span style="font-size: 12px; font-weight: normal; color: gray;">(${zone.category})</span> - Peak Demand`,
+      text: `${zone.zoneName} ${
+        zone.category ? `<span style="font-size: 12px; font-weight: normal; color: gray;">(${zone.category})</span>` : ''
+      } - Peak Demand`,
       useHTML: true,
-    }, 
+    },
     xAxis: {
       categories: zone.data.map((d) => d.hour.substring(11, 16)),
       gridLineWidth: 0,
@@ -229,8 +236,10 @@ const PeakAnalysis = () => {
       const zoneName = currentZoneData.zoneName;
       const category = currentZoneData.category;
 
-      const headerRow1 = [`Zone: ${zoneName} (${category})`, "", ""];
-      const headerRow2 = [`Start Date/Time: ${startDateTime}`, `End Date/Time: ${endDateTime}`, ""];
+      const zoneDisplay = category ? `${zoneName} (${category})` : zoneName;
+
+      const headerRow1 = [`Zone: ${zoneDisplay}`, "", ""];
+      const headerRow2 = [`Start Date Time: ${startDateTime}`, `End Date Time: ${endDateTime}`, ""];
       const columnHeaders = ["Date", "Time", "Total kVA"];
 
       const formattedData = currentZoneData.data.map((item) => [
@@ -258,8 +267,15 @@ const PeakAnalysis = () => {
 
     } else { 
       const headerRow = [`Start: ${startDateTime}`, `End: ${endDateTime}`];
-      const columnHeaders = ["Date", "Time", ...peakData.map((zone) => `${zone.zoneName} (${zone.category}) - kVA`)];
-
+      const columnHeaders = [
+        "Date",
+        "Time",
+        ...peakData.map((zone) =>
+          zone.category
+            ? `${zone.zoneName} (${zone.category}) - kVA`
+            : `${zone.zoneName} - kVA`
+        ),
+      ];
       const uniqueTimes = [
         ...new Set(
           peakData.flatMap((zone) =>
@@ -331,9 +347,10 @@ const PeakAnalysis = () => {
               className="px-3 py-2 border border-gray-300 rounded-md text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               {zoneMetadata.map((zone) => (
-                <option key={zone.id} value={zone.id}>
-                  {zone.name} ({zone.category})
-                </option>
+               <option key={zone.id} value={zone.id}>
+               {zone.name}{zone.category ? ` (${zone.category})` : ""}
+             </option>
+             
               ))}
             </select>
           )}
@@ -353,7 +370,7 @@ const PeakAnalysis = () => {
           <span className="text-gray-500">Loading data...</span>
         </div>
       ) : selectedView === 'all' ? (
-        <HighchartsReact highcharts={Highcharts} options={chartOptionsAllZones} />
+        <HighchartsReact highcharts={Highcharts} options={chartOptionsAllZones}/>
       ) : (
         peakData
           .filter((zone) => zone.zoneId === selectedZone)

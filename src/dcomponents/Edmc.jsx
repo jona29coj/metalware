@@ -12,10 +12,17 @@ const getCurrentRate = (hours) => {
 const Edmc = () => {
   const { startDateTime, endDateTime } = useContext(DateContext);
   const { period, rate } = getCurrentRate(new Date().getHours());
-  const [data, setData] = useState({ consumption: null, apconsumption: null, peakDemand: null, totalCost: null, carbonFootprint: null });
-  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState({
+    consumption: 0,
+    apconsumption: 0,
+    peakDemand: 0,
+    totalCost: 0,
+    carbonFootprint: {
+      emissions: 0,
+      distance: 0
+    }
+  });  
   const [error, setError] = useState(null);
-
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -41,21 +48,14 @@ const Edmc = () => {
           carbonFootprint: { emissions, distance },
         });
 
-        setLoading(false);
       } catch (err) {
         console.error("Error fetching data:", err);
         setError("Failed to fetch data");
-        setLoading(false);
       }
     };
 
     fetchData();
   }, [startDateTime, endDateTime]);
-
-  const renderValue = (value, unit) =>
-    loading ? <div className="animate-pulse h-6 w-20 bg-gray-200 rounded"></div> :
-    error ? <p className="text-sm text-red-500">{error}</p> :
-    <p className="text-md font-extrabold text-gray-900">{value} {unit}</p>;
 
   return (
     <div className="bg-white shadow-md p-4 rounded-lg w-full">
@@ -74,30 +74,18 @@ const Edmc = () => {
   
       <div className="flex flex-col items-center text-center border-b sm:border-b-0 sm:border-r border-gray-300 sm:pr-4 h-full space-y-1">
         <h4 className="text-md text-gray-900">Consumption</h4>
-        {loading ? (
-          <div className="animate-pulse h-6 w-20 bg-gray-200 rounded" />
-        ) : error ? (
-          <p className="text-md text-red-500">{error}</p>
-        ) : (
           <p className="text-md font-bold text-gray-900">
             {`${data.apconsumption} kVAh / ${data.consumption} kWh`}
           </p>
-        )}
         <h4 className="text-md text-gray-900">Peak Demand</h4>
-        <p className="text-md font-bold text-gray-900">{renderValue(data.peakDemand, "kVA")}</p>
+        <p className="text-md font-bold text-gray-900">{data.peakDemand} kVA</p>
       </div>
   
       <div className="flex flex-col items-center text-center border-b sm:border-b-0 sm:border-r border-gray-300 sm:pr-4 h-full space-y-1">
         <h4 className="text-md text-gray-900">Cost of Electricity</h4>
-        {loading ? (
-          <div className="animate-pulse h-6 w-20 bg-gray-200 rounded" />
-        ) : (
-          <>
-            <p className="text-md font-bold text-gray-900">₹{data.totalCost}</p>
+            <p className="text-md font-bold text-gray-900">₹ {data.totalCost}</p>
             <p className="text-md text-gray-900">{period}</p>
             <p className="text-md font-bold text-gray-900">{rate}</p>
-          </>
-        )}
       </div>
   
       <div className="flex flex-col items-center text-center h-full space-y-1">
@@ -109,7 +97,7 @@ const Edmc = () => {
           Equivalent to driving 
         </p>
         <p className="font-bold">
-            {data.carbonFootprint?.distance || "Loading..."} km
+            {data.carbonFootprint?.distance} km
           </p>
       </div>
   

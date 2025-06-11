@@ -20,7 +20,7 @@ async function fetchConsumption(startDateTime,endDateTime) {
       MIN(CASE WHEN kVAh > 0 THEN kVAh ELSE NULL END) AS kVAh_difference
      FROM modbus_data
      WHERE timestamp BETWEEN ? AND ?
-      AND energy_meter_id BETWEEN 1 AND 11
+      AND energy_meter_id BETWEEN 1 AND 12
      GROUP BY energy_meter_id`,
      [startDateTime,endDateTime]
   );

@@ -20,7 +20,6 @@ const ZoneUsage = () => {
   const tooltipRef = useRef(null);
   const [hoveredZone, setHoveredZone] = useState(null);
   const [zoneData, setZoneData] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const meterToZoneMap = {
@@ -58,11 +57,9 @@ const ZoneUsage = () => {
         });
   
         setZoneData(formattedData);
-        setLoading(false);
       } catch (error) {
         console.error("Error fetching data:", error);
         setError("Failed to fetch zone data");
-        setLoading(false);
       }
     };
   
@@ -70,7 +67,7 @@ const ZoneUsage = () => {
   }, [globalStartDateTime, globalEndDateTime]);
 
   useEffect(() => {
-    if (loading || error || !mountRef.current || zoneData.length === 0) return;
+    if (error || !mountRef.current || zoneData.length === 0) return;
   
     const mount = mountRef.current;
     const width = mount.clientWidth;
@@ -234,7 +231,7 @@ const ZoneUsage = () => {
       mount.removeEventListener("mouseover", handleMouseOver);
       window.removeEventListener("scroll", handleScroll);
     };
-  }, [zoneData, loading, error]);
+  }, [zoneData, error]);
   
 
   return (
@@ -242,16 +239,8 @@ const ZoneUsage = () => {
       <div className="relative bg-white p-7 rounded-lg shadow-md w-full flex flex-col space-y-8">
         <h2 className="text-xl font-semibold">Energy - Zone wise</h2>
 
-        {loading ? (
-          <div className="w-full h-[300px] flex items-center justify-center">
-            <span className="text-gray-600">Loading zone data...</span>
-          </div>
-        ) : error ? (
-          <div className="text-red-500 text-center">{error}</div>
-        ) : zoneData.length === 0 ? (
-          <div className="text-center text-gray-500">No zone data available</div>
-        ) : (
-<div ref={mountRef} className="w-full min-h-[300px] aspect-[16/9] overflow-hidden relative transform -translate-x-6" />        )}
+       
+<div ref={mountRef} className="w-full min-h-[300px] aspect-[16/9] overflow-hidden relative transform -translate-x-6" />        
 
         <div className="flex space-x-12 pb-2 justify-center items-start">
           <div className="bg-[#008B8B] text-white px-4 py-3 rounded-lg shadow-lg border-2 border-[#99FF99] text-lg font-bold">

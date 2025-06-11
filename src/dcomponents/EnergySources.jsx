@@ -28,15 +28,11 @@ const EnergySources = () => {
   const [zones, setZones] = useState([]);
   const [highZone, setHighZone] = useState({ meter_id: "N/A", consumption: 0 });
   const [lowZone, setLowZone] = useState({ meter_id: "N/A", consumption: 0 });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
 
   useEffect(() => {
   }, [globalSelectedDate]);
 
 const fetchConsumptionData = async (date) => {
-  setLoading(true);
-  setError(null);
   try {
     const response = await axios.get("https://mw.elementsenergies.com/api/hlcons", {
       params: {
@@ -51,10 +47,8 @@ const fetchConsumptionData = async (date) => {
       setLowZone(response.data.lowZone);
     }
   } catch (err) {
-    setError("Failed to fetch data");
     console.error("Error fetching data:", err);
   }
-  setLoading(false);
 };
 
 useEffect(() => {
@@ -105,12 +99,6 @@ useEffect(() => {
   return (
     <div className="bg-white xl:h-[100%] p-7 rounded-lg shadow-md flex flex-col space-y-7">
         <h2 className="text-xl font-semibold">Facility Overview</h2>
-
-      {loading ? (
-        <p className="text-center text-gray-600">Loading...</p>
-      ) : error ? (
-        <p className="text-center text-red-500">{error}</p>
-      ) : (
         <div className="grid grid-cols-2 gap-6">
           <div>
             <div className="xl:space-y-5 lg:space-y-4 md:space-y-4">
@@ -137,7 +125,6 @@ useEffect(() => {
             <HighchartsReact highcharts={Highcharts} options={chartOptions} />
           </div>
         </div>
-      )}
     </div>
   );
 };
