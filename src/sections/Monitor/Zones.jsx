@@ -32,7 +32,7 @@ const Zones = () => {
   const { startDateTime, endDateTime } = useContext(DateContext);
   const location = useLocation();
   const navigate = useNavigate();
-
+  const [warning, setWarning] = useState('');
   const [zoneData, setZoneData] = useState([]);
   const [selectedView, setSelectedView] = useState(
     new URLSearchParams(location.search).has('zone') ? 'single' : 'all'
@@ -40,53 +40,76 @@ const Zones = () => {
   const [selectedZone, setSelectedZone] = useState(
     parseInt(new URLSearchParams(location.search).get('zone')) || 1
   );
-  const [isLoading, setIsLoading] = useState(true);
   const [consumptionType, setConsumptionType] = useState('kVAh');
 
   useEffect(() => {
+    const start = moment(startDateTime);
+    const end = moment(endDateTime);
+    const durationHours = end.diff(start, 'hours');
+
+    if (durationHours > 24) {
+      setWarning('Only a maximum of 24 hourly values can be displayed.');
+      setZoneData([]);
+      return;
+    } else {
+      setWarning('');
+    }
     const fetchZoneData = async () => {
       try {
-        setIsLoading(true);
-
-        const endpoint = consumptionType === 'kWh' ? 'zconsumption' : 'zkVAhconsumption';
-        const zones = selectedView === 'single' ? [selectedZone] : zoneMetadata.map((zone) => zone.id);
-
-        const consumptionResponses = await Promise.all(
-          zones.map((zone) =>
-            axios.get(`https://mw.elementsenergies.com/api/${endpoint}`, {
-              params: { startDateTime, endDateTime, zone },
-            })
-          )
-        );
-
-        const formattedData = zones.map((zoneId, index) => {
-          const metadata = zoneMetadata.find((z) => z.id === zoneId);
-          const consumptionData = consumptionResponses[index].data.consumptionData || [];
-          const parsedData = consumptionData.map((item) => ({
-            hour: item.hour,
-            value: parseFloat(
-              consumptionType === 'kWh' ? item.kWh_difference || 0 : item.kVAh_difference || 0
-            ),
-          }));
-
-          return {
-            zoneId,
-            zoneName: metadata?.name || `Zone ${zoneId}`,
-            category: metadata?.category || '',
-            data: parsedData,
-          };
-        });
-
+        const isAllZones = selectedView === 'all';
+    
+        let endpoint = isAllZones 
+          ? (consumptionType === 'kWh' ? 'zkWhAZconsumption' : 'zkVAhAZconsumption')
+          : (consumptionType === 'kWh' ? 'zconsumption' : 'zkVAhconsumption');
+    
+        let response;
+        if (isAllZones) {
+          response = await axios.get(`https://mw.elementsenergies.com/api/${endpoint}`, {
+            params: { startDateTime, endDateTime },
+          });
+        } else {
+          response = await axios.get(`https://mw.elementsenergies.com/api/${endpoint}`, {
+            params: { startDateTime, endDateTime, zone: selectedZone },
+          });
+        }
+    
+        const data = response.data?.consumptionData || [];
+    
+        const groupedData = data.reduce((acc, item) => {
+          const zoneId = item.energy_meter_id;
+          if (!acc[zoneId]) {
+            acc[zoneId] = [];
+          }
+          acc[zoneId].push(item);
+          return acc;
+        }, {});
+    
+        const formattedData = zoneMetadata
+          .filter(zone => Object.keys(groupedData).includes(zone.id.toString()))
+          .map(zone => {
+            const zoneData = groupedData[zone.id] || [];
+            const parsedData = zoneData.map(item => ({
+              hour: item.hour,
+              value: parseFloat(
+                consumptionType === 'kWh' ? item.kWh_difference || 0 : item.kVAh_difference || 0 ) }));
+    
+            return {
+              zoneId: zone.id,
+              zoneName: zone.name,
+              category: zone.category || '',
+              data: parsedData,
+            };
+          });
+    
         setZoneData(formattedData);
       } catch (error) {
         console.error('Error fetching zone data:', error);
-      } finally {
-        setIsLoading(false);
       }
     };
-
+  
     fetchZoneData();
   }, [startDateTime, endDateTime, consumptionType, selectedView, selectedZone]);
+  
 
   const downloadExcel = () => {
     if (!zoneData?.length) return;
@@ -180,7 +203,7 @@ const Zones = () => {
   };
 
   const chartOptionsSingleZone = (zone) => ({
-    chart: { type: 'column', backgroundColor: 'white' },
+    chart: { type: 'column', backgroundColor: 'white', height: 500 },
     title: {
       text: `${zone.zoneName} ${zone.category ? `<span style="font-size: 12px; font-weight: normal; color: gray;">(${zone.category})</span>` : ''} - Hourly Consumption`,
       useHTML: true,
@@ -247,7 +270,8 @@ const Zones = () => {
             Select Zone
           </button>
         </div>
-        {selectedView === 'single' && (
+        {
+        selectedView === 'single' && (
          <select
          value={selectedZone}
          onChange={(e) => {
@@ -293,11 +317,13 @@ const Zones = () => {
           </div>
       </div>
 
-      {isLoading ? (
-        <div className="bg-white p-4 rounded-md shadow-sm flex justify-center items-center h-64">
-          <span className="text-gray-500">Loading data...</span>
+     { warning ? (
+          <div className="flex items-center justify-center h-64">
+          <div className="text-yellow-600 bg-yellow-100 px-6 py-4 rounded-md border border-yellow-300 text-center text-base font-medium">
+            {warning}
+          </div>
         </div>
-      ) : selectedView === 'all' ? (
+     ) : selectedView === 'all' ? (
         <HighchartsReact highcharts={Highcharts} options={chartOptionsAllZones} />
       ) : (
         zoneData

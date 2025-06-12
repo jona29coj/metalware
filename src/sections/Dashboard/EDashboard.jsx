@@ -3,14 +3,13 @@ import Batteries from '../../dcomponents/Batteries';
 import EVChargerOverview from '../evchargers';
 import WheeledInSolar from "../../dcomponents/WheeledInSolar";
 import PeakDemand from "../../dcomponents/PeakDemand";
-import EnergyConsumption from "../../dcomponents/EnergyConsumption";
 import MeterInfo from "../EnergyMeter";
 import DieselGeneration from "../../dcomponents/DieselGeneration";
 import HConsumption from "../../dcomponents/HConsumption";
 import Edmc from "../../dcomponents/Edmc";
 import ZoneUsage from "../../dcomponents/ZoneUsage";
 import EnergySources from "../../dcomponents/EnergySources";
-
+import EnergyConsumption from "../../dcomponents/EnergyConsumption";
 
 
 const EDashboard = () => {

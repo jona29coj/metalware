@@ -32,6 +32,8 @@ const dgdRoute = require('./dgd');
 const dgdcvRoute = require('./dgdcv');
 const dgdrtRoute = require('./dgdrt');
 const dgdkWhdiffRoute = require('./dgdkWhdiff');
+const zkVAhAZconsumption = require('./zkVAhAZconsumption');
+const zkWhAZconsumption = require('./zkWhAZconsumption');
 const app = express();
 const port = 3001;
 
@@ -75,6 +77,8 @@ app.use('/api', dgdRoute);
 app.use('/api', dgdcvRoute);
 app.use('/api', dgdrtRoute);
 app.use('/api', dgdkWhdiffRoute);
+app.use('/api', zkVAhAZconsumption);
+app.use('/api', zkWhAZconsumption);
 
 app.use((err, req, res, next) => {
   console.error(err.stack);

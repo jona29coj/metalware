@@ -9,6 +9,7 @@ import * as XLSX from 'xlsx';
 const PeakDemand = () => {
   const { startDateTime, endDateTime } = useContext(DateContext); 
   const [peakDemandData, setPeakDemandData] = useState([]);
+  const [warning, setWarning] = useState('');
 
   const fetchPeakDemandData = async (startDateTime, endDateTime) => {
     try {
@@ -26,9 +27,20 @@ const PeakDemand = () => {
 
   useEffect(() => {
     if (startDateTime && endDateTime) {
+      const start = moment(startDateTime);
+      const end = moment(endDateTime);
+      const durationHours = end.diff(start, 'hours');
+  
+      if (durationHours > 25) {
+        setWarning("Only a maximum of 96 data points can be displayed.");
+        setPeakDemandData([]); 
+        return;
+      }
+      setWarning('');
       fetchPeakDemandData(startDateTime, endDateTime);
     }
-  }, [startDateTime, endDateTime]);
+
+},[startDateTime, endDateTime]);
 
   const downloadExcel = () => {
     if (!peakDemandData || peakDemandData.length === 0) {
@@ -192,10 +204,18 @@ const PeakDemand = () => {
           Download Excel
         </button>
       </div>
+      {warning ? (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-yellow-600 bg-yellow-100 px-6 py-4 rounded-md border border-yellow-300 text-center text-base font-medium">
+          {warning}
+        </div>
+      </div>
+    ) : (
       <div className="w-full h-[400px] -translate-x-4">
         <HighchartsReact highcharts={Highcharts} options={options} />
       </div>
-    </div>
+    )}
+  </div>
   );
 };
 

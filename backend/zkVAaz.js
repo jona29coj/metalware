@@ -16,13 +16,14 @@ async function getTotalKVAForAllZonesPerMinute(startDateTime, endDateTime) {
   const [rows] = await pool.promise().query(
     `
     SELECT
-      DATE_FORMAT(timestamp, '%Y-%m-%d %H:%i:00') AS minute,
-      energy_meter_id AS zone_id,
-      total_kVA
-    FROM modbus_data
-    WHERE timestamp BETWEEN ? AND ?
-      AND energy_meter_id BETWEEN 1 AND 12
-    ORDER BY energy_meter_id ASC, timestamp ASC
+  DATE_FORMAT(timestamp, '%Y-%m-%d %H:%i:00') AS minute,
+  energy_meter_id AS zone_id,
+  total_kVA
+FROM modbus_data
+WHERE timestamp BETWEEN ? AND ?
+  AND energy_meter_id BETWEEN 1 AND 11
+ORDER BY timestamp ASC, energy_meter_id ASC;
+
     `,
     [startDateTime, endDateTime]
   );

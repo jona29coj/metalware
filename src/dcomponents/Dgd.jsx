@@ -5,6 +5,7 @@ import HighchartsReact from "highcharts-react-official";
 import dg from "../sections/pictures/Diesel tank.png"; 
 import { DateContext } from "../contexts/DateContext";
 import moment from "moment-timezone";
+import { grid } from "@mui/system";
 
 const Dgd = () => {
   const { id } = useParams(); 
@@ -37,12 +38,14 @@ const Dgd = () => {
           const localTime = moment.utc(this.value).tz("Asia/Kolkata"); 
           return localTime.format("HH:mm"); 
         },
-      },  
+      },
+      gridLineWidth: 0  
     },
     yAxis: {
       title: {
         text: "Energy Generated (kWh)",
       },
+      gridLineWidth: 0,
     
     },
     series: [

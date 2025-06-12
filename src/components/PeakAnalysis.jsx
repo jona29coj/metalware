@@ -25,14 +25,13 @@ const zoneMetadata = [
   { id: 9, name: "TERRACE", category: "C-49" },
   { id: 10, name: "TOOL ROOM", category: "C-50" },
   { id: 11, name: "ADMIN BLOCK", category: "C-50" },
-  { id: 12, name: "TRANSFORMER" }
 ];
 
 const PeakAnalysis = () => {
   const { startDateTime, endDateTime } = useContext(DateContext);
   const location = useLocation();
   const navigate = useNavigate();
-
+  const [warning, setWarning] = useState('');
   const [peakData, setPeakData] = useState([]);
   const [selectedView, setSelectedView] = useState(
     new URLSearchParams(location.search).has('zone') ? 'single' : 'all'
@@ -40,13 +39,23 @@ const PeakAnalysis = () => {
   const [selectedZone, setSelectedZone] = useState(
     parseInt(new URLSearchParams(location.search).get('zone')) || 1
   );
-  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    
+    const start = moment(startDateTime);
+    const end = moment(endDateTime);
+    const durationHours = end.diff(start, 'hours');
+
+    if (durationHours > 25) {
+      setWarning('Only a maximum of 96 data points can be displayed.');
+      setPeakData([]);
+      return;
+    } else {
+      setWarning('');
+    }
+
     const fetchPeakData = async () => {
       try {
-        setIsLoading(true);
-
         let formattedData = [];
 
         if (selectedView === 'single') {
@@ -98,9 +107,7 @@ const PeakAnalysis = () => {
         setPeakData(formattedData);
       } catch (err) {
         console.error("Error fetching peak data:", err);
-      } finally {
-        setIsLoading(false);
-      }
+      } 
     };
 
     fetchPeakData();
@@ -365,11 +372,14 @@ const PeakAnalysis = () => {
         </div>
       </div>
 
-      {isLoading ? (
-        <div className="bg-white p-4 rounded-md shadow-sm flex justify-center items-center h-64">
-          <span className="text-gray-500">Loading data...</span>
+      { warning ? (
+          <div className="flex items-center justify-center h-64">
+          <div className="text-yellow-600 bg-yellow-100 px-6 py-4 rounded-md border border-yellow-300 text-center text-base font-medium">
+            {warning}
+          </div>
         </div>
-      ) : selectedView === 'all' ? (
+      ):
+       selectedView === 'all' ? (
         <HighchartsReact highcharts={Highcharts} options={chartOptionsAllZones}/>
       ) : (
         peakData
