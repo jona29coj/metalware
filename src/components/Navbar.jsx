@@ -91,7 +91,7 @@ const Navbar = () => {
 
 
   const handleLogout = () => {
-    Cookies.remove('auth', { domain: '.elementsenergies.com', path: '/' });
+    Cookies.remove('authData', { domain: '.elementsenergies.com', path: '/' });
     window.location.href = 'https://elementsenergies.com/login';
   };
 
