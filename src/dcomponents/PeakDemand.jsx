@@ -196,7 +196,7 @@ const PeakDemand = () => {
   return (
     <div className="bg-white shadow-lg rounded-lg p-6 w-full h-full">
       <div className="flex justify-between items-center pb-6">
-        <h2 className="text-xl font-semibold">Peak Demand</h2>
+        <h2 className="text-xl font-semibold">Grid Peak Demand</h2>
         <button
           onClick={downloadExcel}
           className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition"

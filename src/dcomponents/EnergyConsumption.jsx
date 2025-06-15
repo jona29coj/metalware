@@ -1,236 +1,295 @@
-import React, { useState, useEffect } from "react";
-import Plot from "react-plotly.js";
+import React, { useState, useRef, useEffect } from "react";
 import axios from "axios";
 import moment from "moment-timezone";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
+import { FaArrowRight } from "react-icons/fa";
 
-const formatDateForBackend = (date) => {
-  return moment(date).tz("Asia/Kolkata").format("YYYY-MM-DD HH:mm:ss");
-};
+const EnergyHeatmap = () => {
+  const [startDate, setStartDate] = useState(() =>
+    moment.tz("Asia/Kolkata").subtract(30, "days").format("YYYY-MM-DD")
+  );
+  const [endDate, setEndDate] = useState(() =>
+    moment.tz("Asia/Kolkata").format("YYYY-MM-DD")
+  );
 
-const EnergyConsumptionChart = ({ consumptionData, dateRange }) => {
-  if (!consumptionData?.length) return <div className="text-center py-10">No data available</div>;
+  const [viewStartDate, setViewStartDate] = useState(startDate);
+  const [viewEndDate, setViewEndDate] = useState(endDate);
 
-  const daysDiff = Math.ceil((dateRange.endDate - dateRange.startDate) / (86400000)) + 1;
-  const heatmapData = Array(24).fill().map(() => Array(daysDiff).fill(null));
+  const [consumptionData, setConsumptionData] = useState([]);
+  const [tooltip, setTooltip] = useState({ visible: false, x: 0, y: 0, content: "" });
+  const [warning, setWarning] = useState("");
+
+  const svgRef = useRef();
+
+  useEffect(() => {
+    setViewStartDate(startDate);
+    setViewEndDate(endDate);
+    fetchConsumptionData(startDate, endDate);
+  }, []);
   
+
+  const fetchConsumptionData = async (start, end) => {
+    try {
+      const res = await axios.get("https://mw.elementsenergies.com/api/ehconsumption", {
+        params: { startDate: start, endDate: end },
+      });
+      setConsumptionData(res.data.consumptionData);
+    } catch (err) {
+      console.error("Error fetching data:", err);
+    }
+  };
+
+  const handleSubmit = () => {
+    const diff = moment(endDate).diff(moment(startDate), "days");
+    if (diff > 31) {
+      setWarning("Maximum range allowed is 31 days. Please adjust the dates.");
+      setConsumptionData([]);
+    } else {
+      setWarning("");
+      setViewStartDate(startDate);
+      setViewEndDate(endDate);
+      fetchConsumptionData(startDate, endDate);
+    }
+  };
+
+  const handleDownloadExcel = () => {
+    if (!consumptionData?.length) return;
+
+    const headerRow = [
+      `Start: ${moment(viewStartDate).format("YYYY-MM-DD HH:mm:ss")}`,
+      `End: ${moment(viewEndDate).format("YYYY-MM-DD HH:mm:ss")}`,
+      "",
+    ];
+
+    const columnHeaders = ["Date", "Hour", "Energy Consumed (kVAh)"];
+    const formattedData = consumptionData.map((item) => [
+      item.day,
+      `${item.hour}:00`,
+      parseFloat(item.total_consumption),
+    ]);
+
+    const dataForExcel = [headerRow, columnHeaders, ...formattedData];
+
+    const worksheet = XLSX.utils.aoa_to_sheet(dataForExcel);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "EnergyConsumption");
+
+    const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+    const data = new Blob([excelBuffer], { type: "application/octet-stream" });
+    saveAs(
+      data,
+      `Heat_Map_${moment(viewStartDate).format("YYYY_MM_DD")}_to_${moment(viewEndDate).format(
+        "YYYY_MM_DD"
+      )}.xlsx`
+    );
+  };
+
+  const daysDiff =
+    Math.ceil((new Date(viewEndDate) - new Date(viewStartDate)) / 86400000) + 1;
   const dateArray = Array.from({ length: daysDiff }, (_, i) => {
-    const d = new Date(dateRange.startDate);
+    const d = new Date(viewStartDate);
     d.setDate(d.getDate() + i);
-    return d.toISOString().split('T')[0];
+    return d.toISOString().split("T")[0];
   });
 
-  consumptionData.forEach(({ day, hour, total_consumption }) => {
+  const heatmapData = Array(24)
+    .fill()
+    .map(() => Array(daysDiff).fill(null));
+
+  consumptionData?.forEach(({ day, hour, total_consumption }) => {
     const dayIndex = dateArray.indexOf(day);
     if (dayIndex !== -1 && hour >= 0 && hour < 24) {
       heatmapData[hour][dayIndex] = parseFloat(total_consumption);
     }
   });
 
-  const { labels, monthSeparators } = dateArray.reduce((acc, _, i) => {
-    const date = new Date(dateRange.startDate);
-    date.setDate(date.getDate() + i);
-    const formattedDate = date.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
-    
-    acc.labels.push(formattedDate);
-    
-    const month = date.getMonth();
-    if (month !== acc.currentMonth && acc.currentMonth !== null) {
-      acc.monthSeparators.push({ dayIndex: i, monthName: date.toLocaleDateString('en-US', { month: 'long' }) });
-    }
-    acc.currentMonth = month;
-    
-    return acc;
-  }, { labels: [], monthSeparators: [], currentMonth: null });
+  const maxValue = Math.max(...heatmapData.flat().filter((v) => v !== null)) || 1;
 
-  return (
-    <Plot
-      data={[{
-        z: heatmapData,
-        x: labels,
-        y: Array.from({ length: 24 }, (_, i) => `${i}:00`),
-        type: "heatmap",
-        colorscale: [[0, "#006400"], [0.3, "#90EE90"], [0.6, "yellow"], [1, "red"]],
-        zmin: 0,
-        zmax: Math.max(...heatmapData.flat().filter(Boolean)) || 1,
-        colorbar: { title: "Energy (kWh)", thickness: 15, len: 0.8 },
-        hovertemplate: "<b>Date:</b> %{x}<br><b>Hour:</b> %{y}<br><b>Consumption:</b> %{z:.2f} kVAh<extra></extra>"
-      }]}
-      layout={{
-        xaxis: {
-          title: "Date",
-          tickvals: labels,
-          ticktext: labels.map((_, i) => {
-            const d = new Date(dateRange.startDate);
-            d.setDate(d.getDate() + i);
-            return (i === 0 || d.getDate() === 15 || i === labels.length - 1) ? labels[i] : d.getDate();
-          }),
-          tickangle: -45,
-          showgrid: true,
-          ...(monthSeparators.length && {
-            shapes: monthSeparators.map(({ dayIndex }) => ({
-              type: 'line', x0: dayIndex - 0.5, x1: dayIndex - 0.5, y0: -0.5, y1: 23.5,
-              line: { color: 'rgba(0,0,0,0.2)', width: 1.5, dash: 'dot' }
-            })),
-            annotations: monthSeparators.map(({ dayIndex, monthName }) => ({
-              x: dayIndex - 0.5, y: 1.05, yref: 'paper', text: monthName,
-              showarrow: false, font: { size: 11 }, xanchor: 'right'
-            }))
-          })
-        },
-        yaxis: {
-          title: "Hour of Day",
-          tickvals: Array.from({ length: 24 }, (_, i) => `${i}:00`),
-          ticktext: Array.from({ length: 24 }, (_, i) => i % 4 === 0 ? `${i}:00` : '')
-        },
-        margin: { t: 30, l: 60, r: 60, b: 100 },
-        hovermode: 'closest'
-      }}
-      style={{ width: "100%", minHeight: "500px" }}
-      config={{
-        displayModeBar: false,         
-        displaylogo: false,            
-        modeBarButtonsToRemove: [      
-          "zoom2d",
-          "pan2d",
-          "select2d",
-          "lasso2d",
-          "zoomIn2d",
-          "zoomOut2d",
-          "autoScale2d",
-          "resetScale2d"
-        ]
-      }}
-    />
-  );
-};
-
-const EnergyConsumption = () => {
-  const [dateRange, setDateRange] = useState({
-    startDate: new Date(new Date().setDate(new Date().getDate() - 30)),
-    endDate: new Date()
-  });
-  const [consumptionData, setConsumptionData] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-
-  const handleDownloadExcel = () => {
-    if (!consumptionData?.length) return;
-  
-    const headerRow = [`Start: ${moment(dateRange.startDate).format("YYYY-MM-DD HH:mm:ss")}`, 
-                       `End: ${moment(dateRange.endDate).format("YYYY-MM-DD HH:mm:ss")}`, 
-                       ""];
-  
-    const columnHeaders = ["Date", "Hour", "Energy Consumed (kVAh)"];
-  
-    const formattedData = consumptionData.map((item) => [
-      item.day,
-      `${item.hour}:00`,
-      parseFloat(item.total_consumption),
-    ]);
-  
-    const dataForExcel = [
-      headerRow,
-      columnHeaders,
-      ...formattedData,
-    ];
-  
-    const worksheet = XLSX.utils.aoa_to_sheet(dataForExcel);
-  
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "EnergyConsumption");
-  
-    const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
-    const data = new Blob([excelBuffer], { type: "application/octet-stream" });
-    saveAs(data, `Heat_Map_${moment(dateRange.startDate).format("YYYY_MM_DD")}_to_${moment(dateRange.endDate).format("YYYY_MM_DD")}.xlsx`);
+  const getColor = (value) => {
+    if (value === null) return "white";
+    const intensity = Math.min(value / maxValue, 1);
+    if (intensity < 0.3) return "#006400";
+    if (intensity < 0.6) return "#90EE90";
+    if (intensity < 0.8) return "yellow";
+    return "red";
   };
-  
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const currentDateTime = moment().tz("Asia/Kolkata").format("YYYY-MM-DD HH:mm:ss");
-        const { data } = await axios.get('https://mw.elementsenergies.com/api/ehconsumption', {
-          params: {
-            startDate: formatDateForBackend(dateRange.startDate),
-            endDate: formatDateForBackend(dateRange.endDate),
-            currentDateTime: currentDateTime
-          }
-        });
-        setConsumptionData(data.consumptionData);
-      } catch (err) {
-        setError("Failed to load data");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, [dateRange]);
+  const cellSize = 24;
+  const margin = { top: 40, right: 20, bottom: 60, left: 50 };
+  const width = dateArray.length * cellSize + margin.left + margin.right;
+  const height = 24 * cellSize + margin.top + margin.bottom;
+
+  const monthSeparators = [];
+  let currentMonth = new Date(viewStartDate).getMonth();
+  dateArray.forEach((date, i) => {
+    const month = new Date(date).getMonth();
+    if (month !== currentMonth && i > 0) {
+      monthSeparators.push({
+        position: i,
+        name: new Date(date).toLocaleDateString("en-US", { month: "long" }),
+      });
+      currentMonth = month;
+    }
+  });
 
   return (
-    <div className="bg-white shadow rounded-lg p-7">
+    <div className="bg-white shadow rounded-lg p-7 relative w-full h-[700px]">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-2">
         <h2 className="text-xl font-semibold">Energy Heat Map</h2>
         <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
-          <div className="flex gap-2">
-          <input
-  type="date"
-  value={moment(dateRange.startDate).format('YYYY-MM-DD')}
-  onChange={(e) => {
-    const newStartDate = new Date(e.target.value);
-    const maxEndDate = new Date(newStartDate);
-    maxEndDate.setDate(maxEndDate.getDate() + 30);
+          <div className="flex gap-2 items-center">
+            <input
+              type="date"
+              value={startDate}
+              max={endDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="pl-2 pr-2 py-1 border border-gray-300 rounded-md text-sm w-36"
+            />
+            <input
+              type="date"
+              value={endDate}
+              min={startDate}
+              max={new Date().toISOString().split("T")[0]}
+              onChange={(e) => setEndDate(e.target.value)}
+              className="pl-2 pr-2 py-1 border border-gray-300 rounded-md text-sm w-36"
+            />
 
-    const adjustedEndDate = dateRange.endDate > maxEndDate ? maxEndDate : dateRange.endDate;
+            <button
+              onClick={handleSubmit}
+              className="px-4 py-2 bg-blue-500 text-white rounded-md text-sm hover:bg-blue-600 flex items-center gap-2"
+            >
+              <FaArrowRight />
+            </button>
 
-    setDateRange({
-      startDate: newStartDate,
-      endDate: adjustedEndDate,
-    });
-  }}
-  max={moment(dateRange.endDate).format('YYYY-MM-DD')}
-  className="pl-2 pr-2 py-1 border border-gray-300 rounded-md text-sm w-36"
-/>
-
-<input
-  type="date"
-  value={moment(dateRange.endDate).format('YYYY-MM-DD')}
-  onChange={(e) => {
-    const newEndDate = new Date(e.target.value);
-    const minStartDate = new Date(newEndDate);
-    minStartDate.setDate(minStartDate.getDate() - 30);
-
-    const adjustedStartDate = dateRange.startDate < minStartDate ? minStartDate : dateRange.startDate;
-
-    setDateRange({
-      startDate: adjustedStartDate,
-      endDate: newEndDate,
-    });
-  }}
-  min={moment(dateRange.startDate).format('YYYY-MM-DD')}
-  max={moment().tz('Asia/Kolkata').format('YYYY-MM-DD')}
-  className="pl-2 pr-2 py-1 border border-gray-300 rounded-md text-sm w-36"
-/>
-
-<button
-    onClick={handleDownloadExcel}
-    className="px-4 py-1 text-sm bg-green-600 text-white rounded-md hover:bg-green-700"
-  >
-    Download Excel
-  </button>
-
+            <button
+              onClick={handleDownloadExcel}
+              className="px-4 py-1 text-sm bg-green-600 text-white rounded-md hover:bg-green-700"
+            >
+              Download Excel
+            </button>
           </div>
         </div>
       </div>
-      
-      {loading ? <div className="text-center py-10">Loading...</div> :
-       error ? <div className="text-center py-10 text-red-500">{error}</div> :
-       <EnergyConsumptionChart consumptionData={consumptionData} dateRange={dateRange} />}
+
+      {warning ? (
+        <div className="flex items-center justify-center h-16 mb-4">
+          <div className="text-yellow-600 bg-yellow-100 px-6 py-3 rounded-md border border-yellow-300 text-center text-base font-medium">
+            {warning}
+          </div>
+        </div>
+      ) : (
+        <>
+          <svg
+            ref={svgRef}
+            viewBox={`0 0 ${width} ${height}`}
+            preserveAspectRatio="none"
+            className="w-full"
+            style={{ height: "100%" }}
+          >
+            {Array.from({ length: 24 }, (_, i) => (
+              <text
+                key={`hour-${i}`}
+                x={margin.left - 5}
+                y={margin.top + i * cellSize + cellSize / 1.5}
+                textAnchor="end"
+                fontSize="10"
+                fill="#444"
+              >
+                {`${i}:00`}
+              </text>
+            ))}
+
+            {dateArray.map((date, i) => (
+              <text
+                key={`date-${i}`}
+                x={margin.left + i * cellSize + cellSize / 2}
+                y={margin.top - 5}
+                textAnchor="middle"
+                fontSize="10"
+                fill="#444"
+              >
+                {new Date(date).getDate()}
+              </text>
+            ))}
+
+            {heatmapData.map((row, hourIndex) =>
+              row.map((value, dayIndex) => (
+                <rect
+                  key={`cell-${hourIndex}-${dayIndex}`}
+                  x={margin.left + dayIndex * cellSize}
+                  y={margin.top + hourIndex * cellSize}
+                  width={cellSize}
+                  height={cellSize}
+                  fill={getColor(value)}
+                  onMouseEnter={(e) => {
+                    const rect = svgRef.current.getBoundingClientRect();
+                    setTooltip({
+                      visible: true,
+                      x: e.clientX - rect.left,
+                      y: e.clientY - rect.top,
+                      content: `Date: ${dateArray[dayIndex]}\nHour: ${hourIndex}:00\nConsumption: ${
+                        value !== null ? value.toFixed(2) + " kVAh" : "N/A"
+                      }`,
+                    });
+                  }}
+                  onMouseMove={(e) => {
+                    const rect = svgRef.current.getBoundingClientRect();
+                    setTooltip((prev) => ({
+                      ...prev,
+                      x: e.clientX - rect.left,
+                      y: e.clientY - rect.top,
+                    }));
+                  }}
+                  onMouseLeave={() =>
+                    setTooltip({ visible: false, x: 0, y: 0, content: "" })
+                  }
+                />
+              ))
+            )}
+
+            {monthSeparators.map(({ position, name }, i) => (
+              <g key={`separator-${i}`}>
+                <line
+                  x1={margin.left + position * cellSize}
+                  y1={margin.top}
+                  x2={margin.left + position * cellSize}
+                  y2={height - margin.bottom}
+                  stroke="black"
+                  strokeWidth="1"
+                  strokeDasharray="4 2"
+                />
+                <text
+                  x={margin.left + position * cellSize + 5}
+                  y={margin.top - 20}
+                  fontSize="12"
+                  fill="black"
+                >
+                  {name}
+                </text>
+              </g>
+            ))}
+
+
+          </svg>
+
+          {tooltip.visible && (
+            <div
+              className="absolute z-50 p-2 text-xs bg-black text-white rounded shadow"
+              style={{
+                left: tooltip.x + 10,
+                top: tooltip.y + 10,
+                whiteSpace: "pre-line",
+                pointerEvents: "none",
+              }}
+            >
+              {tooltip.content}
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 };
 
-export default EnergyConsumption;
+export default EnergyHeatmap;

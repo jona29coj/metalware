@@ -29,34 +29,34 @@ const Dgd = () => {
       text: null,
     },
     xAxis: {
-      type: "datetime",
+      categories: consumptionData.map(d =>
+        moment(d.originalTimestamp, 'YYYY-MM-DD HH:mm:ss').format('HH:mm')
+      ),
       title: {
         text: "Time",
       },
       labels: {
-        formatter: function () {
-          const localTime = moment.utc(this.value).tz("Asia/Kolkata"); 
-          return localTime.format("HH:mm"); 
+        style: {
+          fontSize: "10px",
         },
       },
-      gridLineWidth: 0  
+      gridLineWidth: 0,
     },
     yAxis: {
       title: {
         text: "Energy Generated (kWh)",
       },
       gridLineWidth: 0,
-    
     },
     series: [
       {
         name: "Energy Generated",
-        data: consumptionData,
+        data: consumptionData.map(d => ({
+          y: d.y,
+          originalTimestamp: d.originalTimestamp,
+        })),
       },
-      
-      
     ],
-    
     tooltip: {
       formatter: function () {
         return `
@@ -74,9 +74,10 @@ const Dgd = () => {
       enabled: false,
     },
     exporting: {
-      enabled: false
+      enabled: false,
     },
   };
+  
   useEffect(() => {
     const backendDGNo = (() => {
       if (id === '1') return 13;

@@ -12,8 +12,7 @@ const pool = mysql.createPool({
   queueLimit: 0,
 });
 
-async function getHourlyConsumptionForRange(startDate, endDate, currentDateTime) {
-  console.log(`Querying database from ${startDate} to ${endDate}, current time: ${currentDateTime}`);
+async function getHourlyConsumptionForRange(startDate, endDate) {
 
   try {
     const [rows] = await pool.promise().query(
@@ -27,12 +26,11 @@ async function getHourlyConsumptionForRange(startDate, endDate, currentDateTime)
       WHERE timestamp BETWEEN ? AND ?
         AND energy_meter_id BETWEEN 1 AND 11
         AND kVAh > 0
-        AND timestamp <= ?  -- Only include data up to current time
       GROUP BY day, hour, energy_meter_id
       HAVING MIN(kVAh) > 0 AND MAX(kVAh) > 0
       ORDER BY day, hour, energy_meter_id;
       `,
-      [startDate, endDate, currentDateTime]
+      [startDate, endDate]
     );
 
     const hourlyConsumption = {};
@@ -67,34 +65,16 @@ async function getHourlyConsumptionForRange(startDate, endDate, currentDateTime)
 }
 
 router.get('/ehconsumption', async (req, res) => {
-  const { startDate, endDate, currentDateTime } = req.query;
-
-  if (!startDate || !endDate || !currentDateTime) {
-    const endDate = new Date();
-    const startDate = new Date();
-    startDate.setDate(endDate.getDate() - 30);
+  const { startDate, endDate } = req.query;
+  console.log(startDate, endDate );
     
     try {
-      const currentDateTime = new Date().toISOString().slice(0, 19).replace('T', ' ');
-      const consumptionData = await getHourlyConsumptionForRange(
-        startDate.toISOString().slice(0, 19).replace('T', ' '),
-        endDate.toISOString().slice(0, 19).replace('T', ' '),
-        currentDateTime
-      );
+      const consumptionData = await getHourlyConsumptionForRange(startDate, endDate);
       return res.status(200).json({ consumptionData });
     } catch (error) {
-      console.error('Error handling request:', error);
-      return res.status(500).json({ error: 'Database query failed' });
+     throw error;
     }
   }
-
-  try {
-    const consumptionData = await getHourlyConsumptionForRange(startDate, endDate, currentDateTime);
-    res.status(200).json({ consumptionData });
-  } catch (error) {
-    console.error('Error handling request:', error);
-    res.status(500).json({ error: 'Database query failed' });
-  }
-});
+);
 
 module.exports = router;
