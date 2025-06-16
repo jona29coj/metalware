@@ -212,7 +212,7 @@ const EnergyHeatmap = () => {
       </div>
 
       {warning ? (
-        <div className="flex items-center justify-center h-16 mb-4">
+        <div className="flex items-center justify-center h-full">
           <div className="text-yellow-600 bg-yellow-100 px-6 py-3 rounded-md border border-yellow-300 text-center text-base font-medium">
             {warning}
           </div>
