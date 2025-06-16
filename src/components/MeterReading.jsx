@@ -29,7 +29,7 @@ const MeterReading = () => {
     const fetchData = async () => {
       if (startDateTime && endDateTime) {
         try {
-          const response = await axios.get('http://localhost:3001/api/meterreading', {
+          const response = await axios.get('https://mw.elementsenergies.com/api/meterreading', {
             params: {
               startDateTime: startDateTime,
               endDateTime: endDateTime,
