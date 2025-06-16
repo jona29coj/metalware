@@ -17,7 +17,9 @@ const meterToZoneMap = {
   9: { name: "TERRACE", category: "C-49" },
   10: { name: "TOOL ROOM", category: "C-50" },
   11: { name: "ADMIN BLOCK", category: "C-50" },
-  12: { name: "TRANSFORMER"}
+  12: { name: "TRANSFORMER"},
+  13: { name: "DG-1"},
+  14: { name: "DG-2"}
 };
 
 const MeterReading = () => {
@@ -27,7 +29,7 @@ const MeterReading = () => {
     const fetchData = async () => {
       if (startDateTime && endDateTime) {
         try {
-          const response = await axios.get('https://mw.elementsenergies.com/api/meterreading', {
+          const response = await axios.get('http://localhost:3001/api/meterreading', {
             params: {
               startDateTime: startDateTime,
               endDateTime: endDateTime,

@@ -5,7 +5,6 @@ import HighchartsReact from "highcharts-react-official";
 import dg from "../sections/pictures/Diesel tank.png"; 
 import { DateContext } from "../contexts/DateContext";
 import moment from "moment-timezone";
-import { grid } from "@mui/system";
 
 const Dgd = () => {
   const { id } = useParams(); 
@@ -162,6 +161,25 @@ const Dgd = () => {
 
   return (
     <div className="p-6 bg-white mt-5 rounded-lg shadow-md mx-4">
+      <div className="flex justify-center mb-6 space-x-4">
+        <button
+          className={`px-4 py-2 rounded-lg font-semibold border transition ${
+            id === "1" ? "bg-blue-600 text-white border-green-600" : "bg-white text-gray-800 border-gray-300"
+          }`}
+          onClick={() => navigate("/monitor/generator/1")}
+        >
+          DG 1
+        </button>
+        <button
+          className={`px-4 py-2 rounded-lg font-semibold border transition ${
+            id === "2" ? "bg-blue-600 text-white border-green-600" : "bg-white text-gray-800 border-gray-300"
+          }`}
+          onClick={() => navigate("/monitor/generator/2")}
+        >
+          DG 2
+        </button>
+      </div>
+
       <div className="flex flex-col lg:flex-row gap-6">
         <div className="lg:w-1/3 p-6 lg:border-r lg:border-gray-300"> 
           <h2 className="text-2xl font-bold text-center mb-4"></h2>  

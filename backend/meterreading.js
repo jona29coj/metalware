@@ -38,7 +38,7 @@ router.get('/meterreading', async (req, res) => {
       SUBSTRING_INDEX(GROUP_CONCAT(timestamp ORDER BY kVAh DESC), ',', 1) AS max_kVAh_timestamp
     FROM modbus_data
     WHERE timestamp BETWEEN ? AND ?
-      AND energy_meter_id BETWEEN 1 AND 12
+      AND energy_meter_id BETWEEN 1 AND 14
     GROUP BY energy_meter_id
   ) AS d
   JOIN (
@@ -48,7 +48,7 @@ router.get('/meterreading', async (req, res) => {
       MAX(kWh) AS max_kWh
     FROM modbus_data
     WHERE timestamp BETWEEN ? AND ?
-      AND energy_meter_id BETWEEN 1 AND 12
+      AND energy_meter_id BETWEEN 1 AND 14
     GROUP BY energy_meter_id
   ) AS agg
   ON d.energy_meter_id = agg.energy_meter_id

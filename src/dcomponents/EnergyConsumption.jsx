@@ -20,6 +20,8 @@ const EnergyHeatmap = () => {
   const [tooltip, setTooltip] = useState({ visible: false, x: 0, y: 0, content: "" });
   const [warning, setWarning] = useState("");
 
+  
+
   const svgRef = useRef();
 
   useEffect(() => {
@@ -107,13 +109,50 @@ const EnergyHeatmap = () => {
   const maxValue = Math.max(...heatmapData.flat().filter((v) => v !== null)) || 1;
 
   const getColor = (value) => {
-    if (value === null) return "white";
+    if (value === null || maxValue === 0) return "white";
+  
     const intensity = Math.min(value / maxValue, 1);
-    if (intensity < 0.3) return "#006400";
-    if (intensity < 0.6) return "#90EE90";
-    if (intensity < 0.8) return "yellow";
-    return "red";
+  
+    const gradientStops = [
+      { stop: 0.0, color: "#006400" }, 
+      { stop: 0.25, color: "#90EE90" }, 
+      { stop: 0.5, color: "#FFFF00" }, 
+      { stop: 0.75, color: "#FFA500" }, 
+      { stop: 1.0, color: "#FF0000" }, 
+    ];
+    
+  
+    const interpolateColor = (color1, color2, factor) => {
+      const c1 = parseInt(color1.slice(1), 16);
+      const c2 = parseInt(color2.slice(1), 16);
+  
+      const r1 = (c1 >> 16) & 0xff;
+      const g1 = (c1 >> 8) & 0xff;
+      const b1 = c1 & 0xff;
+  
+      const r2 = (c2 >> 16) & 0xff;
+      const g2 = (c2 >> 8) & 0xff;
+      const b2 = c2 & 0xff;
+  
+      const r = Math.round(r1 + factor * (r2 - r1));
+      const g = Math.round(g1 + factor * (g2 - g1));
+      const b = Math.round(b1 + factor * (b2 - b1));
+  
+      return `rgb(${r}, ${g}, ${b})`;
+    };
+  
+    for (let i = 0; i < gradientStops.length - 1; i++) {
+      const curr = gradientStops[i];
+      const next = gradientStops[i + 1];
+      if (intensity >= curr.stop && intensity <= next.stop) {
+        const localFactor = (intensity - curr.stop) / (next.stop - curr.stop);
+        return interpolateColor(curr.color, next.color, localFactor);
+      }
+    }
+  
+    return gradientStops[gradientStops.length - 1].color;
   };
+  
 
   const cellSize = 24;
   const margin = { top: 40, right: 20, bottom: 60, left: 50 };
@@ -184,7 +223,7 @@ const EnergyHeatmap = () => {
             ref={svgRef}
             viewBox={`0 0 ${width} ${height}`}
             preserveAspectRatio="none"
-            className="w-full"
+            className="w-full pr-16 custom-dsm:pr-20"
             style={{ height: "100%" }}
           >
             {Array.from({ length: 24 }, (_, i) => (
@@ -272,6 +311,26 @@ const EnergyHeatmap = () => {
 
 
           </svg>
+          <div className="absolute right-6 top-1/2 transform -translate-y-1/2 flex flex-col items-center gap-2">
+  <div className="text-xs text-gray-600 font-medium">Energy (kVAh)</div>
+  <div className="flex flex-row items-center gap-2">
+    <div
+      style={{
+        width: "20px",
+        height: "300px",
+        background: "linear-gradient(to bottom, red, orange, yellow, lightgreen, darkgreen)",
+        border: "1px solid #333",
+      }}
+    />
+    <div className="flex flex-col justify-between h-[300px] text-xs text-gray-800 font-medium">
+      <div>{Math.round(maxValue / 100) * 100}</div>
+      <div>0</div>
+    </div>
+  </div>
+</div>
+
+
+
 
           {tooltip.visible && (
             <div

@@ -4,6 +4,7 @@ import moment from 'moment-timezone';
 import Cookies from 'js-cookie';
 import { DateContext } from '../contexts/DateContext';
 import userprofile from '../components/userprofile.png';
+import { useUser } from '../contexts/UserContext';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -15,6 +16,8 @@ const Navbar = () => {
   const [tempEndDateTime, setTempEndDateTime] = useState(endDateTime);
   const [isStartPickerOpen, setIsStartPickerOpen] = useState(false);
   const [isEndPickerOpen, setIsEndPickerOpen] = useState(false);
+  const { username } = useUser();
+
 
 
   const profileRef = useRef(null);
@@ -224,7 +227,7 @@ const Navbar = () => {
             <div className="absolute right-0 mt-3 w-48 bg-white shadow-lg rounded-lg z-50 py-4">
               <div className="flex flex-col items-center">
                 <img src={userprofile} alt="Profile" className="w-14 h-14 rounded-full mb-2" />
-                <p className="text-gray-800 font-medium">Hi, Admin</p>
+                <p className="text-gray-800 font-medium">Hi, {username}</p>
                 <p className="text-xs text-gray-500">{moment().tz('Asia/Kolkata').format('DD MMM, HH:mm')}</p>
               </div>
               <hr className="my-2" />

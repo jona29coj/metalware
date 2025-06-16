@@ -18,6 +18,7 @@ import Settings from './sections/Settings';
 import { DateProvider } from './contexts/DateContext';
 import PeakDemandView from './components/PeakDemandView';
 import PeakAnalysis from './components/PeakAnalysis';
+import { UserProvider } from './contexts/UserContext';
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
@@ -110,6 +111,7 @@ const App = () => {
                 <Sidebar isCollapsed={isCollapsed} setIsCollapsed={toggleSidebar} />
               </div>
 
+              <UserProvider>    
               <div
                 className={`fixed top-0 h-[55px] transition-all duration-300 ${
                   isCollapsed ? 'left-[9%] w-[91%]' : 'left-[15.5%] w-[84.5%]'
@@ -118,6 +120,7 @@ const App = () => {
               >
                 <Navbar isCollapsed={isCollapsed} setIsCollapsed={toggleSidebar} />
               </div>
+              </UserProvider>
 
               <div
                 key={refreshKey}
@@ -139,7 +142,7 @@ const App = () => {
                     <Route path="/control/ltobattery" element={<LTOControl />} />
                     <Route path="/control/ioebattery" element={<IOEBatteryControl />} />
                     <Route path="/control/upsbattery" element={<UPSControl />} />
-                    <Route path="/generator/:id" element={<Dgd />} />
+                    <Route path="/monitor/generator/:id" element={<Dgd />} />
                     <Route path="/settings" element={<Settings />} />
                     <Route path="/alerts" element={<PeakDemandView />} />
                   </Routes>

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from 'axios';
 import 'tailwindcss/tailwind.css';
 import { DateContext } from "../contexts/DateContext";
+import { set } from "date-fns";
 
 const zoneDetails = {
     1: { name: "PLATING", category: "C-49" },
@@ -20,8 +21,12 @@ const zoneDetails = {
 };
  
 const getZoneNameAndCategory = (id) => {
+  if (id === 0) return { name: "TOTAL CONSUMPTION", category: null };
   return zoneDetails[id] || { name: "Unknown Zone", category: "N/A" };
 };
+
+
+
 
 const EnergyMeter = ({ name, consumption, id }) => {
   const navigate = useNavigate();
@@ -38,31 +43,42 @@ const EnergyMeter = ({ name, consumption, id }) => {
   )}      </div>
 
       <div className="pt-4 flex flex-col items-center">
-        <div className="text-2xl font-bold text-gray-800 whitespace-nowrap">{consumption.toFixed(1)} kVAh</div>
+        <div className="text-2xl font-bold text-gray-800 whitespace-nowrap">{consumption} kVAh</div>
         <div className="text-xs text-gray-400">Consumption</div>
       </div>
 
       <button
-        onClick={() => navigate(`/monitor/zones?zone=${id}`)}
-        className="mt-2 text-blue-600 font-semibold text-xs hover:text-blue-800"
-      >
-        View Details
-      </button>
+    onClick={() =>
+      id === 0
+        ? navigate(`/monitor/zones`)
+        : navigate(`/monitor/zones?zone=${id}`)
+    }
+    className="mt-2 text-blue-600 font-semibold text-xs hover:text-blue-800"
+  >
+    View Details
+  </button>
     </div>
   );
 };
 
 const MeterInfo = () => {
-  const { selectedDate: globalSelectedDate, startDateTime: globalStartDateTime, endDateTime: globalEndDateTime } = useContext(DateContext);
-  const [energyMeters, setEnergyMeters] = useState([]);
+  const { startDateTime, endDateTime } = useContext(DateContext);
+  const [energyMeters, setEnergyMeters] = useState(
+    Array.from({ length: 12 }, (_, i) => ({
+      id: i + 1,
+      name: `Zone ${i + 1}`,
+      consumption: 0,
+    }))
+  );
+    const [totalConsumption, setTotalConsumption] = useState(0);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await axios.get(`https://mw.elementsenergies.com/api/econsumption`, {
           params: {
-            startDateTime: globalStartDateTime,
-            endDateTime: globalEndDateTime
+            startDateTime,
+            endDateTime
           }
         });
   
@@ -73,22 +89,52 @@ const MeterInfo = () => {
         }));
   
         setEnergyMeters(formattedData);
-      } catch (error) {
-        console.error('Error fetching data:', error);
+
+        const totalConsRes = await axios.get(`https://mw.elementsenergies.com/api/mcapcons`, {
+          params: { startDateTime, endDateTime }
+          
+        });
+        setTotalConsumption(totalConsRes.data.consumption); 
+           } 
+        catch (error) {
+          throw error;
       }
     };
   
     fetchData();
-  }, [globalStartDateTime, globalEndDateTime]);
+  }, [startDateTime, endDateTime]);
   
+  const regularMeters = energyMeters.filter((meter) => meter.id !== 12);
+  const transformerMeter = energyMeters.find((meter) => meter.id === 12);
 
   return (
     <div className="p-6 bg-white rounded-lg shadow-md flex flex-col">
       <h2 className="text-xl font-semibold pb-7">Energy Meters</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-16 gap-y-6 mx-auto">
-        {energyMeters.map((meter) => (
-          <EnergyMeter key={meter.id} name={meter.name} consumption={meter.consumption} id={meter.id} />
+      {regularMeters.map((meter) => (
+          <EnergyMeter
+            key={meter.id}
+            name={meter.name}
+            consumption={meter.consumption}
+            id={meter.id}
+          />
         ))}
+
+        <EnergyMeter
+          key="total"
+          name="Total Consumption"
+          consumption={totalConsumption}
+          id={0} 
+        />
+
+        {transformerMeter && (
+          <EnergyMeter
+            key="transformer"
+            name="Transformer"
+            consumption={transformerMeter.consumption}
+            id={12}
+          />
+        )}
       </div>
     </div>
   );

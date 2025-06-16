@@ -9,6 +9,7 @@ const links = {
     { name: "eLog", path: "/monitor/overview" },
     { name: "Zones", path: "/monitor/zones" },
     { name: "Peak Analysis", path: "/monitor/peakanalysis" },
+    { name: "Diesel Generator", path: "/monitor/generator/1"}
   ],
 };
 
@@ -91,7 +92,6 @@ const Sidebar = ({ isCollapsed }) => {
             </div>
           </div>
 
-          {/* Dropdown when expanded */}
           {!isCollapsed && dropdown.monitor && (
             <div className="ml-6 mt-2 flex flex-col">
               {links.monitor.map((item, index) => (

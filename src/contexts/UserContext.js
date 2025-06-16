@@ -16,6 +16,7 @@ export const UserProvider = ({ children }) => {
         const data = await response.json();
         if (data.username) {
           setUsername(data.username);
+          console.log('Username fetched:', data.username);
         } else {
           setUsername('Admin');
         }

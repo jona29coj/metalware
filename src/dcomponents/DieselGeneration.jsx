@@ -79,7 +79,7 @@ const DieselGeneration = () => {
             </p>                  
           </div>
           <button 
-            onClick={() => navigate('/generator/1')}
+            onClick={() => navigate('/monitor/generator/1')}
             className="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg transition-all"
           >
             View Details
@@ -101,7 +101,7 @@ const DieselGeneration = () => {
             </p>           
           </div>
           <button 
-            onClick={() => navigate('/generator/2')}
+            onClick={() => navigate('/monitor/generator/2')}
             className="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg transition-all"
           >
             View Details
