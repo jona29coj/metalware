@@ -1,20 +1,14 @@
-// src/contexts/AuthContext.js
 
 import React, { createContext, useState, useContext, useEffect } from 'react';
 
-// Create a context for authentication
 const AuthContext = createContext();
 
-// AuthProvider component to wrap around your application
 export const AuthProvider = ({ children }) => {
-  // Initialize user state
   const [user, setUser] = useState(() => {
-    // Check if a user is already logged in
     const savedUser = localStorage.getItem('user');
     return savedUser ? JSON.parse(savedUser) : null;
   });
 
-  // Function to handle login
   const login = (username, password) => {
     // Replace this with your actual authentication logic (e.g., API call)
     // For demonstration, we're using hardcoded credentials

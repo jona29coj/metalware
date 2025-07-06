@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
+const path = require('path');
 
 const energyRoutes = require('./hconsumption');
 const meterRoutes = require('./econsumption');
@@ -19,7 +20,7 @@ const hkVAhRoutes = require('./hkVAhconsumption');
 const zkVAhConsumptionRoutes = require('./zkVAhconsumption');
 const ccRoutes = require('./cc');
 const apdRoutes = require('./apd');
-const DashboardRoutes = require('./dashboard');
+const DashboardRoutes = require('./dashboardpt1');
 const hcostconsumptionRoutes = require('./hcostconsumption');
 const authRoute = require('./auth');
 const heartBeatRoute = require('./heartbeat');
@@ -34,6 +35,8 @@ const dgdrtRoute = require('./dgdrt');
 const dgdkWhdiffRoute = require('./dgdkWhdiff');
 const zkVAhAZconsumption = require('./zkVAhAZconsumption');
 const zkWhAZconsumption = require('./zkWhAZconsumption');
+const dashboardpt1Route = require('./dashboardpt1');
+const dashboardpt2Route = require('./dashboardpt2');
 const app = express();
 const port = 3001;
 
@@ -47,6 +50,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
+app.use('/reports', express.static(path.join(__dirname, 'monthly_reports')));
 app.use('/api', energyRoutes);
 app.use('/api', meterRoutes);
 app.use('/api', ehConsumptionRoutes);
@@ -79,6 +83,8 @@ app.use('/api', dgdrtRoute);
 app.use('/api', dgdkWhdiffRoute);
 app.use('/api', zkVAhAZconsumption);
 app.use('/api', zkWhAZconsumption);
+app.use('/api', dashboardpt1Route);
+app.use('/api', dashboardpt2Route);
 
 app.use((err, req, res, next) => {
   console.error(err.stack);

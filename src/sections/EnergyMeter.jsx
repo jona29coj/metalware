@@ -75,7 +75,7 @@ const MeterInfo = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(`https://mw.elementsenergies.com/api/econsumption`, {
+        const response = await axios.get(`http://localhost:3001/api/econsumption`, {
           params: {
             startDateTime,
             endDateTime
@@ -90,7 +90,7 @@ const MeterInfo = () => {
   
         setEnergyMeters(formattedData);
 
-        const totalConsRes = await axios.get(`https://mw.elementsenergies.com/api/mcapcons`, {
+        const totalConsRes = await axios.get(`http://localhost:3001/api/mcapcons`, {
           params: { startDateTime, endDateTime }
           
         });

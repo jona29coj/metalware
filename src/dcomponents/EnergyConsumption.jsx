@@ -33,7 +33,7 @@ const EnergyHeatmap = () => {
 
   const fetchConsumptionData = async (start, end) => {
     try {
-      const res = await axios.get("https://mw.elementsenergies.com/api/ehconsumption", {
+      const res = await axios.get("http://localhost:3001/api/ehconsumption", {
         params: { startDate: start, endDate: end },
       });
       setConsumptionData(res.data.consumptionData);

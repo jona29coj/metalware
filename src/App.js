@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
-import Cookies from 'js-cookie';
 import Sidebar from './components/Sidebar';
 import Navbar from './components/Navbar';
 import Profile from './sections/Profile';
@@ -19,6 +18,8 @@ import { DateProvider } from './contexts/DateContext';
 import PeakDemandView from './components/PeakDemandView';
 import PeakAnalysis from './components/PeakAnalysis';
 import { UserProvider } from './contexts/UserContext';
+import Reports from './components/Reports';
+import Cookies from 'js-cookie';
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
@@ -100,7 +101,7 @@ const App = () => {
     <DateProvider>
         <BrowserRouter>
           <ScrollToTop />
-          {isAuthenticated &&( 
+          {( 
             <div className="min-h-screen flex bg-gray-100">
               <div
                 className={`bg-white shadow-md transition-all duration-300 fixed top-0 left-0 h-full ${
@@ -110,7 +111,6 @@ const App = () => {
               >
                 <Sidebar isCollapsed={isCollapsed} setIsCollapsed={toggleSidebar} />
               </div>
-
               <UserProvider>    
               <div
                 className={`fixed top-0 h-[55px] transition-all duration-300 ${
@@ -145,6 +145,7 @@ const App = () => {
                     <Route path="/monitor/generator/:id" element={<Dgd />} />
                     <Route path="/settings" element={<Settings />} />
                     <Route path="/alerts" element={<PeakDemandView />} />
+                    <Route path="/reports" element={<Reports />} />
                   </Routes>
                 </div>
               </div>

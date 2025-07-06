@@ -34,7 +34,7 @@ const EnergySources = () => {
 
 const fetchConsumptionData = async (date) => {
   try {
-    const response = await axios.get("https://mw.elementsenergies.com/api/hlcons", {
+    const response = await axios.get("http://localhost:3001/api/hlcons", {
       params: {
         startDateTime: globalStartDateTime,
         endDateTime: globalEndDateTime,

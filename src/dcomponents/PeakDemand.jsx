@@ -13,7 +13,7 @@ const PeakDemand = () => {
 
   const fetchPeakDemandData = async (startDateTime, endDateTime) => {
     try {
-      const response = await axios.get("https://mw.elementsenergies.com/api/opeakdemand", {
+      const response = await axios.get("http://localhost:3001/api/opeakdemand", {
         params: {
           startDateTime,
           endDateTime,

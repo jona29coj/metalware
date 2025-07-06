@@ -13,8 +13,8 @@ const Edmc = () => {
   const { startDateTime, endDateTime } = useContext(DateContext);
   const { period, rate } = getCurrentRate(new Date().getHours());
   const [data, setData] = useState({
-    consumption: 0,
-    apconsumption: 0,
+    consumptionkVAh: 0,
+    consumptionkWh: 0,
     peakDemand: 0,
     totalCost: 0,
     carbonFootprint: {
@@ -23,39 +23,36 @@ const Edmc = () => {
     }
   });  
   const [error, setError] = useState(null);
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [consRes, consapRes, peakRes, costRes] = await Promise.all([
-          axios.get('https://mw.elementsenergies.com/api/mccons', { params: { startDateTime, endDateTime } }),
-          axios.get('https://mw.elementsenergies.com/api/mcapcons', { params: { startDateTime, endDateTime } }),
-          axios.get('https://mw.elementsenergies.com/api/mcpeak', { params: { startDateTime, endDateTime } }),
-          axios.get('https://mw.elementsenergies.com/api/cc', { params: { startDateTime, endDateTime } }),
-        ]);
+  
 
-        const consumption = consRes.data.consumption || 0;
-        const apconsumption = consapRes.data.consumption || 0;
-        const peakDemand = peakRes.data.peakDemand || 0;
-        const totalCost = costRes.data.totalCost || 0;
-        const emissions = (consumption * 0.82).toFixed(1);
-        const distance = (emissions * 0.356).toFixed(1);
+useEffect(() => {
+  const fetchData = async () => {
+    try {
+      const res = await axios.get('http://localhost:3001/api/minicardpt1', {
+        params: { startDateTime, endDateTime }
+      });
 
-        setData({
-          consumption,
-          apconsumption,
-          peakDemand,
-          totalCost,
-          carbonFootprint: { emissions, distance },
-        });
+      const {
+        consumptionkVAh,
+        consumptionkWh,
+        peakDemand,
+      } = res.data;
 
-      } catch (err) {
-        console.error("Error fetching data:", err);
-        setError("Failed to fetch data");
-      }
-    };
+      setData({        
+        consumptionkVAh,
+        consumptionkWh,
+        peakDemand,
+      });
 
-    fetchData();
-  }, [startDateTime, endDateTime]);
+    } catch (err) {
+      console.error("Error fetching data:", err);
+      setError("Failed to fetch data");
+    }
+  };
+
+  fetchData();
+}, [startDateTime, endDateTime]);
+
 
   return (
     <div className="bg-white shadow-md p-4 rounded-lg w-full">
@@ -75,7 +72,7 @@ const Edmc = () => {
       <div className="flex flex-col items-center text-center border-b sm:border-b-0 sm:border-r border-gray-300 sm:pr-4 h-full space-y-1">
         <h4 className="text-md text-gray-900">Consumption</h4>
           <p className="text-md font-bold text-gray-900">
-            {`${data.apconsumption} kVAh / ${data.consumption} kWh`}
+            {`${data.consumptionkVAh} kVAh / ${data.consumptionkWh} kWh`}
           </p>
         <h4 className="text-md text-gray-900">Peak Demand</h4>
         <p className="text-md font-bold text-gray-900">{data.peakDemand} kVA</p>
@@ -83,7 +80,7 @@ const Edmc = () => {
   
       <div className="flex flex-col items-center text-center border-b sm:border-b-0 sm:border-r border-gray-300 sm:pr-4 h-full space-y-1">
         <h4 className="text-md text-gray-900">Cost of Electricity</h4>
-            <p className="text-md font-bold text-gray-900">₹ {data.totalCost}</p>
+            <p className="text-md font-bold text-gray-900">₹ 0</p>
             <p className="text-md text-gray-900">{period}</p>
             <p className="text-md font-bold text-gray-900">{rate}</p>
       </div>
@@ -100,7 +97,6 @@ const Edmc = () => {
             {data.carbonFootprint?.distance} km
           </p>
       </div>
-  
     </div>
   </div>
   

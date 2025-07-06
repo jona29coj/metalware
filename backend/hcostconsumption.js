@@ -1,15 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const mysql = require('mysql2');
-
-const pool = mysql.createPool({
-  host: '18.188.231.51',
-  user: 'admin',
-  password: '2166',
-  database: 'metalware',
-  waitForConnections: true,
-  connectionLimit: 10,
-});
+const pool = require('./db.js');
 
 function getTariffRate(hour) {
   if (hour >= 5 && hour < 10) {
@@ -38,7 +29,7 @@ async function fetchHourlyCostConsumption(startDateTime, endDateTime) {
   `;
 
   try {
-    const [rows] = await pool.promise().query(query, [startDateTime, endDateTime]);
+    const [rows] = await pool.query(query, [startDateTime, endDateTime]);
 
     const hourlyCostConsumption = rows.reduce((acc, { hour, kVAh_difference }) => {
       const roundedDifference = parseFloat(kVAh_difference || 0).toFixed(1);

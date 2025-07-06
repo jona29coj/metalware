@@ -1,22 +1,14 @@
 const express = require('express');
 const router = express.Router();
-const mysql = require('mysql2');
+const pool = require('./db.js');
 
-const pool = mysql.createPool({
-  host: '18.188.231.51',
-  user: 'admin',
-  password: '2166',
-  database: 'metalware',
-  waitForConnections: true,
-  connectionLimit: 10,
-});
 
 async function fetchHourlyConsumption(startDateTime, endDateTime) {
   const query = `
   SELECT
   DATE_FORMAT(timestamp, '%Y-%m-%d %H:00:00') AS hour,
   energy_meter_id,
-  MAX(kWh) - MIN(kWh) AS kWh_difference
+  ROUND(MAX(kWh) - MIN(kWh),1) AS kWh_difference
 FROM modbus_data
 WHERE timestamp BETWEEN ? AND ?
   AND energy_meter_id BETWEEN 1 AND 11
@@ -25,14 +17,20 @@ ORDER BY hour ASC;
   `;
 
   try {
-    const [rows] = await pool.promise().query(query, [startDateTime, endDateTime]);
+    const [rows] = await pool.query(query, [startDateTime, endDateTime]);
+    console.log(rows);
 
     const hourlyConsumption = rows.reduce((acc, { hour, kWh_difference }) => {
-      const roundedDifference = parseFloat(kWh_difference || 0).toFixed(1);
-      acc[hour] = (acc[hour] || 0) + parseFloat(roundedDifference);
+      const diff = parseFloat(kWh_difference || 0);
+      acc[hour] = (acc[hour] || 0) + diff;
       return acc;
     }, {});
 
+    Object.keys(hourlyConsumption).forEach(hour => {
+      hourlyConsumption[hour] = parseFloat(hourlyConsumption[hour].toFixed(1));
+    })
+    
+console.log(hourlyConsumption);
     return hourlyConsumption;
   } catch (error) {
     throw error;
@@ -41,21 +39,10 @@ ORDER BY hour ASC;
 
 router.get('/hconsumption', async (req, res) => {
   const { startDateTime, endDateTime } = req.query;
-
-  if (!startDateTime || !endDateTime) {
-    console.warn('Missing required query parameters:', { startDateTime, endDateTime });
-    return res.status(400).json({ error: 'startDateTime and endDateTime are required' });
-  }
-
   try {
     const consumptionData = await fetchHourlyConsumption(startDateTime, endDateTime);
 
-    const roundedConsumptionData = Object.entries(consumptionData).reduce((acc, [hour, value]) => {
-      acc[hour] = parseFloat(value).toFixed(1);
-      return acc;
-    }, {});
-
-    res.status(200).json({ consumptionData: roundedConsumptionData }); 
+    res.status(200).json({ consumptionData }); 
   } catch (error) {
     res.status(500).json({ error: 'Database query failed' });
   }

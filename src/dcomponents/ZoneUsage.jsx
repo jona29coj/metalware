@@ -15,13 +15,6 @@ const highlightColors = {
 };
 
 const ZoneUsage = () => {
-  const { selectedDate: globalSelectedDate, startDateTime: globalStartDateTime, endDateTime: globalEndDateTime } = useContext(DateContext);
-  const mountRef = useRef(null);
-  const tooltipRef = useRef(null);
-  const [hoveredZone, setHoveredZone] = useState(null);
-  const [zoneData, setZoneData] = useState([]);
-  const [error, setError] = useState(null);
-
   const meterToZoneMap = {
     1: { name: "PLATING", category: "C-49" },
     2: { name: "DIE CASTING + CHINA BUFFING + CNC", category: "C-50" },
@@ -35,28 +28,39 @@ const ZoneUsage = () => {
     10: { name: "TOOL ROOM", category: "C-50" },
     11: { name: "ADMIN BLOCK", category: "C-50" },
   };
+  const { startDateTime, endDateTime } = useContext(DateContext);
+  const mountRef = useRef(null);
+  const tooltipRef = useRef(null);
+  const [hoveredZone, setHoveredZone] = useState(null);
+  const [zoneData, setZoneData] = useState(()=> Object.entries(meterToZoneMap).map(([id,info]) => ({
+    id: Number(id),
+    name: info.name,
+    category: info.category,
+    consumption: 0
+  })));
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(`https://mw.elementsenergies.com/api/econsumption`, {
+        const response = await axios.get(`http://localhost:3001/api/econsumption`, {
           params: {
-            startDateTime: globalStartDateTime,
-            endDateTime: globalEndDateTime,
+            startDateTime,
+            endDateTime
           },
         });
   
-        const formattedData = response.data.consumptionData.map((entry) => {
-          const zoneInfo = meterToZoneMap[entry.energy_meter_id];
+        const updatedZones = zoneData.map((zone) => {
+          const matchingEntry = response.data.consumptionData.find(
+            (entry) => entry.energy_meter_id === zone.id
+          );
           return {
-            id: entry.energy_meter_id,
-            name: zoneInfo?.name || `Zone ${entry.energy_meter_id}`,
-            category: zoneInfo?.category || "Unknown",
-            consumption: parseFloat(entry.consumption),
+            ...zone,
+            consumption: matchingEntry ? parseFloat(matchingEntry.consumption) : 0,
           };
         });
   
-        setZoneData(formattedData);
+        setZoneData(updatedZones);
       } catch (error) {
         console.error("Error fetching data:", error);
         setError("Failed to fetch zone data");
@@ -64,7 +68,7 @@ const ZoneUsage = () => {
     };
   
     fetchData();
-  }, [globalStartDateTime, globalEndDateTime]);
+  }, [startDateTime, endDateTime]);
 
   useEffect(() => {
     if (error || !mountRef.current || zoneData.length === 0) return;

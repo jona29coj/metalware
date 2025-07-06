@@ -1,17 +1,17 @@
 const express = require('express');
-const mysql = require('mysql2');
+const moment = require('moment-timezone');
 const router = express.Router();
-
+const mysql = require('mysql2');
 const pool = mysql.createPool({
   host: '18.188.231.51',
   user: 'admin',
   password: '2166',
   database: 'metalware',
   waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0,
+  connectionLimit: 10
 });
 
+// Peak Demand Data
 async function getPeakDemandAboveThreshold(startDateTime, endDateTime) {
   const [rows] = await pool.promise().query(
     `
@@ -28,32 +28,85 @@ async function getPeakDemandAboveThreshold(startDateTime, endDateTime) {
     [startDateTime, endDateTime]
   );
 
-  const result = [];
-  let id = 1;
-
-  rows.forEach(entry => {
-    const kVA = parseFloat(entry.total_kVA).toFixed(1);
-    const entryWithId = {
-      id: id++,
-      minute: entry.minute,
-      total_kVA: kVA
-    };
-    result.push(entryWithId);
-  });
-
-  return result;
+  return rows.map((entry, index) => ({
+    id: index + 1,
+    minute: entry.minute,
+    total_kVA: parseFloat(entry.total_kVA).toFixed(1)
+  }));
 }
 
+async function getDGActivateandDeactivate(startDateTime, endDateTime) {
+  const [rows] = await pool.promise().query(
+    `
+    SELECT 
+      energy_meter_id,
+      timestamp,
+      kWh
+    FROM modbus_data
+    WHERE energy_meter_id IN (13, 14)
+      AND timestamp BETWEEN ? AND ?
+    ORDER BY energy_meter_id, timestamp
+    `,
+    [startDateTime, endDateTime]
+  );
+
+  const events = [];
+  const state = {};
+
+  for (const row of rows) {
+    const id = row.energy_meter_id;
+    const ts = moment.tz(row.timestamp, 'Asia/Kolkata'); // force IST
+    const kWh = parseFloat(row.kWh);
+
+    if (!state[id]) {
+      state[id] = { on: false, prev: kWh, startKWh: null, startTime: null };
+      continue;
+    }
+
+    const meter = state[id];
+
+    if (!meter.on && kWh > meter.prev) {
+      meter.on = true;
+      meter.startKWh = kWh;
+      meter.startTime = ts.clone();
+
+      events.push({
+        meter: id,
+        timestamp: ts.format('YYYY-MM-DD HH:mm:ss'), // IST string
+        status: "DG started",
+        kWh: kWh
+      });
+    } else if (meter.on && kWh === meter.prev) {
+      meter.on = false;
+
+      events.push({
+        meter: id,
+        timestamp: ts.format('YYYY-MM-DD HH:mm:ss'),
+        status: "DG stopped",
+        kWh: kWh,
+        startKWh: meter.startKWh,
+        startTime: meter.startTime.format('YYYY-MM-DD HH:mm:ss')
+      });
+    }
+
+    meter.prev = kWh;
+  }
+
+  return events;
+}
+
+// API Route
 router.get('/apd', async (req, res) => { 
   const { startDateTime, endDateTime } = req.query;
-  if (!startDateTime || !endDateTime) {
-    return res.status(400).json({ error: 'Date and currentDateTime are required' });
-  }
+  console.log("Received:", startDateTime, endDateTime);
 
   try {
     const peakDemandAboveThresholdData = await getPeakDemandAboveThreshold(startDateTime, endDateTime);
+    const dgActivations = await getDGActivateandDeactivate(startDateTime, endDateTime);
+
     res.status(200).json({
-      peakDemandAboveThreshold: peakDemandAboveThresholdData
+      peakDemandAboveThreshold: peakDemandAboveThresholdData,
+      dgActivations: dgActivations
     });
   } catch (error) {
     console.error('Database error:', error);

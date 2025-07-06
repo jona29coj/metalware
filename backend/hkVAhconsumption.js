@@ -1,22 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const mysql = require('mysql2');
-
-const pool = mysql.createPool({
-  host: '18.188.231.51',
-  user: 'admin',
-  password: '2166',
-  database: 'metalware',
-  waitForConnections: true,
-  connectionLimit: 10,
-});
+const pool = require('./db'); 
 
 async function fetchHourlyConsumption(startDateTime, endDateTime) {
   const query = `
   SELECT
       DATE_FORMAT(timestamp, '%Y-%m-%d %H:00:00') AS hour,
       energy_meter_id,
-      MAX(kVAh) - MIN(kVAh) AS kVAh_difference
+      ROUND(MAX(kVAh) - MIN(kVAh),1) AS kVAh_difference
     FROM modbus_data
     WHERE timestamp BETWEEN ? AND ?
       AND energy_meter_id BETWEEN 1 AND 11
@@ -25,15 +16,20 @@ async function fetchHourlyConsumption(startDateTime, endDateTime) {
   `;
 
   try {
-    const [rows] = await pool.promise().query(query, [startDateTime, endDateTime]);
+    const [rows] = await pool.query(query, [startDateTime, endDateTime]);
 
     const hourlyConsumption = rows.reduce((acc, { hour, kVAh_difference }) => {
-      const roundedDifference = parseFloat(kVAh_difference || 0).toFixed(1);
-      acc[hour] = (acc[hour] || 0) + parseFloat(roundedDifference);
+      acc[hour] = (acc[hour] || 0) + (parseFloat(kVAh_difference) || 0); // sum first
       return acc;
     }, {});
 
-    return hourlyConsumption;
+    // Round only the final result per hour
+    const roundedResult = Object.entries(hourlyConsumption).reduce((acc, [hour, value]) => {
+      acc[hour] = parseFloat(value.toFixed(1));
+      return acc;
+    }, {});
+
+    return roundedResult;
   } catch (error) {
     throw error;
   }

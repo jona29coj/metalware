@@ -49,7 +49,7 @@ const HConsumption = () => {
           endpoint = 'hcostconsumption'; 
         }
 
-        const response = await axios.get(`https://mw.elementsenergies.com/api/${endpoint}`, {
+        const response = await axios.get(`http://localhost:3001/api/${endpoint}`, {
           params: {
             startDateTime,
             endDateTime

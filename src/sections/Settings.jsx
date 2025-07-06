@@ -154,44 +154,6 @@ const Settings = ({ setUserProfileName }) => {
             </div>
           </div>
         </div>
-
-        {/* Old Password and New Password */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Old Password</label>
-            <input
-              type="password"
-              value={oldPassword}
-              onChange={(e) => setOldPassword(e.target.value)}
-              className="mt-1 p-2 w-full border border-gray-300 rounded-md"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">New Password</label>
-            <input
-              type="password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              className="mt-1 p-2 w-full border border-gray-300 rounded-md"
-            />
-          </div>
-        </div>
-
-        {/* Save and Cancel Buttons */}
-        <div className="flex justify-end space-x-4 mt-8">
-          <button
-            onClick={handleCancel}
-            className="px-4 py-2 border border-gray-300 rounded-md text-gray-700"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleSave}
-            className="px-4 py-2 bg-green-500 text-white rounded-md"
-          >
-            Save
-          </button>
-        </div>
       </div>
     </div>
   );

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { MdKeyboardArrowDown, MdKeyboardArrowUp } from "react-icons/md";
-import { FiMonitor, FiAlertCircle, FiFileText, FiHome, FiBook, FiUser, FiSettings, FiFile, FiFolder } from "react-icons/fi";
+import { FiMonitor, FiAlertCircle, FiFileText, FiHome, FiUser, FiSettings, FiFolder } from "react-icons/fi";
 import logo from "../logo2.png";
 
 const links = {
@@ -17,7 +17,7 @@ const navItems = [
   { name: "Alerts", path: "/alerts", icon: FiAlertCircle },
   { name: "Building Profile", path: "/profile", icon: FiUser },
   { name: "Files", path: "/files", icon: FiFolder },
-  { name: "Settings", path: "/settings", icon: FiSettings }, 
+  { name: "Settings", path: "/settings", icon: FiSettings }
 ];
 
 const Sidebar = ({ isCollapsed }) => {

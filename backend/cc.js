@@ -103,7 +103,6 @@ router.get('/cc', async (req, res) => {
     );
     res.status(200).json({
       totalCost,
-      breakdown: rows, 
     });
 
   } catch (error) {

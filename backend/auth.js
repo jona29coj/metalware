@@ -3,7 +3,6 @@ const crypto = require('crypto');
 const mysql = require('mysql2');
 const moment = require('moment-timezone');
 
-
 const pool = mysql.createPool({
   host: '18.188.231.51',
   user: 'admin',

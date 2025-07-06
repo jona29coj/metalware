@@ -14,10 +14,9 @@ const CombinedComponent = () => {
       <div className="grid lg:grid-cols-1 xl:grid-cols-2 gap-4 items-center w-full ">
         <div className="p-6 bg-white rounded-lg flex flex-col gap-[10px] items-center h-[100%]"> 
           <div className='flex aling-center justify-center '>
-            <img src={modelImage} alt="Metalware Model" className="md:w-[auto] md:h-[30vmin] lg:w-[auto] lg:h-[35vmin] xl:h-[60vmin]"/>
+            <img src={modelImage} alt="Metalware Model" className="md:w-[auto] md:h-[30vmin] lg:w-[auto] lg:h-[35vmin] xl:h-[50vmin] aspect-auto"/>
           </div>
         </div>
-
         <div className="text-start grid grid-cols-2 gap-4">
           <div className="lg:text-sm xl:text-md font-bold text-gray-500 border-r-2 border-gray space-y-3 ">
             <p>Company Name:</p>
