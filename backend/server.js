@@ -2,7 +2,11 @@ const express = require('express');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const path = require('path');
+require('./scheduler'); 
+const fs = require('fs');
 
+
+const reportsDir = path.join(__dirname, 'monthly_reports');
 const energyRoutes = require('./hconsumption');
 const meterRoutes = require('./econsumption');
 const ehConsumptionRoutes = require('./ehconsumption');
@@ -42,6 +46,7 @@ const port = 3001;
 
 const baseFolderPath = '/Users/jonathanprince/Documents/Work/filesTest';
 
+app.use('/reports', express.static(path.join(__dirname, 'monthly_reports')));
 app.use('/uploads', express.static(baseFolderPath));
 
 
@@ -50,7 +55,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-app.use('/reports', express.static(path.join(__dirname, 'monthly_reports')));
 app.use('/api', energyRoutes);
 app.use('/api', meterRoutes);
 app.use('/api', ehConsumptionRoutes);
@@ -86,10 +90,24 @@ app.use('/api', zkWhAZconsumption);
 app.use('/api', dashboardpt1Route);
 app.use('/api', dashboardpt2Route);
 
+app.get('/api/list-reports', (req, res) => {
+  fs.readdir(reportsDir, (err, files) => {
+    if (err) {
+      console.error('Error reading monthly_reports:', err);
+      return res.status(500).json({ error: 'Unable to fetch reports.' });
+    }
+
+    const excelFiles = files.filter(file => file.endsWith('.xlsx'));
+    res.json(excelFiles);
+  });
+});
+
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).send('Something broke!');
 });
+
+
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);

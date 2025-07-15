@@ -18,8 +18,6 @@ const Navbar = () => {
   const [isEndPickerOpen, setIsEndPickerOpen] = useState(false);
   const { username } = useUser();
 
-
-
   const profileRef = useRef(null);
   const notificationRef = useRef(null);
   const datePickerRef = useRef(null);

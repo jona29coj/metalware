@@ -1,11 +1,12 @@
 const fs = require('fs-extra');
+const path = require('path');
 const XLSX = require('xlsx');
 const moment = require('moment-timezone');
 const mysql = require('mysql2/promise');
 
 const meterMap = {
   1: { name: "PLATING", category: "C-49" },
-  2: { name: "DC+CB+CNC", category: "C-50" },
+  2: { name: "DIE CASTING + CHINA BUFFING + CNC", category: "C-50" },
   3: { name: "SCOTCH BUFFING", category: "C-50" },
   4: { name: "BUFFING", category: "C-49" },
   5: { name: "SPRAY+EPL-I", category: "C-50" },
@@ -15,7 +16,7 @@ const meterMap = {
   9: { name: "TERRACE", category: "C-49" },
   10: { name: "TOOL ROOM", category: "C-50" },
   11: { name: "ADMIN BLOCK", category: "C-50" },
-  12: { name: "TRANSFORMER", category: "" }
+  12: { name: "TRANSFORMER", category: ""}
 };
 
 const pool = mysql.createPool({
@@ -53,86 +54,105 @@ async function fetchMinMaxReadingsBatch(startTime, endTime) {
   return readings;
 }
 
-async function writeToExcelFile(allReadings, filePath) {
-  const workbook = XLSX.utils.book_new();
+function hasData(readings) {
+  return Object.values(readings).some(({ min, max }) => min.kWh && max.kWh);
+}
+
+async function writeToExcelFile(allReadings, filePath, sheetName, noData = false) {
+  let workbook;
+
+  if (fs.existsSync(filePath)) {
+    workbook = XLSX.readFile(filePath);
+  } else {
+    workbook = XLSX.utils.book_new();
+  }
+
+  if (workbook.SheetNames.includes(sheetName)) {
+    console.log(`ℹ️ Sheet "${sheetName}" already exists in ${filePath}`);
+    return;
+  }
+
   const data = [];
 
-  for (const { dayLabel, readings } of allReadings) {
-    data.push([`Day: ${dayLabel}`, "", "", "", "", ""]);
-    data.push(["Zone", "Timestamp", "kVAh", "Consumption (kVAh)", "kWh", "Consumption (kWh)"]);
+  if (noData) {
+    data.push([`Day: ${sheetName}`, "", "", "", "", ""]);
+    data.push(["No Data Available"]);
+  } else {
+    for (const { dayLabel, readings } of allReadings) {
+      data.push([`Day: ${dayLabel}`, "", "", "", "", ""]);
+      data.push(["Zone", "Timestamp", "kVAh", "Consumption (kVAh)", "kWh", "Consumption (kWh)"]);
 
-    Object.entries(readings).forEach(([meterId, { min, max }]) => {
-      const zone = meterMap[meterId];
-      const name = zone ? `${zone.name} (${zone.category})` : `Meter ${meterId}`;
-      const cons_kvah = (parseFloat(max.kVAh) - parseFloat(min.kVAh)).toFixed(2);
-      const cons_kwh = (parseFloat(max.kWh) - parseFloat(min.kWh)).toFixed(2);
+      Object.entries(readings).forEach(([meterId, { min, max }]) => {
+        const zone = meterMap[meterId];
+        let name = zone ? zone.name : `Meter ${meterId}`;
+        if (zone?.category) {
+          name += ` (${zone.category})`;
+        }
+      
+        const cons_kvah = (parseFloat(max.kVAh) - parseFloat(min.kVAh)).toFixed(2);
+        const cons_kwh = (parseFloat(max.kWh) - parseFloat(min.kWh)).toFixed(2);
+      
+        data.push([
+          name,
+          `Start D&T: ${min.timestamp ? moment(min.timestamp).format("YYYY-MM-DD HH:mm:ss") : "N/A"}`,
+          min.kVAh || "N/A",
+          "",
+          min.kWh || "N/A",
+          ""
+        ]);
+      
+        data.push([
+          "",
+          `End D&T: ${max.timestamp ? moment(max.timestamp).format("YYYY-MM-DD HH:mm:ss") : "N/A"}`,
+          max.kVAh || "N/A",
+          isNaN(cons_kvah) ? "N/A" : cons_kvah,
+          max.kWh || "N/A",
+          isNaN(cons_kwh) ? "N/A" : cons_kwh,
+        ]);
+      });
+      
 
-      data.push([
-        name,
-        `Start D&T: ${min.timestamp ? moment(min.timestamp).format("YYYY-MM-DD HH:mm:ss") : "N/A"}`,
-        min.kVAh || "N/A",
-        "",
-        min.kWh || "N/A",
-        ""
-      ]);
-
-      data.push([
-        "",
-        `End D&T: ${max.timestamp ? moment(max.timestamp).format("YYYY-MM-DD HH:mm:ss") : "N/A"}`,
-        max.kVAh || "N/A",
-        isNaN(cons_kvah) ? "N/A" : cons_kvah,
-        max.kWh || "N/A",
-        isNaN(cons_kwh) ? "N/A" : cons_kwh,
-      ]);
-    });
-
-    data.push([]); 
+      data.push([]);
+    }
   }
 
   const worksheet = XLSX.utils.aoa_to_sheet(data);
-  XLSX.utils.book_append_sheet(workbook, worksheet, "June Readings");
-  console.log("📄 Writing Excel file to:", filePath);
+  XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
   XLSX.writeFile(workbook, filePath);
-  console.log("✅ Excel file written successfully.");
+  console.log(`✅ Sheet "${sheetName}" written to ${filePath}`);
 }
 
 (async () => {
   const timezone = "Asia/Kolkata";
-  const startOfJune = moment.tz("2025-06-01 08:00:00", timezone);
-  const now = moment.tz("2025-07-01 08:00:00",timezone);
-
-  const lastEnd = now.clone().hour(8).minute(0).second(0).millisecond(0);
-  if (now.isBefore(lastEnd)) {
-    lastEnd.subtract(1, 'day'); 
-  }
-  
-
-  const allReadings = [];
-  let currentStart = startOfJune.clone();
-
-  console.log("🕒 Starting report generation...");
-
-  while (currentStart.isBefore(lastEnd)) {
-    const currentEnd = currentStart.clone().add(1, "day");
-    const label = currentStart.format("YYYY-MM-DD");
-
-    console.log(`📅 Fetching: ${label} (${currentStart.format()} → ${currentEnd.format()})`);
-    const readings = await fetchMinMaxReadingsBatch(currentStart.format(), currentEnd.format());
-
-    allReadings.push({
-      dayLabel: label,
-      readings
-    });
-
-    currentStart = currentEnd;
-  }
-
-  const baseFolderPath = '/home/ubuntu/reports/';
+  const now = moment().tz(timezone);
+  const baseFolderPath = path.join(__dirname, 'monthly_reports');
   await fs.ensureDir(baseFolderPath);
-  const filePath = `${baseFolderPath}/Metalware_Report_June_2025.xlsx`;
-  await writeToExcelFile(allReadings, filePath);
-  
+  const monthLabel = now.format("MMMM_YYYY");
+  const filePath = path.join(baseFolderPath, `Metalware_Report_${monthLabel}.xlsx`);
 
-  console.log(`✅ Full June report saved to: ${filePath}`);
+  // Dates
+  const today = now.clone().hour(8).minute(0).second(0).millisecond(0);
+  const yesterday = now.clone().subtract(1, 'day').hour(8).minute(0).second(0).millisecond(0);
+
+  const datePairs = [
+    { start: yesterday.clone(), end: today.clone(), label: yesterday.format("YYYY-MM-DD"), sheet: yesterday.format("MMMM_DD") },
+    { start: today.clone(), end: now.clone(), label: today.format("YYYY-MM-DD"), sheet: today.format("MMMM_DD") }
+  ];
+
+  for (const { start, end, label, sheet } of datePairs) {
+    if (fs.existsSync(filePath) && XLSX.readFile(filePath).SheetNames.includes(sheet)) {
+      console.log(`ℹ️ Sheet "${sheet}" already exists, skipping...`);
+      continue;
+    }
+
+    console.log(`📅 Generating report for: ${label} (${start.format()} → ${end.format()})`);
+
+    const readings = await fetchMinMaxReadingsBatch(start.format(), end.format());
+    const validData = hasData(readings);
+    const allReadings = [{ dayLabel: label, readings }];
+
+    await writeToExcelFile(allReadings, filePath, sheet, !validData);
+  }
+
   process.exit();
 })();

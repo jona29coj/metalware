@@ -17,6 +17,7 @@ const navItems = [
   { name: "Alerts", path: "/alerts", icon: FiAlertCircle },
   { name: "Building Profile", path: "/profile", icon: FiUser },
   { name: "Files", path: "/files", icon: FiFolder },
+  { name: "Reports", path: "/reports", icon: FiFileText },
   { name: "Settings", path: "/settings", icon: FiSettings }
 ];
 

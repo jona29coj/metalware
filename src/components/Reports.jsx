@@ -1,51 +1,51 @@
 import React, { useEffect, useState } from 'react';
 
 const Reports = () => {
-  const [fileInfo, setFileInfo] = useState(null);
+  const [fileList, setFileList] = useState([]);
   const [error, setError] = useState(null);
-  const fileUrl = "http://localhost:3001/reports/Meter_Report_June_2025.xlsx";
+  const fileBaseUrl = "http://localhost:3001/reports/";
 
   useEffect(() => {
-    const fetchFileMetadata = async () => {
+    const fetchFiles = async () => {
       try {
-        const res = await fetch(fileUrl, { method: 'HEAD' });
-        if (!res.ok) throw new Error('File not found');
+        const res = await fetch("http://localhost:3001/api/list-reports");
+        if (!res.ok) throw new Error("Failed to fetch report list.");
 
-        const contentLength = res.headers.get("Content-Length");
-        const lastModified = res.headers.get("Last-Modified");
-
-        setFileInfo({
-          size: contentLength,
-          lastModified,
-          name: "Metalware_Report_June_2025.xlsx",
-        });
+        const files = await res.json();
+        setFileList(files);
       } catch (err) {
-        console.error("Error fetching file info:", err);
-        setError("Report file not found or server unavailable.");
+        console.error("Error fetching file list:", err);
+        setError("Could not load report list.");
       }
     };
 
-    fetchFileMetadata();
-  }, [fileUrl]);
+    fetchFiles();
+  }, []);
 
   return (
     <div className="p-6">
-      <h2 className="text-xl font-bold mb-4 text-center">Monthly Energy Report</h2>
+      <h2 className="text-xl font-bold mb-4 text-center">Monthly Reports</h2>
 
       {error && <p className="text-red-600">{error}</p>}
 
-      {fileInfo && (
-        <div className="bg-white p-4 rounded shadow w-fit">
-          <p><strong>File:</strong> {fileInfo.name}</p>
-          <a 
-            href={fileUrl} 
-            download 
-            className="mt-4 inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
-          >
-            ⬇️ Download Report
-          </a>
-        </div>
+      {fileList.length === 0 && !error && (
+        <p className="text-gray-500">No reports found.</p>
       )}
+
+      <div className="space-y-4">
+        {fileList.map(file => (
+          <div key={file} className="bg-white p-4 rounded shadow w-fit">
+            <p><strong>File:</strong> {file}</p>
+            <a
+              href={fileBaseUrl + file}
+              download
+              className="mt-2 inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+            >
+              ⬇️ Download
+            </a>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };

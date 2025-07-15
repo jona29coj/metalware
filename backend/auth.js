@@ -35,59 +35,95 @@ function decrypt(encryptedText) {
 }
 
 router.get('/auth', (req, res) => {
-  const encryptedCookie = req.cookies?.authData; 
+  const encryptedCookie = req.cookies?.authData;
   if (!encryptedCookie) {
     return res.status(401).json({ message: 'Access Denied. No cookie provided.' });
   }
 
   try {
     const decryptedData = decrypt(encryptedCookie);
-    if (!decryptedData) {
-      throw new Error('Invalid or corrupted cookie');
-    }
+    if (!decryptedData) throw new Error('Invalid or corrupted cookie');
+    
     const cookieData = JSON.parse(decryptedData);
 
     if (cookieData.auth !== "true") {
-      return res.status(401).json({ message: 'Invalid authentication token.'})
+      return res.status(401).json({ message: 'Invalid authentication token.' });
     }
 
-    const { username, deviceName, ipAddress} = cookieData;
-    const login_time = moment().tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss');
-    const last_active = login_time;
-
+    const { username, deviceName, ipAddress } = cookieData;
+    const currentTime = moment().tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss');
 
     pool.query(
-      'INSERT INTO user_sessions (username, login_time, last_active, device_name, ip_address) VALUES (?, ?, ?, ?, ?)',
-      [username, login_time, last_active, deviceName, ipAddress],
-      (err,result) => {
+      'SELECT session_id FROM user_sessions WHERE username = ? AND device_name = ? AND ip_address = ? AND logout_time IS NULL ORDER BY login_time DESC LIMIT 1',
+      [username, deviceName, ipAddress],
+      (err, rows) => {
         if (err) {
-          console.error('Error inserting session record:', err.message);
+          console.error('Error checking session:', err.message);
           return res.status(500).json({ message: 'Database error' });
         }
-        const sessionId = result.insertId;
 
-        res.cookie('sessionId', sessionId, {
-          httpOnly: true,
-          secure: true,
-          sameSite: 'Strict',
-          maxAge: 24 * 60 * 60 * 1000, 
-        });
+        if (rows.length > 0) {
+          const sessionId = rows[0].session_id;
+          pool.query(
+            'UPDATE user_sessions SET last_active = ? WHERE session_id = ?',
+            [currentTime, sessionId],
+            (err) => {
+              if (err) {
+                console.error('Error updating last_active:', err.message);
+                return res.status(500).json({ message: 'Database error' });
+              }
 
-    return res.status(200).json({
-      message: 'Valid token',
-      authenticated: true,
-      username: cookieData.username,
-      deviceName: cookieData.deviceName,
-      ipAddress: cookieData.ipAddress,
-    });
+              res.cookie('sessionId', sessionId, {
+                httpOnly: true,
+                secure: true,
+                sameSite: 'Strict',
+                maxAge: 24 * 60 * 60 * 1000,
+              });
 
+              return res.status(200).json({
+                message: 'Session updated',
+                authenticated: true,
+                username,
+                deviceName,
+                ipAddress,
+              });
+            }
+          );
+        } else {
+          pool.query(
+            'INSERT INTO user_sessions (username, login_time, last_active, device_name, ip_address) VALUES (?, ?, ?, ?, ?)',
+            [username, currentTime, currentTime, deviceName, ipAddress],
+            (err, result) => {
+              if (err) {
+                console.error('Error inserting session:', err.message);
+                return res.status(500).json({ message: 'Database error' });
+              }
+
+              const sessionId = result.insertId;
+              res.cookie('sessionId', sessionId, {
+                httpOnly: true,
+                secure: true,
+                sameSite: 'Strict',
+                maxAge: 24 * 60 * 60 * 1000,
+              });
+
+              return res.status(200).json({
+                message: 'New session created',
+                authenticated: true,
+                username,
+                deviceName,
+                ipAddress,
+              });
+            }
+          );
+        }
       }
-    )
-
+    );
   } catch (error) {
     console.error('Authentication error:', error.message);
-    res.status(401).json({ message: 'Invalid token or authentication failed.' });
+    return res.status(401).json({ message: 'Invalid token or authentication failed.' });
   }
 });
+
 
 module.exports = router;

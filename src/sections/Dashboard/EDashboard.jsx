@@ -25,7 +25,6 @@ if (ExportData && typeof ExportData === 'function') {
   ExportData(Highcharts);
 }
 
-
 const getCurrentRate = (hours) => {
   if (hours >= 5 && hours < 10) return { period: "Off-Peak Tariff (05:00 - 10:00)", rate: "₹6.035 per kVAh" };
   if (hours >= 10 && hours < 19) return { period: "Normal Tariff (10:00 - 19:00)", rate: "₹7.10 per kVAh" };
@@ -33,7 +32,7 @@ const getCurrentRate = (hours) => {
   return { period: "Normal Tariff (03:00 - 05:00)", rate: "₹7.10 per kVAh" };
 };
 
-const Edmc = ({data, period, rate, totalCost}) => {
+const Edmc = ({data, period, rate}) => {
   const consumptionKWh = data?.consumptionkWh;
   const emissions = consumptionKWh ? (consumptionKWh * 0.82).toFixed(1) : "0";
   const distance = consumptionKWh ? (parseFloat(emissions) * 0.356).toFixed(1) : "0";
@@ -64,7 +63,7 @@ const Edmc = ({data, period, rate, totalCost}) => {
   
       <div className="flex flex-col items-center text-center border-b sm:border-b-0 sm:border-r border-gray-300 sm:pr-4 h-full space-y-1">
         <h4 className="text-md text-gray-900">Cost of Electricity</h4>
-            <p className="text-md font-bold text-gray-900">₹ {totalCost || 0}</p>
+            <p className="text-md font-bold text-gray-900">₹ {data.totalCost || 0}</p>
             <p className="text-md text-gray-900">{period}</p>
             <p className="text-md font-bold text-gray-900">{rate}</p>
       </div>
@@ -584,7 +583,7 @@ const HConsumption = ({data}) => {
 
         if (!endpoint) return;
 
-        const response = await axios.get(`http://localhost:3001/api/${endpoint}`, {
+        const response = await axios.get(`https://mw.elementsenergies.com/api/${endpoint}`, {
           params: {
             startDateTime,
             endDateTime,
@@ -1381,28 +1380,20 @@ const [endDate, setEndDate] = useState(() =>
   useEffect(() => {
     const fetchSequentially = async () => {
       try {
-        // 1. Fetch dashboardpt1
         const res1 = await axios.get('https://mw.elementsenergies.com/api/dashboardpt1', {
           params: { startDateTime, endDateTime }
         });
         setDashboardData1(res1.data);
   
-        // 2. Fetch cc (totalCost)
-        const res2 = await axios.get('https://mw.elementsenergies.com/api/cc', {
+        const res2 = await axios.get('https://mw.elementsenergies.com/api/dashboardpt2', {
           params: { startDateTime, endDateTime }
         });
-        setTotalCost(res2.data.totalCost);
-  
-        // 3. Fetch dashboardpt2
-        const res3 = await axios.get('https://mw.elementsenergies.com/api/dashboardpt2', {
-          params: { startDateTime, endDateTime }
-        });
-        setDashboardData2(res3.data);
+        setDashboardData2(res2.data);
 
-        const res4 = await axios.get('https://mw.elementsenergies.com/api/ehconsumption', {
+        const res3 = await axios.get('https://mw.elementsenergies.com/api/ehconsumption', {
           params: { startDate, endDate }
         });
-        setEhConsumption(res4.data.consumptionData);
+        setEhConsumption(res3.data.consumptionData);
   
       } catch (error) {
         console.error("Error in sequential dashboard fetch:", error);
@@ -1421,7 +1412,7 @@ const [endDate, setEndDate] = useState(() =>
     <div className="flex flex-col bg-gray-100 p-3 gap-4">
       <div className="flex flex-col bg-gray-100 gap-4">
         <div className="mt-2">
-          <Edmc data={dashboardData1} period={period} rate={rate} totalCost={totalCost} />
+          <Edmc data={dashboardData1} period={period} rate={rate} />
         </div>
         <div className="grid gap-4 grid-cols-1 xl:grid-cols-2 relative">
           <ZoneUsage data={dashboardData1} />
