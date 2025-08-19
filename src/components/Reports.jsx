@@ -37,12 +37,12 @@ const Reports = () => {
           <div key={file} className="bg-white p-4 rounded shadow w-fit">
             <p><strong>File:</strong> {file}</p>
             <a
-              href={fileBaseUrl + file}
-              download
-              className="mt-2 inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
-            >
-              ⬇️ Download
-            </a>
+  href={`https://mw.elementsenergies.com/api/download-report/${file}`}
+  download={file}
+  className="mt-2 inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+>
+  ⬇️ Download
+</a>
           </div>
         ))}
       </div>

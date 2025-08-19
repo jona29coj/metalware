@@ -92,15 +92,20 @@ app.use('/api', dashboardpt2Route);
 app.use('/api', opeakdemandmbRoute);
 app.use('/api', zkVAazmbRoute);
 
-app.get('/api/list-reports', (req, res) => {
-  fs.readdir(reportsDir, (err, files) => {
-    if (err) {
-      console.error('Error reading monthly_reports:', err);
-      return res.status(500).json({ error: 'Unable to fetch reports.' });
-    }
-
-    const excelFiles = files.filter(file => file.endsWith('.xlsx'));
-    res.json(excelFiles);
+app.get('/api/download-report/:filename', (req, res) => {
+  const file = path.join(reportsDir, req.params.filename);
+  
+  // Set correct headers
+  res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+  res.setHeader('Content-Disposition', `attachment; filename=${req.params.filename}`);
+  
+  // Stream the file
+  const fileStream = fs.createReadStream(file);
+  fileStream.pipe(res);
+  
+  fileStream.on('error', (err) => {
+    console.error('Error streaming file:', err);
+    res.status(500).send('Error downloading file');
   });
 });
 
