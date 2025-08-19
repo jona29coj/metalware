@@ -3,12 +3,12 @@ import React, { useEffect, useState } from 'react';
 const Reports = () => {
   const [fileList, setFileList] = useState([]);
   const [error, setError] = useState(null);
-  const fileBaseUrl = "http://localhost:3001/reports/";
+  const fileBaseUrl = "https://mw.elementsenergies.com/reports/";
 
   useEffect(() => {
     const fetchFiles = async () => {
       try {
-        const res = await fetch("http://localhost:3001/api/list-reports");
+        const res = await fetch("https://mw.elementsenergies.com/api/list-reports");
         if (!res.ok) throw new Error("Failed to fetch report list.");
 
         const files = await res.json();
@@ -32,7 +32,7 @@ const Reports = () => {
         <p className="text-gray-500">No reports found.</p>
       )}
 
-      <div className="space-y-4">
+      <div className="flex gap-4">
         {fileList.map(file => (
           <div key={file} className="bg-white p-4 rounded shadow w-fit">
             <p><strong>File:</strong> {file}</p>

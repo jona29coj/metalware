@@ -5,7 +5,6 @@ const path = require('path');
 require('./scheduler'); 
 const fs = require('fs');
 
-
 const reportsDir = path.join(__dirname, 'monthly_reports');
 const energyRoutes = require('./hconsumption');
 const meterRoutes = require('./econsumption');
@@ -16,7 +15,7 @@ const mbConsumptionRoutes = require('./mbconsumption');
 const mcconspeakRoutes = require('./mcconspeak');
 const ConsumptionRoutes = require('./consumption');
 const mcconsRoutes = require('./mccons');
-const mcapconsRoutes = require('./mcapcons')
+const mcapconsRoutes = require('./mcapcons');
 const hlconsRoutes = require('./hlcons');
 const mcpeakRoutes = require('./mcpeak');
 const pfRoutes = require('./pf');
@@ -41,6 +40,8 @@ const zkVAhAZconsumption = require('./zkVAhAZconsumption');
 const zkWhAZconsumption = require('./zkWhAZconsumption');
 const dashboardpt1Route = require('./dashboardpt1');
 const dashboardpt2Route = require('./dashboardpt2');
+const opeakdemandmbRoute = require('./opeakdemandmb');
+const zkVAazmbRoute = require('./zkVAazmb');
 const app = express();
 const port = 3001;
 
@@ -48,7 +49,6 @@ const baseFolderPath = '/Users/jonathanprince/Documents/Work/filesTest';
 
 app.use('/reports', express.static(path.join(__dirname, 'monthly_reports')));
 app.use('/uploads', express.static(baseFolderPath));
-
 
 app.use(cors());
 app.use(express.json());
@@ -89,6 +89,8 @@ app.use('/api', zkVAhAZconsumption);
 app.use('/api', zkWhAZconsumption);
 app.use('/api', dashboardpt1Route);
 app.use('/api', dashboardpt2Route);
+app.use('/api', opeakdemandmbRoute);
+app.use('/api', zkVAazmbRoute);
 
 app.get('/api/list-reports', (req, res) => {
   fs.readdir(reportsDir, (err, files) => {
@@ -106,8 +108,6 @@ app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).send('Something broke!');
 });
-
-
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);

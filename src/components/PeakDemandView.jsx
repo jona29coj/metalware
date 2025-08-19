@@ -32,8 +32,8 @@ const PeakDemandView = () => {
           const dgNumber = meter === 13 ? 1 : 2;
           const baseData = {
             type: 'Diesel Generator',
-            date: timestamp.split('T')[0],
-            time: new Date(timestamp).toISOString().split('T')[1].substring(0, 5),
+            date: timestamp.split(' ')[0],
+            time: timestamp.split(' ')[1].substring(0, 5),
             limit: 'N/A',
           };
 
