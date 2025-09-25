@@ -66,21 +66,52 @@ const Navbar = () => {
 
   const fetchNotifications = async () => {
     try {
-      const response = await fetch(`https://mw.elementsenergies.com/api/apd?startDateTime=${startDateTime}&endDateTime=${endDateTime}`);
+      const response = await fetch(
+        `http://localhost:3001/api/apdtest?startDateTime=${startDateTime}&endDateTime=${endDateTime}`
+      );
       const data = await response.json();
-
+  
+      let formatted = [];
+  
+      // Peak demand notifications
       if (data?.peakDemandAboveThreshold) {
-        const formatted = data.peakDemandAboveThreshold.map((entry) => ({
-          id: entry.id,
-          text: `Apparent Power → ${entry.total_kVA} kVA ${moment(entry.minute).format("HH:mm")} crossing 596 → Lower Ceiling`,
-          read: false,
-        }));
-        setNotifications(formatted);
+        formatted = formatted.concat(
+          data.peakDemandAboveThreshold.map((entry) => ({
+            id: `pd-${entry.id}`,
+            text: `⚡ Apparent Power → ${entry.total_kVA} kVA at ${moment(entry.minute).format(
+              "YYYY-MM-DD HH:mm"
+            )} crossing 596 → Lower Ceiling`,
+            read: false,
+          }))
+        );
       }
+  
+      // DG events notifications
+      if (data?.dgActivations) {
+        formatted = formatted.concat(
+          data.dgActivations.map((entry, index) => ({
+            id: `dg-${index}`,
+            text: `🔄 DG ${entry.status} (Meter ${entry.meter}) at ${moment(entry.timestamp).format(
+              "YYYY-MM-DD HH:mm"
+            )}, kWh: ${entry.kWh}`,
+            read: false,
+          }))
+        );
+      }
+  
+      // Sort notifications by timestamp (latest first)
+      formatted.sort((a, b) => {
+        const aTime = moment(a.text.match(/\d{4}-\d{2}-\d{2} \d{2}:\d{2}/));
+        const bTime = moment(b.text.match(/\d{4}-\d{2}-\d{2} \d{2}:\d{2}/));
+        return bTime - aTime;
+      });
+  
+      setNotifications(formatted);
     } catch (err) {
       console.error("Error fetching notifications:", err);
     }
   };
+  
 
   const handleSubmit = () => {
     handleDateChange({

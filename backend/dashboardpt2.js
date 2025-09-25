@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const pool = require('./db.js');
-
+const pool = require('./dbpg.js');
 
 async function getPeakDemandForDate(startDateTime, endDateTime) {
   const cutoff = new Date('2025-05-15T00:00:00');

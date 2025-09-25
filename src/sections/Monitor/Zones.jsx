@@ -59,16 +59,16 @@ const Zones = () => {
         const isAllZones = selectedView === 'all';
     
         let endpoint = isAllZones 
-          ? (consumptionType === 'kWh' ? 'zkWhAZconsumption' : 'zkVAhAZconsumption')
-          : (consumptionType === 'kWh' ? 'zconsumption' : 'zkVAhconsumption');
+          ? (consumptionType === 'kWh' ? 'zkWhAZconsumptiontest' : 'zkVAhAZconsumptiontest')
+          : (consumptionType === 'kWh' ? 'zconsumptiontest' : 'zkVAhconsumptiontest');
     
         let response;
         if (isAllZones) {
-          response = await axios.get(`https://mw.elementsenergies.com/api/${endpoint}`, {
+          response = await axios.get(`http://localhost:3001/api/${endpoint}`, {
             params: { startDateTime, endDateTime },
           });
         } else {
-          response = await axios.get(`https://mw.elementsenergies.com/api/${endpoint}`, {
+          response = await axios.get(`http://localhost:3001/api/${endpoint}`, {
             params: { startDateTime, endDateTime, zone: selectedZone },
           });
         }
@@ -91,7 +91,7 @@ const Zones = () => {
             const parsedData = zoneData.map(item => ({
               hour: item.hour,
               value: parseFloat(
-                consumptionType === 'kWh' ? item.kWh_difference || 0 : item.kVAh_difference || 0 ) }));
+                consumptionType === 'kWh' ? item.kwh_difference || 0 : item.kvah_difference || 0 ) }));
     
             return {
               zoneId: zone.id,

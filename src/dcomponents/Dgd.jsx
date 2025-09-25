@@ -26,7 +26,7 @@ const Dgd = () => {
     const fetchDGData = async () => {
       try {
         const response = await fetch(
-          `https://mw.elementsenergies.com/api/dgd?startDateTime=${startDateTime}&endDateTime=${endDateTime}&DGNo=${backendDGNo}`
+          `http://localhost:3001/api/dgdtest?startDateTime=${startDateTime}&endDateTime=${endDateTime}&DGNo=${backendDGNo}`
         );
         const data = await response.json();
 
@@ -83,7 +83,7 @@ const Dgd = () => {
     const fetchAlertsData = async () => {
       try {
         const response = await fetch(
-          `https://mw.elementsenergies.com/api/apd?startDateTime=${startDateTime}&endDateTime=${endDateTime}`
+          `http://localhost:3001/api/apdtest?startDateTime=${startDateTime}&endDateTime=${endDateTime}`
         );
         const data = await response.json();
 
