@@ -36,12 +36,6 @@ const App = () => {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const token = Cookies.get('token');
-
-      if (!token) {
-        window.location.href = 'https://elementsenergies.com/login';
-        return;
-      }
 
       try {
         const response = await fetch('https://mw.elementsenergies.com/api/auth', {
