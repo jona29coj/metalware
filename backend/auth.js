@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const express = require('express');
 const mysql = require('mysql2');
 const moment = require('moment-timezone');
@@ -38,6 +40,14 @@ router.get('/auth', (req, res) => {
           console.error('Error checking session:', err.message);
           return res.status(500).json({ message: 'Database error' });
         }
+ 
+        const setCookieOptions = {
+              httpOnly: true,
+              secure: true,
+              sameSite: 'None',
+              domain: '.elementsenergies.com',
+              maxAge: 24 * 60 * 60 * 1000,
+              };
 
         if (rows.length > 0) {
           const sessionId = rows[0].session_id;
@@ -45,17 +55,12 @@ router.get('/auth', (req, res) => {
             'UPDATE user_sessions SET last_active = ? WHERE session_id = ?',
             [currentTime, sessionId],
             (err) => {
-              if (err) {
+                if (err) {
                 console.error('Error updating last_active:', err.message);
                 return res.status(500).json({ message: 'Database error' });
               }
 
-              res.cookie('sessionId', sessionId, {
-                httpOnly: true,
-                secure: true,
-                sameSite: 'Strict',
-                maxAge: 24 * 60 * 60 * 1000,
-              });
+              res.cookie('sessionId', sessionId, setCookieOptions);
 
               return res.status(200).json({
                 message: 'Session updated',
@@ -77,12 +82,7 @@ router.get('/auth', (req, res) => {
               }
 
               const sessionId = result.insertId;
-              res.cookie('sessionId', sessionId, {
-                httpOnly: true,
-                secure: true,
-                sameSite: 'Strict',
-                maxAge: 24 * 60 * 60 * 1000,
-              });
+              res.cookie('sessionId', sessionId, setCookieOptions);
 
               return res.status(200).json({
                 message: 'New session created',
@@ -104,3 +104,4 @@ router.get('/auth', (req, res) => {
 
 
 module.exports = router;
+

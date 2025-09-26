@@ -26,6 +26,7 @@ const apdRoutes = require('./apd');
 const DashboardRoutes = require('./dashboardpt1');
 const hcostconsumptionRoutes = require('./hcostconsumption');
 const authRoute = require('./auth');
+const logoutRoute = require('./logout')
 const heartBeatRoute = require('./heartbeat');
 const filesRoute = require('./fileF');
 const mrRoute = require('./meterreading');
@@ -75,6 +76,7 @@ app.use('/api', DashboardRoutes);
 app.use('/api', hcostconsumptionRoutes);
 app.use('/api', mcapconsRoutes);
 app.use('/api', authRoute);
+app.use('/api', logoutRoute);
 app.use('/api', heartBeatRoute);
 app.use('/api', filesRoute);
 app.use('/api', mrRoute);

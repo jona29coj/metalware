@@ -91,9 +91,23 @@ const Navbar = () => {
   };
 
 
-  const handleLogout = () => {
-    Cookies.remove('authData', { domain: '.elementsenergies.com', path: '/' });
-    window.location.href = 'https://elementsenergies.com/login';
+  const handleLogout = async() => {
+    try {
+      await fetch('https://mw.elementsenergies.com/api/logout', {
+        method: 'POST',
+        credentials: 'include',
+      });
+
+      Cookies.remove('sessionId', { domain: '.elementsenergies.com', path: '/'});
+      Cookies.remove('token', { domain: '.elementsenergies.com', path: '/'});
+
+      window.location.href = 'https://elementsenergies.com/login';
+
+
+    }
+    catch (err) {
+      console.error('Logout failed:', err);
+    }
   };
 
   const markAsRead = (id) => {
