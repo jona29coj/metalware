@@ -26,6 +26,15 @@ router.post('/logout', async (req,res) => {
                 domain: '.elementsenergies.com',
                 path: '/',
             });
+
+            res.clearCookie("token", {
+                httpOnly: true,
+                secure: true,
+                sameSite: "None",
+                domain: ".elementsenergies.com",
+                path: "/",
+              });
+              
             res.status(200).json({ message: 'Logged out successfully'})
         }
     )

@@ -93,11 +93,6 @@ const Navbar = () => {
 
   const handleLogout = async() => {
     try {
-      await fetch('https://mw.elementsenergies.com/api/logout', {
-        method: 'POST',
-        credentials: 'include',
-      });
-
       Cookies.remove('sessionId', { domain: '.elementsenergies.com', path: '/'});
       Cookies.remove('token', { domain: '.elementsenergies.com', path: '/'});
 
