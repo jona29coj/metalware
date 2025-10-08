@@ -124,11 +124,15 @@ async function writeToExcelFile(allReadings, filePath, sheetName, noData = false
 
 (async () => {
   const timezone = "Asia/Kolkata";
-  const startMonth = moment.tz("2025-07-01T08:00:00", timezone);
-  const endMonth = moment.tz("2025-08-01T08:00:00", timezone);
+
+  // Set month to September 2025
+  const startMonth = moment.tz("2025-08-01T08:00:00", timezone);
+  const endMonth = moment.tz("2025-09-01T08:00:00", timezone); // first day of next month
+
   const baseFolderPath = path.join(__dirname, 'monthly_reports');
   await fs.ensureDir(baseFolderPath);
-  const filePath = path.join(baseFolderPath, `Metalware_Report_July_2025.xlsx`);
+  
+  const filePath = path.join(baseFolderPath, `Metalware_Report_August_2025.xlsx`);
 
   for (let m = moment(startMonth); m.isBefore(endMonth); m.add(1, 'day')) {
     const sheet = m.format("MMMM_DD");
