@@ -13,7 +13,7 @@ const PeakDemandView = () => {
   useEffect(() => {
     const fetchAlertData = async () => {
       try {
-        const response = await axios.get('https://mw.elementsenergies.com/api/apd', {
+        const response = await axios.get('https://mw.elementsenergies.com/api/apdtest', {
           params: { startDateTime, endDateTime },
         });
 

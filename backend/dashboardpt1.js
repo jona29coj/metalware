@@ -5,7 +5,7 @@ const pool = require('./db.js');
 async function getKVAhConsumption(startDateTime, endDateTime) {
   const query = `
     SELECT ROUND(SUM(cons), 1) AS consumption FROM (
-      SELECT MAX(kVAh) - MIN(kVAh) AS cons
+      SELECT MAX(kvah) - MIN(kvah) AS cons
       FROM modbus_data
       WHERE energy_meter_id BETWEEN 1 AND 11
         AND timestamp BETWEEN ? AND ?
@@ -19,7 +19,7 @@ async function getKVAhConsumption(startDateTime, endDateTime) {
 async function getKWhConsumption(startDateTime, endDateTime) {
   const query = `
     SELECT ROUND(SUM(diff), 1) AS consumption FROM (
-      SELECT MAX(kWh) - MIN(kWh) AS diff
+      SELECT MAX(kwh) - MIN(kwh) AS diff
       FROM modbus_data
       WHERE energy_meter_id BETWEEN 1 AND 11
         AND timestamp BETWEEN ? AND ?
@@ -39,7 +39,7 @@ async function getPeakDemand(startDateTime, endDateTime) {
     
         if (start > cutoff) {
           query = `
-            SELECT MAX(total_kVA) AS peakDemand
+            SELECT MAX(total_kva) AS peakDemand
             FROM modbus_data
             WHERE energy_meter_id = 12
               AND timestamp BETWEEN ? AND ?
@@ -50,7 +50,7 @@ async function getPeakDemand(startDateTime, endDateTime) {
           SELECT MAX(peakDemand) AS peakDemand
             FROM (
               SELECT 
-                SUM(ROUND(total_kVA, 1)) AS peakDemand
+                SUM(ROUND(total_kva, 1)) AS peakDemand
               FROM modbus_data
               WHERE timestamp BETWEEN ? AND ?
                 AND energy_meter_id BETWEEN 1 AND 11
@@ -118,7 +118,6 @@ async function gethlcons(startDateTime, endDateTime) {
   }
 }
 
-
 async function fetchConsumption(startDateTime, endDateTime) {
   const [rows] = await pool.query(
     `SELECT 
@@ -142,7 +141,7 @@ async function fetchHourlyConsumption(startDateTime, endDateTime) {
   SELECT
   DATE_FORMAT(timestamp, '%Y-%m-%d %H:00:00') AS hour,
   energy_meter_id,
-  ROUND(MAX(kVAh) - MIN(kVAh),1) AS kVAh_difference
+  ROUND(MAX(kvah) - MIN(kvah),1) AS kVAh_difference
 FROM modbus_data
 WHERE timestamp BETWEEN ? AND ?
   AND energy_meter_id BETWEEN 1 AND 11
@@ -233,16 +232,54 @@ router.get('/dashboardpt1', async (req, res) => {
       return res.status(400).json({ error: 'startDateTime and endDateTime required' });
     }
 
-    const [kVAh, kWh, peak, totalCost, meterWiseConsumption,hlCons,hourlyConsumption ] = await Promise.all([
-      getKVAhConsumption(startDateTime, endDateTime),
-      getKWhConsumption(startDateTime, endDateTime),
-      getPeakDemand(startDateTime, endDateTime),
-      getConsumptionCost(startDateTime, endDateTime),
-      fetchConsumption(startDateTime, endDateTime),
-      gethlcons(startDateTime, endDateTime),
-      fetchHourlyConsumption(startDateTime, endDateTime),
-    ]);
-    console.log('Dashboard data fetched successfully:', { kVAh, kWh, peak });
+    console.time("dashboardpt1_total");
+
+    console.time("getKVAhConsumption");
+    const p1 = getKVAhConsumption(startDateTime, endDateTime).then(r => {
+      console.timeEnd("getKVAhConsumption");
+      return r;
+    });
+
+    console.time("getKWhConsumption");
+    const p2 = getKWhConsumption(startDateTime, endDateTime).then(r => {
+      console.timeEnd("getKWhConsumption");
+      return r;
+    });
+
+    console.time("getPeakDemand");
+    const p3 = getPeakDemand(startDateTime, endDateTime).then(r => {
+      console.timeEnd("getPeakDemand");
+      return r;
+    });
+
+    console.time("getConsumptionCost");
+    const p4 = getConsumptionCost(startDateTime, endDateTime).then(r => {
+      console.timeEnd("getConsumptionCost");
+      return r;
+    });
+
+    console.time("fetchConsumption");
+    const p5 = fetchConsumption(startDateTime, endDateTime).then(r => {
+      console.timeEnd("fetchConsumption");
+      return r;
+    });
+
+    console.time("gethlcons");
+    const p6 = gethlcons(startDateTime, endDateTime).then(r => {
+      console.timeEnd("gethlcons");
+      return r;
+    });
+
+    console.time("fetchHourlyConsumption");
+    const p7 = fetchHourlyConsumption(startDateTime, endDateTime).then(r => {
+      console.timeEnd("fetchHourlyConsumption");
+      return r;
+    });
+
+    const [kVAh, kWh, peak, totalCost, meterWiseConsumption, hlCons, hourlyConsumption] =
+      await Promise.all([p1, p2, p3, p4, p5, p6, p7]);
+
+    console.timeEnd("dashboardpt1_total");
 
     res.status(200).json({
       consumptionkVAh: kVAh,
@@ -259,5 +296,6 @@ router.get('/dashboardpt1', async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch dashboard data', details: err.message });
   }
 });
+
 
 module.exports = router;

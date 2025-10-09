@@ -124,20 +124,29 @@ async function writeToExcelFile(allReadings, filePath, sheetName, noData = false
 
 (async () => {
   const timezone = "Asia/Kolkata";
-  const now = moment().tz(timezone);
   const baseFolderPath = path.join(__dirname, 'monthly_reports');
   await fs.ensureDir(baseFolderPath);
-  const monthLabel = now.format("MMMM_YYYY");
+  const monthLabel = "August_2024";  // 👈 Report file name
   const filePath = path.join(baseFolderPath, `Metalware_Report_${monthLabel}.xlsx`);
 
-  // Dates
-  const today = now.clone().hour(8).minute(0).second(0).millisecond(0);
-  const yesterday = now.clone().subtract(1, 'day').hour(8).minute(0).second(0).millisecond(0);
+  // 🔹 Hardcoded range
+  const startDate = moment.tz("2025-08-01 08:00:00", timezone);
+  const endDate = moment.tz("2025-09-01 08:00:00", timezone);
 
-  const datePairs = [
-    { start: yesterday.clone(), end: today.clone(), label: yesterday.format("YYYY-MM-DD"), sheet: yesterday.format("MMMM_DD") },
-    { start: today.clone(), end: now.clone(), label: today.format("YYYY-MM-DD"), sheet: today.format("MMMM_DD") }
-  ];
+  // 🔹 Build all daily ranges between start and end
+  const datePairs = [];
+  let current = startDate.clone();
+
+  while (current.isBefore(endDate)) {
+    const next = current.clone().add(1, "day");
+    datePairs.push({
+      start: current.clone(),
+      end: next.clone(),
+      label: current.format("YYYY-MM-DD"),
+      sheet: current.format("MMMM_DD"),
+    });
+    current = next;
+  }
 
   for (const { start, end, label, sheet } of datePairs) {
     if (fs.existsSync(filePath) && XLSX.readFile(filePath).SheetNames.includes(sheet)) {
@@ -156,3 +165,4 @@ async function writeToExcelFile(allReadings, filePath, sheetName, noData = false
 
   process.exit();
 })();
+

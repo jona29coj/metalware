@@ -59,7 +59,7 @@ const PeakAnalysis = () => {
         let formattedData = [];
 
         if (selectedView === 'single') {
-          const response = await axios.get(`https://mw.elementsenergies.com/api/zkVA`, {
+          const response = await axios.get(`https://mw.elementsenergies.com/api/zkVAtest`, {
             params: { startDateTime, endDateTime, zone: selectedZone },
           });
           const meta = zoneMetadata.find((z) => z.id === selectedZone);
@@ -70,11 +70,11 @@ const PeakAnalysis = () => {
             category: meta?.category || '',
             data: data.map((item) => ({
               hour: item.minute,
-              value: parseFloat(item.total_kVA || 0),
+              value: parseFloat(item.total_kva || 0),
             })),
           }];
         } else { 
-          const response = await axios.get(`https://mw.elementsenergies.com/api/zkVAaz`, {
+          const response = await axios.get(`https://mw.elementsenergies.com/api/zkVAaztest`, {
             params: { startDateTime, endDateTime },
           });
 
@@ -98,7 +98,7 @@ const PeakAnalysis = () => {
               category: meta?.category || '',
               data: groupedByZone[zoneIdStr].map(item => ({
                 hour: item.minute,
-                value: parseFloat(item.total_kVA || 0),
+                value: parseFloat(item.total_kva || 0),
               })),
             };
           }).sort((a,b) => a.zoneId - b.zoneId);

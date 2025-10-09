@@ -28,8 +28,10 @@ const MeterReading = () => {
   useEffect(() => {
     const fetchData = async () => {
       if (startDateTime && endDateTime) {
+        console.log("Sending to backend - Start DateTime:", startDateTime);
+        console.log("Sending to backend - End DateTime:", endDateTime);
         try {
-          const response = await axios.get('https://mw.elementsenergies.com/api/meterreading', {
+          const response = await axios.get('https://mw.elementsenergies.com/api/meterreadingtest', {
             params: {
               startDateTime: startDateTime,
               endDateTime: endDateTime,

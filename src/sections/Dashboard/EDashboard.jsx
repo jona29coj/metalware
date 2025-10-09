@@ -524,7 +524,6 @@ useEffect(() => {
   );
 };
 
-
 const zoneDetails = {
   1: { name: "PLATING", category: "C-49" },
   2: { name: "DIE CASTING+CB+CNC", category: "C-50" },
@@ -576,9 +575,9 @@ const HConsumption = ({data}) => {
       try {
         let endpoint;
         if (consumptionType === 'kWh') {
-          endpoint = 'hconsumption';
+          endpoint = 'hconsumptiontest';
         } else if (consumptionType === '₹') {
-          endpoint = 'hcostconsumption';
+          endpoint = 'hcostconsumptiontest';
         }
 
         if (!endpoint) return;
@@ -1366,8 +1365,8 @@ const ZoneUsage = ({data}) => {
 const EDashboard = () => {
   const { startDateTime, endDateTime } = useContext(DateContext);
   const { period, rate } = getCurrentRate(new Date().getHours());
-  const [dashboardData1, setDashboardData1] = useState(0);
-  const [dashboardData2, setDashboardData2] = useState(0);
+  const [dashboardData1, setDashboardData1] = useState({});
+  const [dashboardData2, setDashboardData2] = useState({});
   const [totalCost, setTotalCost] = useState(0);
   const [ehconsumption, setEhConsumption] = useState([]);
   const [startDate, setStartDate] = useState(() =>
@@ -1380,17 +1379,17 @@ const [endDate, setEndDate] = useState(() =>
   useEffect(() => {
     const fetchSequentially = async () => {
       try {
-        const res1 = await axios.get('https://mw.elementsenergies.com/api/dashboardpt1', {
+        const res1 = await axios.get('https://mw.elementsenergies.com/api/dashboardpt1test', {
           params: { startDateTime, endDateTime }
         });
         setDashboardData1(res1.data);
   
-        const res2 = await axios.get('https://mw.elementsenergies.com/api/dashboardpt2', {
+        const res2 = await axios.get('https://mw.elementsenergies.com/api/dashboardpt2test', {
           params: { startDateTime, endDateTime }
         });
         setDashboardData2(res2.data);
 
-        const res3 = await axios.get('https://mw.elementsenergies.com/api/ehconsumption', {
+        const res3 = await axios.get('https://mw.elementsenergies.com/api/ehconsumptiontest', {
           params: { startDate, endDate }
         });
         setEhConsumption(res3.data.consumptionData);

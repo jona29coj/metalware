@@ -16,6 +16,7 @@ const Navbar = () => {
   const [tempEndDateTime, setTempEndDateTime] = useState(endDateTime);
   const [isStartPickerOpen, setIsStartPickerOpen] = useState(false);
   const [isEndPickerOpen, setIsEndPickerOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
   const { username } = useUser();
 
   const profileRef = useRef(null);
@@ -61,33 +62,67 @@ const Navbar = () => {
   }, []);
 
   useEffect(() => {
-    fetchNotifications();
-  }, []);
+    fetchNotifications(startDateTime, endDateTime);
+  }, [startDateTime, endDateTime]);
 
   const fetchNotifications = async () => {
     try {
-      const response = await fetch(`https://mw.elementsenergies.com/api/apd?startDateTime=${startDateTime}&endDateTime=${endDateTime}`);
+      setLoading(true);
+      const response = await fetch(
+        `https://mw.elementsenergies.com/api/apdtest?startDateTime=${startDateTime}&endDateTime=${endDateTime}`
+      );
       const data = await response.json();
-
+  
+      let formatted = [];
+  
+      // Peak demand notifications
       if (data?.peakDemandAboveThreshold) {
-        const formatted = data.peakDemandAboveThreshold.map((entry) => ({
-          id: entry.id,
-          text: `Apparent Power → ${entry.total_kVA} kVA ${moment(entry.minute).format("HH:mm")} crossing 596 → Lower Ceiling`,
-          read: false,
-        }));
-        setNotifications(formatted);
+        formatted = formatted.concat(
+          data.peakDemandAboveThreshold.map((entry) => ({
+            id: `pd-${entry.id}`,
+            text: `⚡ Apparent Power → ${entry.total_kVA} kVA at ${moment(entry.minute).format(
+              "YYYY-MM-DD HH:mm"
+            )} crossing 596 → Lower Ceiling`,
+            read: false,
+          }))
+        );
       }
+  
+      // DG events notifications
+      if (data?.dgActivations) {
+        formatted = formatted.concat(
+          data.dgActivations.map((entry, index) => ({
+            id: `dg-${index}`,
+            text: `🔄 DG ${entry.status} (Meter ${entry.meter}) at ${moment(entry.timestamp).format(
+              "YYYY-MM-DD HH:mm"
+            )}, kWh: ${entry.kWh}`,
+            read: false,
+          }))
+        );
+      }
+  
+      // Sort notifications by timestamp (latest first)
+      formatted.sort((a, b) => {
+        const aTime = moment(a.text.match(/\d{4}-\d{2}-\d{2} \d{2}:\d{2}/));
+        const bTime = moment(b.text.match(/\d{4}-\d{2}-\d{2} \d{2}:\d{2}/));
+        return bTime - aTime;
+      });
+  
+      setNotifications(formatted);
     } catch (err) {
       console.error("Error fetching notifications:", err);
+    } finally {
+      setLoading(false);
     }
   };
+  
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     handleDateChange({
       startDateTime: tempStartDateTime,
       endDateTime: tempEndDateTime,
     });
-    fetchNotifications();
+    await fetchNotifications(tempStartDateTime, tempEndDateTime);
   };
 
 
@@ -112,6 +147,15 @@ const Navbar = () => {
   };
 
   return (
+    <>
+    {loading && (
+      <div className="fixed inset-0 flex items-center justify-center z-[9999]">
+      <div className="bg-white border border-gray-300 rounded-xl px-6 py-5 flex flex-col items-center shadow-lg">
+        <div className="w-10 h-10 border-4 border-gray-300 border-t-blue-500 rounded-full animate-spin mb-3"></div>
+        <p className="text-gray-800 text-sm font-medium tracking-wide">Fetching data...</p>
+      </div>
+    </div>
+    )}
     <div className='bg-white w-full h-full flex flex-end p-3 justify-end space-x-3 items-center shadow-md'>
       <div className='custom-dsm:hidden space-x-3'>
                 <label className="text-sm text-gray-600">Start</label>
@@ -187,12 +231,16 @@ const Navbar = () => {
           </div>
         </div>
       )}         
-             <button
-            onClick={handleSubmit}
-            className="px-4 py-2 bg-blue-500 text-white rounded-md text-sm hover:bg-blue-600"
-          >
-            <FaArrowRight/>
-          </button>
+         <button
+  onClick={handleSubmit}
+  disabled={loading}
+  aria-busy={loading}
+  className={`px-4 py-2 rounded-md text-sm flex items-center justify-center transition 
+    ${loading ? 'bg-blue-500 opacity-60 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600 text-white'}`}
+>
+  <FaArrowRight />
+</button>
+
         <div ref={notificationRef} className="relative">
           <div onClick={() => {
             setShowNotifications(!showNotifications);
@@ -246,6 +294,7 @@ const Navbar = () => {
           )}
         </div>
     </div>
+    </>
   );
 };
 
