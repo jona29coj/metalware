@@ -1,7 +1,9 @@
+require('dotenv').config();
+
 const express = require('express');
-const crypto = require('crypto');
 const mysql = require('mysql2');
 const moment = require('moment-timezone');
+const jwt = require('jsonwebtoken');
 
 const pool = mysql.createPool({
   host: '18.188.231.51',
@@ -14,43 +16,20 @@ const pool = mysql.createPool({
 
 const router = express.Router();
 
-const ENCRYPTION_KEY = '9cF7Gk2MZpQ8XvT5LbR3NdYqWjK6HsA4'; 
-
-function decrypt(encryptedText) {
-  try {
-    const [ivHex, encryptedHex] = encryptedText.split(':'); 
-    const iv = Buffer.from(ivHex, 'hex'); 
-    const encrypted = Buffer.from(encryptedHex, 'hex'); 
-
-    const decipher = crypto.createDecipheriv('aes-256-cbc', Buffer.from(ENCRYPTION_KEY), iv);
-
-    let decrypted = decipher.update(encrypted, 'hex', 'utf8');
-    decrypted += decipher.final('utf8'); 
-
-    return decrypted; 
-  } catch (error) {
-    console.error('Decryption error:', error.message);
-    return null; 
-  }
-}
-
 router.get('/auth', (req, res) => {
-  const encryptedCookie = req.cookies?.authData;
-  if (!encryptedCookie) {
-    return res.status(401).json({ message: 'Access Denied. No cookie provided.' });
+  const token = req.cookies?.token;
+  if (!token) {
+    return res.status(401).json({ message: 'Access Denied. No token provided.' });
   }
 
   try {
-    const decryptedData = decrypt(encryptedCookie);
-    if (!decryptedData) throw new Error('Invalid or corrupted cookie');
-    
-    const cookieData = JSON.parse(decryptedData);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    if (cookieData.auth !== "true") {
-      return res.status(401).json({ message: 'Invalid authentication token.' });
+    if (decoded.auth !== "true") {
+      return res.status(401).json({ message: 'Invalid authentication token.'});
     }
 
-    const { username, deviceName, ipAddress } = cookieData;
+    const { username, deviceName, ipAddress} = decoded;
     const currentTime = moment().tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss');
 
     pool.query(
@@ -61,6 +40,13 @@ router.get('/auth', (req, res) => {
           console.error('Error checking session:', err.message);
           return res.status(500).json({ message: 'Database error' });
         }
+ 
+        const setCookieOptions = {
+              httpOnly: true,
+              secure: true,
+              sameSite: 'None',
+              domain: '.elementsenergies.com',
+              };
 
         if (rows.length > 0) {
           const sessionId = rows[0].session_id;
@@ -68,17 +54,12 @@ router.get('/auth', (req, res) => {
             'UPDATE user_sessions SET last_active = ? WHERE session_id = ?',
             [currentTime, sessionId],
             (err) => {
-              if (err) {
+                if (err) {
                 console.error('Error updating last_active:', err.message);
                 return res.status(500).json({ message: 'Database error' });
               }
 
-              res.cookie('sessionId', sessionId, {
-                httpOnly: true,
-                secure: true,
-                sameSite: 'Strict',
-                maxAge: 24 * 60 * 60 * 1000,
-              });
+              res.cookie('sessionId', sessionId, setCookieOptions);
 
               return res.status(200).json({
                 message: 'Session updated',
@@ -100,12 +81,7 @@ router.get('/auth', (req, res) => {
               }
 
               const sessionId = result.insertId;
-              res.cookie('sessionId', sessionId, {
-                httpOnly: true,
-                secure: true,
-                sameSite: 'Strict',
-                maxAge: 24 * 60 * 60 * 1000,
-              });
+              res.cookie('sessionId', sessionId, setCookieOptions);
 
               return res.status(200).json({
                 message: 'New session created',

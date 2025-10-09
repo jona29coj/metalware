@@ -34,14 +34,8 @@ const App = () => {
   const [isCollapsed, setIsCollapsed] = useState(window.innerWidth < 1250);
   const [refreshKey, setRefreshKey] = useState(0);
 
- /* useEffect(() => {
+  useEffect(() => {
     const checkAuth = async () => {
-      const token = Cookies.get('authData');
-
-      if (!token) {
-        window.location.href = 'https://elementsenergies.com/login';
-        return;
-      }
 
       try {
         const response = await fetch('https://mw.elementsenergies.com/api/auth', {
@@ -60,7 +54,7 @@ const App = () => {
       }
     };
     checkAuth();
-  }, []); */
+  }, []); 
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -101,6 +95,7 @@ const App = () => {
     <DateProvider>
         <BrowserRouter>
           <ScrollToTop />
+          {isAuthenticated &&( 
             <div className="min-h-screen flex bg-gray-100">
               <div
                 className={`bg-white shadow-md transition-all duration-300 fixed top-0 left-0 h-full ${
@@ -149,6 +144,7 @@ const App = () => {
                 </div>
               </div>
             </div>
+          )}
         </BrowserRouter>
     </DateProvider>
   );

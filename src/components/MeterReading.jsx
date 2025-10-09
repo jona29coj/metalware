@@ -31,7 +31,7 @@ const MeterReading = () => {
         console.log("Sending to backend - Start DateTime:", startDateTime);
         console.log("Sending to backend - End DateTime:", endDateTime);
         try {
-          const response = await axios.get('http://localhost:3001/api/meterreadingtest', {
+          const response = await axios.get('https://mw.elementsenergies.com/api/meterreadingtest', {
             params: {
               startDateTime: startDateTime,
               endDateTime: endDateTime,

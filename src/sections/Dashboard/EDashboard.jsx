@@ -582,7 +582,7 @@ const HConsumption = ({data}) => {
 
         if (!endpoint) return;
 
-        const response = await axios.get(`http://localhost:3001/api/${endpoint}`, {
+        const response = await axios.get(`https://mw.elementsenergies.com/api/${endpoint}`, {
           params: {
             startDateTime,
             endDateTime,
@@ -1379,17 +1379,17 @@ const [endDate, setEndDate] = useState(() =>
   useEffect(() => {
     const fetchSequentially = async () => {
       try {
-        const res1 = await axios.get('http://localhost:3001/api/dashboardpt1test', {
+        const res1 = await axios.get('https://mw.elementsenergies.com/api/dashboardpt1test', {
           params: { startDateTime, endDateTime }
         });
         setDashboardData1(res1.data);
   
-        const res2 = await axios.get('http://localhost:3001/api/dashboardpt2test', {
+        const res2 = await axios.get('https://mw.elementsenergies.com/api/dashboardpt2test', {
           params: { startDateTime, endDateTime }
         });
         setDashboardData2(res2.data);
 
-        const res3 = await axios.get('http://localhost:3001/api/ehconsumptiontest', {
+        const res3 = await axios.get('https://mw.elementsenergies.com/api/ehconsumptiontest', {
           params: { startDate, endDate }
         });
         setEhConsumption(res3.data.consumptionData);

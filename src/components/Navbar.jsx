@@ -16,6 +16,7 @@ const Navbar = () => {
   const [tempEndDateTime, setTempEndDateTime] = useState(endDateTime);
   const [isStartPickerOpen, setIsStartPickerOpen] = useState(false);
   const [isEndPickerOpen, setIsEndPickerOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
   const { username } = useUser();
 
   const profileRef = useRef(null);
@@ -61,13 +62,14 @@ const Navbar = () => {
   }, []);
 
   useEffect(() => {
-    fetchNotifications();
-  }, []);
+    fetchNotifications(startDateTime, endDateTime);
+  }, [startDateTime, endDateTime]);
 
   const fetchNotifications = async () => {
     try {
+      setLoading(true);
       const response = await fetch(
-        `http://localhost:3001/api/apdtest?startDateTime=${startDateTime}&endDateTime=${endDateTime}`
+        `https://mw.elementsenergies.com/api/apdtest?startDateTime=${startDateTime}&endDateTime=${endDateTime}`
       );
       const data = await response.json();
   
@@ -109,16 +111,18 @@ const Navbar = () => {
       setNotifications(formatted);
     } catch (err) {
       console.error("Error fetching notifications:", err);
+    } finally {
+      setLoading(false);
     }
   };
   
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     handleDateChange({
       startDateTime: tempStartDateTime,
       endDateTime: tempEndDateTime,
     });
-    fetchNotifications();
+    await fetchNotifications(tempStartDateTime, tempEndDateTime);
   };
 
 
@@ -134,6 +138,15 @@ const Navbar = () => {
   };
 
   return (
+    <>
+    {loading && (
+      <div className="fixed inset-0 flex items-center justify-center z-[9999]">
+      <div className="bg-white border border-gray-300 rounded-xl px-6 py-5 flex flex-col items-center shadow-lg">
+        <div className="w-10 h-10 border-4 border-gray-300 border-t-blue-500 rounded-full animate-spin mb-3"></div>
+        <p className="text-gray-800 text-sm font-medium tracking-wide">Fetching data...</p>
+      </div>
+    </div>
+    )}
     <div className='bg-white w-full h-full flex flex-end p-3 justify-end space-x-3 items-center shadow-md'>
       <div className='custom-dsm:hidden space-x-3'>
                 <label className="text-sm text-gray-600">Start</label>
@@ -209,12 +222,16 @@ const Navbar = () => {
           </div>
         </div>
       )}         
-             <button
-            onClick={handleSubmit}
-            className="px-4 py-2 bg-blue-500 text-white rounded-md text-sm hover:bg-blue-600"
-          >
-            <FaArrowRight/>
-          </button>
+         <button
+  onClick={handleSubmit}
+  disabled={loading}
+  aria-busy={loading}
+  className={`px-4 py-2 rounded-md text-sm flex items-center justify-center transition 
+    ${loading ? 'bg-blue-500 opacity-60 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600 text-white'}`}
+>
+  <FaArrowRight />
+</button>
+
         <div ref={notificationRef} className="relative">
           <div onClick={() => {
             setShowNotifications(!showNotifications);
@@ -268,6 +285,7 @@ const Navbar = () => {
           )}
         </div>
     </div>
+    </>
   );
 };
 

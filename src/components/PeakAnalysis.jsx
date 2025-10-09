@@ -59,7 +59,7 @@ const PeakAnalysis = () => {
         let formattedData = [];
 
         if (selectedView === 'single') {
-          const response = await axios.get(`http://localhost:3001/api/zkVAtest`, {
+          const response = await axios.get(`https://mw.elementsenergies.com/api/zkVAtest`, {
             params: { startDateTime, endDateTime, zone: selectedZone },
           });
           const meta = zoneMetadata.find((z) => z.id === selectedZone);
@@ -74,7 +74,7 @@ const PeakAnalysis = () => {
             })),
           }];
         } else { 
-          const response = await axios.get(`http://localhost:3001/api/zkVAaztest`, {
+          const response = await axios.get(`https://mw.elementsenergies.com/api/zkVAaztest`, {
             params: { startDateTime, endDateTime },
           });
 

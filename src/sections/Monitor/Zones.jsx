@@ -64,11 +64,11 @@ const Zones = () => {
     
         let response;
         if (isAllZones) {
-          response = await axios.get(`http://localhost:3001/api/${endpoint}`, {
+          response = await axios.get(`https://mw.elementsenergies.com/api/${endpoint}`, {
             params: { startDateTime, endDateTime },
           });
         } else {
-          response = await axios.get(`http://localhost:3001/api/${endpoint}`, {
+          response = await axios.get(`https://mw.elementsenergies.com/api/${endpoint}`, {
             params: { startDateTime, endDateTime, zone: selectedZone },
           });
         }
