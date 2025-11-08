@@ -1,19 +1,16 @@
 const express = require('express');
 const router = express.Router();
-const pool = require('./dbpg.js'); // your pg pool
+const pool = require('./dbpg.js'); 
 
-// ------------------ Peak Demand ------------------
 async function getPeakDemandForDate(startDateTime, endDateTime) {
-    console.log('📊 getPeakDemandForDate called with:', { startDateTime, endDateTime });
   
-    const cutoff = new Date('2025-05-15T00:00:00');
+    const cutoff = new Date('2025-05-15 00:00:00');
     const start = new Date(startDateTime);
   
     let query = '';
     let params = [startDateTime, endDateTime];
   
     if (start > cutoff) {
-      console.log('➡️ Date after cutoff → using meter 12 only');
       query = `
         SELECT
           TO_CHAR(timestamp, 'YYYY-MM-DD HH24:MI:00') AS minute,
@@ -24,7 +21,6 @@ async function getPeakDemandForDate(startDateTime, endDateTime) {
         ORDER BY minute
       `;
     } else {
-      console.log('➡️ Date before cutoff → summing meters 1–11');
       query = `
         SELECT
           TO_CHAR(timestamp, 'YYYY-MM-DD HH24:MI:00') AS minute,

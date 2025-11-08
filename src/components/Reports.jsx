@@ -32,20 +32,23 @@ const Reports = () => {
         <p className="text-gray-500">No reports found.</p>
       )}
 
-      <div className="flex gap-4">
-        {fileList.map(file => (
-          <div key={file} className="bg-white p-4 rounded shadow w-fit">
-            <p><strong>File:</strong> {file}</p>
-            <a
-  href={`https://mw.elementsenergies.com/api/download-report/${file}`}
-  download={file}
-  className="mt-2 inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
->
-  ⬇️ Download
-</a>
-          </div>
-        ))}
+<div className="flex flex-wrap gap-4">
+    {fileList.map(file => (
+      <div 
+        key={file} 
+        className="bg-white p-4 rounded shadow w-64" 
+      >
+        <p><strong>File:</strong> {file}</p>
+        <a
+          href={`https://mw.elementsenergies.com/api/download-report/${file}`}
+          download={file}
+          className="mt-2 inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+        >
+          ⬇️ Download
+        </a>
       </div>
+    ))}
+  </div>
     </div>
   );
 };

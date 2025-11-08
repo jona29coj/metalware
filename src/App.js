@@ -95,7 +95,7 @@ const App = () => {
     <DateProvider>
         <BrowserRouter>
           <ScrollToTop />
-          {isAuthenticated &&( 
+          {isAuthenticated && ( 
             <div className="min-h-screen flex bg-gray-100">
               <div
                 className={`bg-white shadow-md transition-all duration-300 fixed top-0 left-0 h-full ${
